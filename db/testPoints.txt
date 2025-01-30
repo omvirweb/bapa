@@ -1,0 +1,19 @@
+SELECT COUNT(*) item_stock_row_count, `item_stock`.* FROM `item_stock` 
+WHERE `category_id` = 32 AND `item_id` = 420 AND `grwt` != 0 AND `ntwt` != 0 
+GROUP BY `department_id`, `tunch`, abs(`grwt`), abs(`ntwt`) 
+HAVING item_stock_row_count > 1
+application\controllers\Delete_data_upto_date.php Line no. 91
+Why ==2 in ? (instead of >=2) if($select_row['item_stock_row_count'] == '2')
+Line no. 2039 if($stock_method == STOCK_METHOD_ITEM_WISE){ => Why Update?
+
+
+
+
+Why there are so many (621) records with 
+SELECT * FROM `item_stock` WHERE `grwt` = 0
+?
+testresults/a01.png
+
+if($stock_method == STOCK_METHOD_ITEM_WISE){
+
+ALTER TABLE `issue_receive_details` ADD `add_wt` DOUBLE NULL DEFAULT '0' AFTER `less`;
