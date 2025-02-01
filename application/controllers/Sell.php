@@ -3561,7 +3561,94 @@ class Sell extends CI_Controller {
         return json_encode($check_rfid_used_arr);
     }
 
+    function get_opening_customer_ledger($from_date, $account_id, $type_sort, $view_only_hisab)
+    {
+        $to_date = '';
+        $account_group_id = $this->crud->get_column_value_by_id('account', 'account_group_id', array('account_id' => $account_id));
+        if ($account_group_id == DEPARTMENT_GROUP) {
+            $customer_ledger_data = $this->applib->get_customer_ledger_department_data_arr($from_date, $to_date, $account_id, $type_sort, '0');
+        } else {
+            $customer_ledger_data = $this->applib->get_customer_ledger_data_arr($from_date, $to_date, $account_id, $type_sort, $view_only_hisab, '0');
+        }
+        $total_grwt = 0;
+        $total_less = 0;
+        $total_net_wt = 0;
+        $total_gold_fine = 0;
+        $total_silver_fine = 0;
+        $total_amount = 0;
+        $total_c_amount = 0;
+        $total_r_amount = 0;
+        foreach ($customer_ledger_data as $key => $customer_ledger) {
+            $total_grwt = (float) $total_grwt + (float) $customer_ledger->grwt;
+            $total_less = (float) $total_less + (float) $customer_ledger->less;
+            $total_net_wt = (float) $total_net_wt + (float) $customer_ledger->net_wt;
+            $total_gold_fine = (float) $total_gold_fine + (float) $customer_ledger->gold_fine;
+            $total_silver_fine = (float) $total_silver_fine + (float) $customer_ledger->silver_fine;
+            $total_amount = (float) $total_amount + (float) $customer_ledger->amount;
+            if (isset($customer_ledger->c_amt)) {
+                $total_c_amount = (float) $total_c_amount + (float) $customer_ledger->c_amt;
+            }
+            if (isset($customer_ledger->r_amt)) {
+                $total_r_amount = (float) $total_r_amount + (float) $customer_ledger->r_amt;
+            }
+        }
+        $account_data = $this->crud->get_row_by_id('account', array('account_id' => $account_id));
+        if (!empty($account_data)) {
+            if ($account_data[0]->gold_ob_credit_debit == '1') {
+                $total_gold_fine = (float) $total_gold_fine - (float) $account_data[0]->opening_balance_in_gold;
+            } else {
+                $total_gold_fine = (float) $total_gold_fine + (float) $account_data[0]->opening_balance_in_gold;
+            }
+            if ($account_data[0]->silver_ob_credit_debit == '1') {
+                $total_silver_fine = (float) $total_silver_fine - (float) $account_data[0]->opening_balance_in_silver;
+            } else {
+                $total_silver_fine = (float) $total_silver_fine + (float) $account_data[0]->opening_balance_in_silver;
+            }
+            if ($account_data[0]->rupees_ob_credit_debit == '1') {
+                $total_amount = (float) $total_amount - (float) $account_data[0]->opening_balance_in_rupees;
+            } else {
+                $total_amount = (float) $total_amount + (float) $account_data[0]->opening_balance_in_rupees;
+            }
+            if ($account_data[0]->c_amount_ob_credit_debit == '1') {
+                $total_c_amount = (float) $total_c_amount - (float) $account_data[0]->opening_balance_in_c_amount;
+            } else {
+                $total_c_amount = (float) $total_c_amount + (float) $account_data[0]->opening_balance_in_c_amount;
+            }
+            if ($account_data[0]->r_amount_ob_credit_debit == '1') {
+                $total_r_amount = (float) $total_r_amount - (float) $account_data[0]->opening_balance_in_r_amount;
+            } else {
+                $total_r_amount = (float) $total_r_amount + (float) $account_data[0]->opening_balance_in_r_amount;
+            }
+        }
+        $tunch = 0;
+        $opening_data = new stdClass();
+        $opening_data->st_id = '';
+        $opening_data->st_date = '';
+        $opening_data->account_name = 'Opening Balance';
+        $opening_data->type_sort = '';
+        $opening_data->grwt = '';//$total_grwt;
+        $opening_data->less = '';//$total_less;
+        $opening_data->net_wt = '';//$total_net_wt;
+        if ($total_gold_fine != 0 && $total_net_wt != 0) {
+            $tunch = number_format((float) $total_gold_fine * 100 / (float) $total_net_wt, 2, '.', '');
+        }
+        $opening_data->touch_id = '';//$tunch;
+        $opening_data->wstg = '';//0;
+        $opening_data->gold_fine = $total_gold_fine;
+        $opening_data->silver_fine = $total_silver_fine;
+        $opening_data->amount = $total_amount;
+        $opening_data->c_amt = $total_c_amount;
+        $opening_data->r_amt = $total_r_amount;
+        $opening_data->created_at = '';
+        $opening_data->reference_no = '';
+        return $opening_data = array($opening_data);
+    }
+
     function sell_print($sell_id = '', $isimage = '') {
+        // ini_set('display_errors', 1);
+        // ini_set('display_startup_errors', 1);
+        // error_reporting(E_ALL);
+
         $data = array();
 
         $setting_data = $this->crud->get_all_records('settings', 'fields_section', 'asc');
@@ -3578,17 +3665,118 @@ class Sell extends CI_Controller {
             $sell_data->old_gold_fine = 0;
             $sell_data->old_silver_fine = 0;
             $sell_data->old_amount = 0;
+            $sell_data->old_voucher_no = '';
+            $sell_data->old_sell_date = '';
+
+            // For old balance and sell details start 
+            $from_date = '';
+            $to_date = '';
+            
+            // Get the previous sell record for the same account
+            $previous_sell = $this->db->select('*')
+                ->from('sell')
+                ->where('account_id', $sell_data->account_id)
+                ->where('sell_id <', $sell_id)
+                ->order_by('sell_id', 'DESC')
+                ->limit(1)
+                ->get()
+                ->row();
+            if (!empty($previous_sell)) {
+                $from_date = date('Y-m-d', strtotime($previous_sell->sell_date));
+                $sell_data->old_voucher_no = $previous_sell->sell_no;
+                $sell_data->old_sell_date = $previous_sell->sell_date;
+            } else {
+                $from_date = '1970-01-01';
+            }
+            
+            if (!empty($sell_data->sell_date)) {
+                $to_date = date('Y-m-d', strtotime($sell_data->sell_date));
+            }
+            $type_sort = '';
+            $display_opening = 0;
+            if (!empty($sell_data->account_id) && empty($type_sort)) {
+                $display_opening = 1;
+            }
+            $offset = 0;
+            $opening_data = $this->get_opening_customer_ledger($from_date, $sell_data->account_id, $type_sort, '0');
+            $account_group_id = $this->crud->get_column_value_by_id('account', 'account_group_id', array('account_id' => $sell_data->account_id));
+            if ($account_group_id == DEPARTMENT_GROUP) {
+                $customer_ledger_data = $this->applib->get_customer_ledger_department_data_arr($from_date, $to_date, $sell_data->account_id, $type_sort, $offset);
+            } else {
+                $customer_ledger_data = $this->applib->get_customer_ledger_data_arr($from_date, $to_date, $sell_data->account_id, $type_sort, '0', $offset);
+            }
+            uasort($customer_ledger_data, function ($a, $b) {
+                $value1 = strtotime($a->st_date);
+                $value2 = strtotime($b->st_date);
+                return $value1 - $value2;
+            });
+            usort($customer_ledger_data, function ($a, $b) {
+                if ($a->st_date < $b->st_date) {
+                    $retval = -1;
+                } elseif ($a->st_date > $b->st_date) {
+                    $retval = 1;
+                } else {
+                    $retval = 0;
+                }
+                if ($retval == 0) {
+                    $value1 = strtotime($a->updated_at);
+                    $value2 = strtotime($b->updated_at);
+                    $retval = $value1 - $value2;
+                    return $retval;
+                }
+                return $retval;
+            });
+
+            $customer_ledger_data = array_merge($opening_data, $customer_ledger_data);
+            $customer_ledger_data = array_values($customer_ledger_data);
+            $total_grwt = 0;
+            $total_less = 0;
+            $total_net_wt = 0;
+            $total_gold_fine = 0;
+            $total_silver_fine = 0;
+            $total_amount = 0;
+            foreach ($customer_ledger_data as $key => $customer_ledger) {
+                if (empty($customer_ledger->gold_fine) && empty($customer_ledger->silver_fine) && empty($customer_ledger->amount) && $post_data['from_zero'] == 1 && isset($customer_ledger->group_name) ? $customer_ledger->group_name != '3' : '') {
+                } else {
+                    if (empty($customer_ledger->gold_fine) && empty($customer_ledger->silver_fine) && empty($customer_ledger->amount) && $post_data['from_zero'] == 1 && isset($customer_ledger->group_name) ? $customer_ledger->group_name != '3' : '') {
+                        $total_grwt = 0;
+                        $total_less = 0;
+                        $total_net_wt = 0;
+                        $total_gold_fine = 0;
+                        $total_silver_fine = 0;
+                        $total_amount = 0;
+                    } else {
+                        if (($display_opening != 1 || ($display_opening == 1 && $key != '0')) || ($display_opening == 1 && $key == '0')) {
+                            if((isset($customer_ledger->sell_id) && $customer_ledger->sell_id < $sell_id) || $customer_ledger->account_name == 'Opening Balance'){
+                                $total_grwt = number_format((float) $total_grwt, 3, '.', '') + number_format((float) $customer_ledger->grwt, 3, '.', '');
+                                $total_less = number_format((float) $total_less, 3, '.', '') + number_format((float) $customer_ledger->less, 3, '.', '');
+                                $total_net_wt = number_format((float) $total_net_wt, 3, '.', '') + number_format((float) $customer_ledger->net_wt, 3, '.', '');
+                                $total_gold_fine = number_format((float) $total_gold_fine, 3, '.', '') + number_format((float) $customer_ledger->gold_fine, 3, '.', '');
+                                $total_silver_fine = number_format((float) $total_silver_fine, 3, '.', '') + number_format((float) $customer_ledger->silver_fine, 3, '.', '');
+                                $total_amount = number_format((float) $total_amount, 2, '.', '') + number_format((float) $customer_ledger->amount, 2, '.', '');
+                            }
+                            echo " Total: " . $total_gold_fine . "<br>";
+                        }
+                    }
+                }
+            }
+            echo " Total: " . $total_gold_fine . "<br>";
+            // exit;
+            // For old balance and sell details end 
+
             $account_data = $this->crud->get_row_by_id('account',array('account_id' => $sell_data->account_id));
             if(!empty($account_data)){
                 $sell_data->account_name = $account_data[0]->account_name;
                 $sell_data->account_phone = $account_data[0]->account_phone;
                 $sell_data->account_mobile = $account_data[0]->account_mobile;
-                $sell_data->old_gold_fine = $account_data[0]->gold_fine;
+                // $sell_data->old_gold_fine = $account_data[0]->gold_fine;
+                $sell_data->old_gold_fine = $total_gold_fine;
                 $sell_data->old_silver_fine = $account_data[0]->silver_fine;
                 if(PACKAGE_FOR == 'manek') {
                     $sell_data->old_amount = $account_data[0]->amount;
                 } else {
-                    $sell_data->old_amount = number_format($account_data[0]->amount, 0, '.', '');
+                    // $sell_data->old_amount = number_format($account_data[0]->amount, 0, '.', '');
+                    $sell_data->old_amount = number_format($total_amount, 0, '.', '');
                 }
             }
             $sell_data->total_gold_fine = (!empty($sell_data->total_gold_fine)) ? $sell_data->total_gold_fine : 0;
@@ -3598,9 +3786,9 @@ class Sell extends CI_Controller {
                 $sell_data->discount_amount = (!empty($sell_data->discount_amount)) ? $sell_data->discount_amount : 0;
                 $sell_data->total_amount = $sell_data->total_amount - $sell_data->discount_amount;
             }
-            $sell_data->old_gold_fine = $sell_data->old_gold_fine - $sell_data->total_gold_fine;
-            $sell_data->old_silver_fine = $sell_data->old_silver_fine - $sell_data->total_silver_fine;
-            $sell_data->old_amount = $sell_data->old_amount - $sell_data->total_amount;
+            // $sell_data->old_gold_fine = $sell_data->old_gold_fine - $sell_data->total_gold_fine;
+            // $sell_data->old_silver_fine = $sell_data->old_silver_fine - $sell_data->total_silver_fine;
+            // $sell_data->old_amount = $sell_data->old_amount - $sell_data->total_amount;
             $data['sell_data'] = $sell_data;
 //            print_r($data['sell_data']); exit;
 

@@ -554,7 +554,9 @@
                 <td class="text-right"><?php echo number_format($total_amount, 2, '.', ''); ?></td>
             </tr>
             <tr>
-                <td class="text-right" colspan="7" style="width:50px;"><b>Old Bal.</b></td>
+                <td colspan="2">Old Voucher No.: <?php echo !empty($sell_data->old_voucher_no) ? $sell_data->old_voucher_no : ''; ?></td>
+                <td>Date:  <?php echo !empty($sell_data->old_sell_date) ? date('d-M-Y', strtotime($sell_data->old_sell_date)) : ''; ?></td>
+                <td class="text-right" colspan="4" style="width:50px;"><b>Old Bal.</b></td>
                 <td class="text-right"><?php echo number_format($sell_data->old_gold_fine, 3, '.', ''); ?></td>
                 <!-- <td class="text-right"><?php echo number_format($sell_data->old_silver_fine, 3, '.', ''); ?></td> -->
                 <td class="text-right"><?php echo number_format($sell_data->old_amount, 2, '.', ''); ?></td>

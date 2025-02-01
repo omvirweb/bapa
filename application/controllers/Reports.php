@@ -44,7 +44,6 @@ class Reports extends CI_Controller
             $this->session->set_flashdata('error_message', 'You have not permission to access this page.');
             redirect("/");
         }
-
     }
 
     function daybook_datatable()
@@ -648,7 +647,6 @@ class Reports extends CI_Controller
                 $amount = (float) $gold * (float) $gold_rate / 10;
                 // $row[] = '<b class="' . ((float) $amount < 0 ? 'text-danger' : 'text-primary') . '">' . number_format((float) $amount, 2, '.', '') . '</b>';
                 $gold_amount = (float) $gold_amount + $amount;
-
             } else if ($stock->category_group_id == 2) {
                 // Update silver variables and calculate amount
                 $silver_grwt = (float) $silver_grwt + (float) $grwt;
@@ -664,7 +662,6 @@ class Reports extends CI_Controller
                 $amount = (float) $silver * (float) $silver_rate / 10;
                 // $row[] = '<b class="' . ((float) $amount < 0 ? 'text-danger' : 'text-primary') . '">' . number_format((float) $amount, 2, '.', '') . '</b>';
                 $silver_amount = (float) $silver_amount + $amount;
-
             } else {
                 // $row[] = '<b>0</b>';
             }
@@ -1598,7 +1595,6 @@ class Reports extends CI_Controller
                     $without_wastage_fine = (float) $net_wt * (float) $touch_id / 100;
                     $balance_fine = $stock_ledger_data[$key]->balance_fine = $without_wastage_fine;
                 }
-
             } else {
                 $balance_grwt = $stock_ledger_data[$key]->balance_grwt = (float) $stock_ledger_data[$pre_key]->balance_grwt + (float) $grwt;
                 $balance_net_wt = $stock_ledger_data[$key]->balance_net_wt = (float) $stock_ledger_data[$pre_key]->balance_net_wt + (float) $net_wt;
@@ -1872,7 +1868,6 @@ class Reports extends CI_Controller
 
                 $outstanding_data_arr[$account_id]['account_id'] = $account_id;
                 $outstanding_data_arr[$account_id]['account_group_id'] = $list_row->account_group_id;
-
             } else {
 
                 $outstanding_data_arr[$account_id]['st_date'] = (isset($list_row->st_date) && !empty($list_row->st_date)) ? date('d-m-Y', strtotime($list_row->st_date)) : '-';
@@ -2002,7 +1997,6 @@ class Reports extends CI_Controller
                         } else {
                             $total_credit_net_amount = number_format((float) $total_credit_net_amount, 3, '.', '') + number_format((float) $outstanding_row['net_amount'], 3, '.', '');
                         }
-
                     } else if ($post_data['credit_limit'] == '2' && $credit_limit > $outstanding_row['net_amount']) {
                         $row[] = '<span style="text-align: center;">
                                         <div class="form-group">
@@ -2061,7 +2055,6 @@ class Reports extends CI_Controller
                         } else {
                             $total_credit_net_amount = number_format((float) $total_credit_net_amount, 3, '.', '') + number_format((float) $outstanding_row['net_amount'], 3, '.', '');
                         }
-
                     } else if ($post_data['credit_limit'] == '3' && $credit_limit < $outstanding_row['net_amount']) {
                         $row[] = '<span style="text-align: center;">
                                         <div class="form-group">
@@ -2123,7 +2116,6 @@ class Reports extends CI_Controller
                                 $total_credit_net_amount = number_format((float) $total_credit_net_amount, 3, '.', '') + number_format((float) $outstanding_row['net_amount'], 3, '.', '');
                             }
                         }
-
                     }
                 } // Check selected date and today date same then Not entry net_balance condition consider.
             }
@@ -3466,14 +3458,14 @@ class Reports extends CI_Controller
         $opening_data->st_date = '';
         $opening_data->account_name = 'Opening Balance';
         $opening_data->type_sort = '';
-        $opening_data->grwt = '';//$total_grwt;
-        $opening_data->less = '';//$total_less;
-        $opening_data->net_wt = '';//$total_net_wt;
+        $opening_data->grwt = ''; //$total_grwt;
+        $opening_data->less = ''; //$total_less;
+        $opening_data->net_wt = ''; //$total_net_wt;
         if ($total_gold_fine != 0 && $total_net_wt != 0) {
             $tunch = number_format((float) $total_gold_fine * 100 / (float) $total_net_wt, 2, '.', '');
         }
-        $opening_data->touch_id = '';//$tunch;
-        $opening_data->wstg = '';//0;
+        $opening_data->touch_id = ''; //$tunch;
+        $opening_data->wstg = ''; //0;
         $opening_data->gold_fine = $total_gold_fine;
         $opening_data->silver_fine = $total_silver_fine;
         $opening_data->amount = $total_amount;
@@ -3628,7 +3620,6 @@ class Reports extends CI_Controller
             }
 
             if ((isset($list_row->st_date) && strtotime($list_row->st_date) > 0) || isset($list_row->is_opening_balance)) {
-
             } else {
                 $issue_rows[] = $list_row;
                 continue;
@@ -3682,7 +3673,6 @@ class Reports extends CI_Controller
 
                 $outstanding_data_arr[$account_id]['account_id'] = $account_id;
                 $outstanding_data_arr[$account_id]['account_group_id'] = $list_row->account_group_id;
-
             } else {
                 $outstanding_data_arr[$account_id]['st_date'] = (isset($list_row->st_date) && !empty($list_row->st_date)) ? date('d-m-Y', strtotime($list_row->st_date)) : '-';
                 $outstanding_data_arr[$account_id]['gold_fine'] = number_format((float) $list_row->gold_fine, 3, '.', '');
@@ -3976,7 +3966,6 @@ class Reports extends CI_Controller
                 "issue_rows" => $issue_rows
             );
             echo json_encode($output);
-
         } else {
 
             if ($capital >= 0) {
@@ -4067,7 +4056,6 @@ class Reports extends CI_Controller
                 "issue_rows" => $issue_rows
             );
             echo json_encode($output);
-
         }
     }
     function balance_sheet_gold_datatable()
@@ -4170,7 +4158,6 @@ class Reports extends CI_Controller
             }
 
             if ((isset($list_row->st_date) && strtotime($list_row->st_date) > 0) || isset($list_row->is_opening_balance)) {
-
             } else {
                 $issue_rows[] = $list_row;
                 continue;
@@ -4224,7 +4211,6 @@ class Reports extends CI_Controller
 
                 $outstanding_data_arr[$account_id]['account_id'] = $account_id;
                 $outstanding_data_arr[$account_id]['account_group_id'] = $list_row->account_group_id;
-
             } else {
                 $outstanding_data_arr[$account_id]['st_date'] = (isset($list_row->st_date) && !empty($list_row->st_date)) ? date('d-m-Y', strtotime($list_row->st_date)) : '-';
                 $outstanding_data_arr[$account_id]['gold_fine'] = number_format((float) $list_row->gold_fine, 3, '.', '');
@@ -4518,7 +4504,6 @@ class Reports extends CI_Controller
                 "issue_rows" => $issue_rows
             );
             echo json_encode($output);
-
         } else {
 
             if ($capital >= 0) {
@@ -4609,7 +4594,6 @@ class Reports extends CI_Controller
                 "issue_rows" => $issue_rows
             );
             echo json_encode($output);
-
         }
     }
 
@@ -4927,7 +4911,6 @@ class Reports extends CI_Controller
             "data" => $data,
         );
         echo json_encode($output);
-
     }
     function trading_pl_gold_datatable()
     {
@@ -5145,7 +5128,6 @@ class Reports extends CI_Controller
             "data" => $data,
         );
         echo json_encode($output);
-
     }
 
     function create_rfid()
@@ -5262,6 +5244,7 @@ class Reports extends CI_Controller
                 $rfid_action_btn .= '<a href="javascript:void(0);" class="edit_rfid" data-item_stock_rfid_id="' . $created_rfid->item_stock_rfid_id . '" ><i class="glyphicon glyphicon-edit"></i></a>';
             }
             $rfid_action_btn .= ' &nbsp; <a href="' . base_url('reports/print_item_rfid/' . $created_rfid->item_stock_rfid_id) . '" class="btn btn-primary btn-xs" target="_blank"><i class="fa fa-print"></i></a>';
+            $rfid_action_btn .= ' &nbsp; <a href="' . base_url('reports/print_item_rfid_tag/' . $created_rfid->item_stock_rfid_id) . '" title="Print RFID tag" class="btn btn-primary btn-xs" target="_blank"><i class="fa fa-print"></i></a>';
             if ($this->applib->have_access_role(STOCK_STATUS_MODULE_ID, "rfid_delete")) {
                 $rfid_action_btn .= ' &nbsp; <a href="javascript:void(0);" class="delete_rfid" data-href="' . base_url('reports/delete_rfid/' . $created_rfid->item_stock_rfid_id) . '"><span class="glyphicon glyphicon-trash" style="color : red">&nbsp;</span></a>';
             }
@@ -5333,6 +5316,41 @@ class Reports extends CI_Controller
                 0 //margin-footer
             );
             $html = $this->load->view('reports/print_item_rfid', $data, true);
+            $pdf->WriteHTML($html);
+            $pdfFilePath = "RFID.pdf";
+            $pdf->Output($pdfFilePath, "I");
+        }
+    }
+    function print_item_rfid_tag($item_stock_rfid_id = '')
+    {
+        if (!empty($item_stock_rfid_id)) {
+            $data = array();
+            $data['item_master'] = null;
+            $data['item_stock_rfid'] = $this->crud->get_data_row_by_id('item_stock_rfid', 'item_stock_rfid_id', $item_stock_rfid_id);
+            $item_stock_id = $data['item_stock_rfid']->item_stock_id;
+            $item_stock = $this->crud->get_data_row_by_id('item_stock', 'item_stock_id', $item_stock_id);
+            if ($item_stock) {
+                $item_id = $item_stock->item_id;
+                $data['item_master'] = $this->crud->get_data_row_by_id('item_master', 'item_id', $item_id);
+            }
+
+            $data['use_barcode'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'use_barcode'));
+            $this->load->library('m_pdf');
+            $pdf = new mPDF('utf-8', array(60, 12));
+            $pdf->AddPage(
+                'P', //orientation
+                '', //type
+                '', //resetpagenum
+                '', //pagenumstyle
+                '', //suppress
+                '1px', //margin-left
+                '1px', //margin-right
+                '1px', //margin-top
+                '1px', //margin-bottom
+                0, //margin-header
+                0 //margin-footer
+            );
+            $html = $this->load->view('reports/print_item_rfid_tag', $data, true);
             $pdf->WriteHTML($html);
             $pdfFilePath = "RFID.pdf";
             $pdf->Output($pdfFilePath, "I");
@@ -5662,11 +5680,10 @@ class Reports extends CI_Controller
         $this->db->where('account_id', $account_id);
         $this->db->where('row_particular', $st_id);
         $query = $this->db->get();
-        if ($query->num_rows() > 0) {
-            return $query->result_array();
-        } else {
+        if (!$query || $query->num_rows() == 0) {
             return [];
         }
+        return $query->result_array();
     }
 
     function remove_unchecked_rows()
@@ -5681,5 +5698,4 @@ class Reports extends CI_Controller
 
         echo json_encode(['status' => 'success', 'message' => 'Rows deleted successfully']);
     }
-
 }

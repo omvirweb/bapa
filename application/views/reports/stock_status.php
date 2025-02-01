@@ -214,7 +214,7 @@
                             <select name="rfid_ad_id" class="form-control rfid_ad_id" id="rfid_ad_id"></select>
                         </div>
                         <div class="col-md-3">
-                            <label for="real_rfid">Real RFID <span class="required-sign">&nbsp;*</span></label>
+                            <label for="real_rfid">Real RFID <span class="required-sign">&nbsp;</span></label>
                             <input type="text" name="real_rfid" id="real_rfid" class="form-control">
                         </div>
                         <div class="col-md-3">
@@ -711,11 +711,11 @@
                 $("#rfid_grwt").focus();
                 return false;
             }
-            if ($.trim($("#real_rfid").val()) == '') {
-                show_notify('Please Enter Real RFID!', false);
-                $("#real_rfid").focus();
-                return false;
-            }
+            // if ($.trim($("#real_rfid").val()) == '') {
+            //     show_notify('Please Enter Real RFID!', false);
+            //     $("#real_rfid").focus();
+            //     return false;
+            // }
             var postData = new FormData(this);
             $("#ajax-loader").show();
             $('.create_rfid_btn').attr('disabled', 'disabled');
