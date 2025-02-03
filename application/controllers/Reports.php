@@ -5153,14 +5153,13 @@ class Reports extends CI_Controller
         } else {
             $new_rfid_created_grwt = $old_rfid_created_grwt + $post_data['rfid_grwt'];
         }
-
         $exist_where_array = array('real_rfid' => $post_data['real_rfid']);
         if (isset($post_data['item_stock_rfid_id']) && !empty($post_data['item_stock_rfid_id'])) {
             $exist_where_array['item_stock_rfid_id !='] = $post_data['item_stock_rfid_id'];
         }
         $exist_where_array['rfid_used'] = '0';
         $exist_item_stock_rfid = $this->crud->get_row_by_id('item_stock_rfid', $exist_where_array);
-        if (!empty($exist_item_stock_rfid)) {
+        if (!empty($exist_item_stock_rfid) && !empty($post_data['real_rfid'])) {
             $return['error'] = "Exist";
         } else {
             $insert_arr = array();

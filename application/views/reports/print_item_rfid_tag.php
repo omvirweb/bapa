@@ -129,20 +129,22 @@
             <td style="text-align: center;">
                 <b>BAPA</b><br>
                 <b>ORNAMENTS</b>
+                <br>
+                <?php if (isset($item_master->item_name)) { ?>
+                    <b><?php echo $item_master->item_name; ?></b><br>
+                <?php } ?>
             </td>
             <td>
                 <table style="text-align: right; width:100%" width="100%">
                     <tr>
                         <td>
-                            <?php if (isset($item_master->item_name)) { ?>
-                                <b><?php echo $item_master->item_name; ?></b><br>
-                            <?php } ?>
-                            <b>W: <?php echo number_format($item_stock_rfid->rfid_grwt, 3, '.', ''); ?></b>
+                            <b>Gw: <?php echo number_format($item_stock_rfid->rfid_grwt, 3, '.', ''); ?></b><br>
+                            <b>L: <?php echo number_format($item_stock_rfid->rfid_less, 3, '.', ''); ?></b><br>
+                            <b>N: <?php echo number_format($item_stock_rfid->rfid_ntwt, 3, '.', ''); ?></b>
                         </td>
                         <?php if ($use_barcode == '1') { ?>
                             <td>
-                                <img
-                                    alt="barcode"
+                                <img alt="barcode"
                                     src="<?= base_url() . '/barcode.php'; ?>?codetype=Code128&size=40&text=<?php echo $item_stock_rfid->item_stock_rfid_id; ?>"
                                     style="text-align:right; height: 50px; width: auto; display: inline-block; margin-top: 5px;" />
                             </td>
