@@ -52,3 +52,5 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'auth';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+$route['sync'] = 'SyncController/index';  // To access the sync view
+$route['sync/sync_data'] = 'SyncController/sync_data';  // To trigger sync data

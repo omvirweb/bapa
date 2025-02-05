@@ -38,6 +38,11 @@ $segment3 = $this->uri->segment(3);
                 color: #ffffff !important;
             }
         }
+        .user-footer{
+            display: flex;
+            justify-content: space-between;
+        }
+        
     </style>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -1261,6 +1266,10 @@ $segment3 = $this->uri->segment(3);
                                         <div class="pull-left">
                                             <a href="<?= base_url() ?>auth/change_profile"
                                                 class="btn btn-default btn-flat">Profile</a>
+                                        </div>
+                                        <div class="pull-center">
+                                            <a href="<?= base_url() ?>sync" target="_blank"
+                                                class="btn btn-default btn-flat">Sync</a>
                                         </div>
                                         <div class="pull-right">
                                             <a href="<?= base_url() ?>auth/logout" class="btn btn-default btn-flat">Sign
