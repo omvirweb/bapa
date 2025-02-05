@@ -14,9 +14,9 @@ class Reports extends CI_Controller
         $this->load->helper(array('form', 'url'));
         $this->load->model('Appmodel', 'app_model');
         $this->load->model('Crud', 'crud');
-        
+
         // List of methods or routes to bypass login check
-        $allowed_routes = ['print_item_rfid_tag'];
+        $allowed_routes = ['print_item_rfid_tag', 'print_selected_rfid_tags'];
 
         // Check if the current method is not in the allowed routes
         if (!in_array($this->router->fetch_method(), $allowed_routes)) {
@@ -5248,6 +5248,8 @@ class Reports extends CI_Controller
         $rfid_pcs = 1;
         foreach ($created_rfid_list as $created_rfid) {
             $rfid_action_btn = '';
+            $checkbox = '<input type="checkbox" class="rfid-checkbox" value="' . $created_rfid->item_stock_rfid_id . '">';
+            $rfid_action_btn .= $checkbox . ' &nbsp; ';
             if ($this->applib->have_access_role(STOCK_STATUS_MODULE_ID, "rfid_edit")) {
                 $rfid_action_btn .= '<a href="javascript:void(0);" class="edit_rfid" data-item_stock_rfid_id="' . $created_rfid->item_stock_rfid_id . '" ><i class="glyphicon glyphicon-edit"></i></a>';
             }
@@ -5268,6 +5270,7 @@ class Reports extends CI_Controller
             $row[] = $created_rfid->rfid_fine;
             $row[] = $created_rfid->rfid_charges;
             $row[] = $created_rfid->ad_name;
+            $row[] = date('d/m/Y h:i A', strtotime($created_rfid->created_at));
             $data[] = $row;
 
             $total_rfid_grwt = $total_rfid_grwt + $created_rfid->rfid_grwt;
@@ -5289,6 +5292,7 @@ class Reports extends CI_Controller
         $row[] = '<b>' . number_format((float) $total_rfid_ntwt, 3, '.', '') . '</b>';
         $row[] = '<b>' . number_format((float) $total_rfid_fine, 3, '.', '') . '</b>';
         $row[] = '<b>' . number_format((float) $total_rfid_charges, 2, '.', '') . '</b>';
+        $row[] = '';
         $row[] = '';
         $data[] = $row;
         $output = array(
@@ -5361,6 +5365,63 @@ class Reports extends CI_Controller
             $html = $this->load->view('reports/print_item_rfid_tag', $data, true);
             $pdf->WriteHTML($html);
             $pdfFilePath = "RFID.pdf";
+            $pdf->Output($pdfFilePath, "I");
+        }
+    }
+
+    function print_selected_rfid_tags()
+    {
+        $item_stock_rfid_ids = $this->input->get('item_stock_rfid_ids'); // Get the IDs via GET request
+
+        if (!empty($item_stock_rfid_ids)) {
+            $ids_array = explode(',', $item_stock_rfid_ids); // Split the comma-separated IDs
+            $data = array();
+            $data['use_barcode'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'use_barcode'));
+
+            $rfid_data = [];
+            foreach ($ids_array as $item_stock_rfid_id) {
+                $rfid = $this->crud->get_data_row_by_id('item_stock_rfid', 'item_stock_rfid_id', $item_stock_rfid_id);
+
+                if ($rfid) {
+                    $item_stock_id = $rfid->item_stock_id;
+                    $item_stock = $this->crud->get_data_row_by_id('item_stock', 'item_stock_id', $item_stock_id);
+
+                    $item_master = null;
+                    if ($item_stock) {
+                        $item_id = $item_stock->item_id;
+                        $item_master = $this->crud->get_data_row_by_id('item_master', 'item_id', $item_id);
+                    }
+
+                    $rfid_data[] = array(
+                        'item_stock_rfid' => $rfid,
+                        'item_master' => $item_master,
+                    );
+                }
+            }
+
+            $data['rfid_data'] = $rfid_data;
+            // return $this->load->view('reports/print_selected_rfid_tags', $data);
+
+            $this->load->library('m_pdf');
+            // $pdf = new mPDF('utf-8', array(60, 12));
+            $pdf = new mPDF('utf-8');
+            $pdf->AddPage(
+                'P', // orientation
+                '', // type
+                '', // resetpagenum
+                '', // pagenumstyle
+                '', // suppress
+                '1px', // margin-left
+                '1px', // margin-right
+                '1px', // margin-top
+                '1px', // margin-bottom
+                0, // margin-header
+                0 // margin-footer
+            );
+
+            $html = $this->load->view('reports/print_selected_rfid_tags', $data, true);
+            $pdf->WriteHTML($html);
+            $pdfFilePath = "RFID_Tags.pdf";
             $pdf->Output($pdfFilePath, "I");
         }
     }
