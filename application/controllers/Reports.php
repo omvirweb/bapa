@@ -8,18 +8,27 @@ class Reports extends CI_Controller
     public $logged_in_id = null;
     public $now_time = null;
 
-    function __construct()
+    public function __construct()
     {
         parent::__construct();
         $this->load->helper(array('form', 'url'));
         $this->load->model('Appmodel', 'app_model');
         $this->load->model('Crud', 'crud');
-        if (!$this->session->userdata(PACKAGE_FOLDER_NAME . 'is_logged_in')) {
-            redirect('/auth/login/');
+        
+        // List of methods or routes to bypass login check
+        $allowed_routes = ['print_item_rfid_tag'];
+
+        // Check if the current method is not in the allowed routes
+        if (!in_array($this->router->fetch_method(), $allowed_routes)) {
+            if (!$this->session->userdata(PACKAGE_FOLDER_NAME . 'is_logged_in')) {
+                redirect('/auth/login/');
+            }
         }
-        $this->logged_in_id = $this->session->userdata(PACKAGE_FOLDER_NAME . 'is_logged_in')['user_id'];
+
+        $this->logged_in_id = $this->session->userdata(PACKAGE_FOLDER_NAME . 'is_logged_in')['user_id'] ?? null;
         $this->now_time = date('Y-m-d H:i:s');
     }
+
 
     // Daybook related Functions
     function daybook($daybook_id = '')

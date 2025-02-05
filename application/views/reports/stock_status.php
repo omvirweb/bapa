@@ -737,7 +737,7 @@
                         $("#real_rfid").val('');
                     } else if (json['success'] == 'Added') {
                         show_notify('RFID Created Successfully!', true);
-                        var win = window.open('<?php echo base_url('reports/print_item_rfid/'); ?>'+ json['item_stock_rfid_id'], '_blank');
+                        var win = window.open('<?php echo base_url('reports/print_item_rfid_tag/'); ?>'+ json['item_stock_rfid_id'], '_blank');
                         if (win) { //Browser has allowed it to be opened
                             win.focus();
                         } else { //Browser has blocked it
