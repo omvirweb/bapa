@@ -289,11 +289,13 @@ class Master extends CI_Controller {
             $post_data['category_id'] = $opening_stock[0]->category_id;
             $post_data['item_id'] = $opening_stock[0]->item_id;
             $post_data['tunch'] = $post_data['tunch'];
+            $post_data['wstg'] = $post_data['wstg'];
         } else {
             $post_data['department_id'] = isset($post_data['department_id']) && !empty($post_data['department_id']) ? $post_data['department_id'] : NULL;
             $post_data['category_id'] = isset($post_data['category_id']) && !empty($post_data['category_id']) ? $post_data['category_id'] : NULL;
             $post_data['item_id'] = isset($post_data['item_id']) && !empty($post_data['item_id']) ? $post_data['item_id'] : NULL;
             $post_data['tunch'] = isset($post_data['tunch']) && !empty($post_data['tunch']) ? $post_data['tunch'] : NULL;
+            $post_data['wstg'] = isset($post_data['wstg']) && !empty($post_data['wstg']) ? $post_data['wstg'] : NULL;
             $post_data['design_no'] = isset($post_data['design_no']) && !empty($post_data['design_no']) ? $post_data['design_no'] : NULL;
         }
         $item_stock_method = $this->crud->get_column_value_by_id('item_master','stock_method',array('item_id' => $post_data['item_id']));
@@ -316,6 +318,7 @@ class Master extends CI_Controller {
             $update_data['less'] = $post_data['less'] = number_format((float) $post_data['less'], '3', '.', '');
             $update_data['ntwt'] = $post_data['ntwt'] = number_format((float) $post_data['ntwt'], '3', '.', '');
             $update_data['fine'] = $post_data['fine'] = number_format((float) $post_data['fine'], '3', '.', '');
+            $update_data['wstg'] = $post_data['wstg'] = number_format((float) $post_data['wstg'], '3', '.', '');
             $update_data['design_no'] = $post_data['design_no'];
             $update_data['rfid_number'] = $post_data['rfid_number'];
             $update_data['opening_pcs'] = $post_data['opening_pcs'];
@@ -338,11 +341,13 @@ class Master extends CI_Controller {
                     $current_stock_less = number_format((float) $post_data['less'], '3', '.', '');
                     $current_stock_ntwt = number_format((float) $post_data['ntwt'], '3', '.', '');
                     $current_stock_fine = number_format((float) $post_data['fine'], '3', '.', '');
+                    $current_stock_fine = number_format((float) $post_data['wstg'], '3', '.', '');
                     $update_item_stock = array();
                     $update_item_stock['grwt'] = number_format((float) $current_stock_grwt, '3', '.', '');
                     $update_item_stock['less'] = number_format((float) $current_stock_less, '3', '.', '');
                     $update_item_stock['ntwt'] = number_format((float) $current_stock_ntwt, '3', '.', '');
                     $update_item_stock['fine'] = number_format((float) $current_stock_fine, '3', '.', '');
+                    $update_item_stock['wstg'] = number_format((float) $current_stock_fine, '3', '.', '');
                     $update_item_stock['updated_at'] = $this->now_time;
                     $update_item_stock['updated_by'] = $this->logged_in_id;
                     $this->crud->update('item_stock', $update_item_stock, array('item_stock_id' => $exist_item_stock->item_stock_id));
@@ -389,11 +394,13 @@ class Master extends CI_Controller {
                     $current_stock_less = number_format((float) $exist_opening->less, '3', '.', '') + number_format((float) $post_data['less'], '3', '.', '');
                     $current_stock_ntwt = number_format((float) $exist_opening->ntwt, '3', '.', '') + number_format((float) $post_data['ntwt'], '3', '.', '');
                     $current_stock_fine = number_format((float) $exist_opening->fine, '3', '.', '') + number_format((float) $post_data['fine'], '3', '.', '');
+                    $current_stock_wstg = number_format((float) $exist_opening->wstg, '3', '.', '') + number_format((float) $post_data['wstg'], '3', '.', '');
                     $update_item_stock = array();
                     $update_item_stock['grwt'] = number_format((float) $current_stock_grwt, '3', '.', '');
                     $update_item_stock['less'] = number_format((float) $current_stock_less, '3', '.', '');
                     $update_item_stock['ntwt'] = number_format((float) $current_stock_ntwt, '3', '.', '');
                     $update_item_stock['fine'] = number_format((float) $current_stock_fine, '3', '.', '');
+                    $update_item_stock['wstg'] = number_format((float) $current_stock_wstg, '3', '.', '');
                     $update_item_stock['updated_at'] = $this->now_time;
                     $update_item_stock['updated_by'] = $this->logged_in_id;
                     $this->crud->update('item_stock', $update_item_stock, array('item_stock_id' => $exist_opening->item_stock_id));
@@ -483,6 +490,7 @@ class Master extends CI_Controller {
             $row[] = number_format($opening_stock->less, 3, '.', '');
             $row[] = number_format($opening_stock->ntwt, 3, '.', '');
             $row[] = number_format($opening_stock->tunch, 2, '.', '');
+            $row[] = number_format($opening_stock->wstg, 2, '.', '');
             $row[] = number_format($opening_stock->fine, 3, '.', '');
             $row[] = $opening_stock->design_no;
             $row[] = $opening_stock->rfid_number;
