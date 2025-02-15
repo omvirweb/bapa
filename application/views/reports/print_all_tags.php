@@ -11,71 +11,86 @@
 
         body {
             font-family: Arial, sans-serif;
-            /* font-size: 10pt; */
         }
 
-        table {
-            border-spacing: 0;
-            page-break-inside: avoid;
+        .container {
+            width: 50mm;
+            float: left;
+            font-size: 10px;
         }
 
-        tr {
-            /* padding-bottom: 5px; */
-            page-break-inside: avoid;
-            page-break-after: auto;
+        .rfid-item {
+            border: 1px solid #ccc;
+            float: left;
+            width: 100%;
+            margin: 0px 0px 2mm 0px;
+            padding: 0;
         }
 
-        td {
-            padding: 0 5px;
-            page-break-inside: avoid;
+        .item-name {
+            float: left;
+            width: 42%;
+            margin-right:1%;
+            padding:2px 0 0 5px;
         }
 
-        .border {
-            border: 1px solid grey;
-            border-radius: 25px !important;
+        .details-barcode {
+            float: left;
+            width: 53%;
+            margin-left:1%;
+        }
+
+        .details {
+            float: left;
+            width: 48%;
+            margin-left:1%;
+        }
+
+        .barcode {
+            float: left;
+            width: 48%;
+            margin-left:1%;
+        }
+
+        .barcode img {
+            height: 50px;
+            width: auto;
+            display: block;
         }
     </style>
 </head>
 
-<body style="width: 265px !important; overflow:hidden;">
+<body style="width: auto !important; overflow:hidden;">
     <?php if (!empty($rfid_data)) { ?>
-        <table style="font-size: 10px; font-family: Arial Rounded MT Bold;" class="border">
-            <?php foreach ($rfid_data as $rfid) {
-                // echo '<pre>';
-                // print_r($rfid);
-                // echo '</pre>';
-                // exit;
-            ?>
-                <tr>
-                    <td style="text-align: center; width:132px;">
+        <div class="container">
+            <?php foreach ($rfid_data as $rfid) { ?>
+                <div class="rfid-item">
+                    <!-- Left: Item Name -->
+                    <div class="item-name">
                         <b>BAPA</b><br>
-                        <b>ORNAMENTS</b>
-                        <br>
+                        <b>ORNAMENTS</b><br>
                         <?php if (isset($rfid['item_name'])) { ?>
-                            <b><?php echo $rfid['item_name']; ?></b><br>
+                            <b><?php echo $rfid['item_name']; ?></b>
                         <?php } ?>
-                    </td>
-                    <td>
-                        <table style="text-align: right; width:100%">
-                            <tr>
-                                <td>
-                                    <b>Gw: <?php echo number_format($rfid['rfid_grwt'], 3, '.', ''); ?></b><br>
-                                    <b>L: <?php echo number_format($rfid['rfid_less'], 3, '.', ''); ?></b><br>
-                                    <b>N: <?php echo number_format($rfid['rfid_ntwt'], 3, '.', ''); ?></b>
-                                </td>
-                                <?php if ($use_barcode == '1') { ?>
-                                    <td>
-                                        <img alt="barcode"
-                                            src="<?= base_url() . '/barcode.php'; ?>?codetype=Code128&size=40&text=<?php echo $rfid['item_stock_rfid']; ?>"
-                                            style="text-align:right; height: 50px; width: auto; display: inline-block; margin-top: 5px;" />
-                                    </td>
-                                <?php } ?>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
+                    </div>
+
+                    <!-- Right: Weight Details + Barcode -->
+                    <div class="details-barcode">
+                        <div class="details">
+                            <b>Gw: <?php echo number_format($rfid['rfid_grwt'], 3, '.', ''); ?></b><br>
+                            <b>L: <?php echo number_format($rfid['rfid_less'], 3, '.', ''); ?></b><br>
+                            <b>N: <?php echo number_format($rfid['rfid_ntwt'], 3, '.', ''); ?></b>
+                        </div>
+                        <?php if ($use_barcode == '1') { ?>
+                            <div class="barcode">
+                                <img alt="barcode"
+                                    src="<?= base_url() . '/qrcode.php'; ?>?codetype=Code128&size=40&text=<?php echo $rfid['item_stock_rfid']; ?>" />
+                            </div>
+                        <?php } ?>
+                    </div>
+                </div>
             <?php } ?>
-        </table>
+        </div>
     <?php } ?>
 </body>
 

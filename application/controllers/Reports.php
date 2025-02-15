@@ -5582,9 +5582,16 @@ class Reports extends CI_Controller
             // return $this->load->view('reports/print_selected_rfid_tags', $data);
 
             $this->load->library('m_pdf');
+
+            // Define label size (width x height in mm)
+            $labelWidth = 50;  // Example width
+            $labelHeight = 10; // Example height
+
+
             // $pdf = new mPDF('utf-8', array(60, 12));
             $pdf = new mPDF('utf-8');
-            $pdf->AddPage(
+            // $pdf = new mPDF('utf-8', [$labelWidth, $labelHeight]);
+            /*$pdf->AddPage(
                 'P', // orientation
                 '', // type
                 '', // resetpagenum
@@ -5594,6 +5601,20 @@ class Reports extends CI_Controller
                 '1px', // margin-right
                 '6px', // margin-top
                 '2px', // margin-bottom
+                0, // margin-header
+                0 // margin-footer
+            );*/
+
+            $pdf->AddPage(
+                'P', // orientation
+                '', // type
+                '', // resetpagenum
+                '', // pagenumstyle
+                '', // suppress
+                '1px', // margin-left
+                '1px', // margin-right
+                '0px', // margin-top
+                '0px', // margin-bottom
                 0, // margin-header
                 0 // margin-footer
             );
