@@ -583,6 +583,10 @@ class Reports extends CI_Controller
                     $stock_adjust_btn .= '<span class="pull-right">&nbsp;' . $rfid_count . '&nbsp;</span>';
                 }
             }
+
+            $stock_adjust_btn .= ' &nbsp; <a href="javascript:void(0);" class="btn btn-primary btn-xs item_stock_details pull-left" data-category_name="Stock" data-item_name="Stock" style="margin: 0px 3px;" > Stock </a>';
+
+
             $row = array();
             $row[] = $stock->category_name;
             $filtered_data = array_filter([
@@ -5306,6 +5310,78 @@ class Reports extends CI_Controller
         echo json_encode($output);
     }
 
+    function get_created_stock_items_list()
+    {
+        $post_data = $this->input->post();
+        $config['table'] = 'item_stock isr';
+        $config['select'] = 'isr.*';
+        // $config['column_search'] = array('isr.ntwt','isr.grwt','isr.less','isr.tunch','isr.fine','isr.stock_type');
+        $config['order'] = array('isr.item_stock_id' => 'desc');
+        $this->load->library('datatables', $config, 'datatable');
+        $created_rfid_list = $this->datatable->get_datatables();
+        $data = array();
+        $total_rfid_grwt = 0;
+        $total_rfid_less = 0;
+        $total_rfid_add = 0;
+        $total_rfid_ntwt = 0;
+        $total_rfid_fine = 0;
+        $total_rfid_charges = 0;
+        $rfid_pcs = 1;
+        foreach ($created_rfid_list as $created_rfid) {
+            $rfid_action_btn = '';
+            $checkbox = '<input type="checkbox" class="stock-checkbox" value="' . $created_rfid->item_stock_id . '">';
+            $rfid_action_btn .= $checkbox . ' &nbsp; ';
+            if ($this->applib->have_access_role(STOCK_STATUS_MODULE_ID, "rfid_edit")) {
+                $rfid_action_btn .= '<a href="javascript:void(0);" class="edit_rfid" data-item_stock_id="' . $created_rfid->item_stock_id . '" ><i class="glyphicon glyphicon-edit"></i></a>';
+            }
+            $rfid_action_btn .= ' &nbsp; <a href="' . base_url('reports/print_item_rfid/' . $created_rfid->item_stock_id) . '" class="btn btn-primary btn-xs" target="_blank"><i class="fa fa-print"></i></a>';
+            $rfid_action_btn .= ' &nbsp; <a href="' . base_url('reports/print_item_rfid_tag/' . $created_rfid->item_stock_id) . '" title="Print RFID tag" class="btn btn-primary btn-xs" target="_blank"><i class="fa fa-print"></i></a>';
+            if ($this->applib->have_access_role(STOCK_STATUS_MODULE_ID, "rfid_delete")) {
+                $rfid_action_btn .= ' &nbsp; <a href="javascript:void(0);" class="delete_rfid" data-href="' . base_url('reports/delete_rfid/' . $created_rfid->item_stock_id) . '"><span class="glyphicon glyphicon-trash" style="color : red">&nbsp;</span></a>';
+            }
+            $row = array();
+            $row[] = $rfid_action_btn;
+            $row[] = $rfid_pcs;
+            // $row[] = $created_rfid->item_stock_id;
+            $row[] = $created_rfid->grwt;
+            $row[] = $created_rfid->less;
+            $row[] = $created_rfid->ntwt;
+            $row[] = $created_rfid->fine;
+            $row[] = date('d/m/Y h:i A', strtotime($created_rfid->created_at));
+            $data[] = $row;
+            
+
+            $total_rfid_grwt = $total_rfid_grwt + $created_rfid->grwt;
+            $total_rfid_less = $total_rfid_less + $created_rfid->less;
+            $total_rfid_ntwt = $total_rfid_ntwt + $created_rfid->ntwt;
+            $total_rfid_fine = $total_rfid_fine + $created_rfid->fine;
+            $rfid_pcs++;
+        }
+        $row = array();
+        $row[] = '<b>Total<b>';
+        $row[] = '';
+        $row[] = '';
+        $row[] = '';
+        $row[] = '<b>' . number_format((float) $total_rfid_grwt, 3, '.', '') . '</b>';
+        $row[] = '<b>' . number_format((float) $total_rfid_less, 3, '.', '') . '</b>';
+        $row[] = '<b>' . number_format((float) $total_rfid_add, 3, '.', '') . '</b>';
+        $row[] = '<b>' . number_format((float) $total_rfid_ntwt, 3, '.', '') . '</b>';
+        $row[] = '<b>' . number_format((float) $total_rfid_fine, 3, '.', '') . '</b>';
+        $row[] = '<b>' . number_format((float) $total_rfid_charges, 2, '.', '') . '</b>';
+        $row[] = '';
+        $row[] = '';
+        $data[] = $row;
+        $output = array(
+            // "draw" => 2,
+            "recordsTotal" => count($created_rfid_list),
+            "recordsFiltered" => $this->datatable->count_filtered(),
+            "data" => $data,
+            "rfid_stock" => number_format((float) $total_rfid_grwt, 3, '.', ''),
+            "rfid_pcs" => $rfid_pcs - 1,
+        );
+        echo json_encode($output);
+    }
+
     function print_item_rfid($item_stock_rfid_id = '')
     {
         if (!empty($item_stock_rfid_id)) {
@@ -5424,6 +5500,109 @@ class Reports extends CI_Controller
             $pdfFilePath = "RFID_Tags.pdf";
             $pdf->Output($pdfFilePath, "I");
         }
+    }
+
+    function print_selected_stock_items_tags()
+    {
+        $item_stock_id = $this->input->get('item_stock_id'); // Get the IDs via GET request
+
+        if (!empty($item_stock_id)) {
+            $ids_array = explode(',', $item_stock_id); // Split the comma-separated IDs
+            $data = array();
+            $data['use_barcode'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'use_barcode'));
+
+            $rfid_data = [];
+            foreach ($ids_array as $item_stock_rfid_id) {
+                $rfid = $this->crud->get_data_row_by_id('item_stock', 'item_stock_id', $item_stock_rfid_id);
+
+                if ($rfid) {
+                    $item_master = $this->crud->get_data_row_by_id('item_master', 'item_id', $rfid->item_id);
+                    $rfid_data[] = array(
+                        'item_stock_rfid' => $rfid,
+                        'item_master' => $item_master,
+                    );
+                }
+            }
+
+            // print_r($rfid_data);exit;
+
+            $data['rfid_data'] = $rfid_data;
+            // return $this->load->view('reports/print_selected_rfid_tags', $data);
+
+            $this->load->library('m_pdf');
+            // $pdf = new mPDF('utf-8', array(60, 12));
+            $pdf = new mPDF('utf-8');
+            $pdf->AddPage(
+                'P', // orientation
+                '', // type
+                '', // resetpagenum
+                '', // pagenumstyle
+                '', // suppress
+                '1px', // margin-left
+                '1px', // margin-right
+                '1px', // margin-top
+                '1px', // margin-bottom
+                0, // margin-header
+                0 // margin-footer
+            );
+
+            $html = $this->load->view('reports/print_selected_stock_items_tags', $data, true);
+            $pdf->WriteHTML($html);
+            $pdfFilePath = "RFID_Tags.pdf";
+            $pdf->Output($pdfFilePath, "I");
+        }
+    }
+
+    function print_all_rfid_tags()
+    {
+            $custom_data = $this->crud->get_all_records_with_three('item_stock','item_stock_id','');
+            // echo '<pre>';
+            // print_r($custom_data);
+            // echo '<pre>';
+
+            $data = array();
+            $data['use_barcode'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'use_barcode'));
+            $rfid_data = [];
+            foreach($custom_data as $cs_row){
+                $item_master = $this->crud->get_data_row_by_id('item_master', 'item_id', $cs_row->item_id);
+                $rfid = $this->crud->get_data_row_by_id('item_stock', 'item_stock_id', $cs_row->item_stock_id);
+                $rfid_data[] = array(
+                    'item_stock_rfid' => $cs_row->item_stock_id,
+                    'item_name' => $item_master->item_name??'',
+                    'rfid_grwt' => $rfid->grwt??'',
+                    'rfid_less' => $rfid->less??'',
+                    'rfid_ntwt' => $rfid->ntwt??''
+                );
+            }
+            $data['rfid_data'] = $rfid_data;
+            // echo '<pre>';
+            // print_r($data);
+            // echo '</pre>';
+            // exit;
+            // return $this->load->view('reports/print_selected_rfid_tags', $data);
+
+            $this->load->library('m_pdf');
+            // $pdf = new mPDF('utf-8', array(60, 12));
+            $pdf = new mPDF('utf-8');
+            $pdf->AddPage(
+                'P', // orientation
+                '', // type
+                '', // resetpagenum
+                '', // pagenumstyle
+                '', // suppress
+                '1px', // margin-left
+                '1px', // margin-right
+                '6px', // margin-top
+                '2px', // margin-bottom
+                0, // margin-header
+                0 // margin-footer
+            );
+
+            $html = $this->load->view('reports/print_all_tags', $data, true);
+            $pdf->WriteHTML($html);
+            $pdfFilePath = "RFID_Tags.pdf";
+            $pdf->Output($pdfFilePath, "I");
+        
     }
 
     function delete_rfid($item_stock_rfid_id = '')

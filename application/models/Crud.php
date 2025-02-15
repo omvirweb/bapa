@@ -92,6 +92,19 @@ class Crud extends CI_Model
 		}
 	}
 
+    function get_all_records_with_three($table_name,$order_by_column,$order_by_value){
+		$this->db->select("*");
+		$this->db->from($table_name);
+		$this->db->order_by($order_by_column,$order_by_value);
+        $this->db->limit('3');
+		$query = $this->db->get();
+		if ($query->num_rows() > 0){
+			return $query->result();
+		}else{
+			return false;
+		}
+	}
+
 	/**
 	 * @param $tbl_name
 	 * @param $column_name
