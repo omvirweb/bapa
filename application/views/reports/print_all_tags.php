@@ -10,53 +10,57 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
+            font-family: arial-bold;
         }
 
         .container {
             width: 50mm;
             float: left;
-            font-size: 10px;
+            font-size: 6px;
         }
 
         .rfid-item {
             border: 1px solid #ccc;
             float: left;
             width: 100%;
-            margin: 0px 0px 2mm 0px;
+            margin: 0px 0px 1mm 0px;
             padding: 0;
         }
 
         .item-name {
             float: left;
-            width: 42%;
-            margin-right:1%;
+            width: 30%;
+            /* margin-right:1%; */
             padding:2px 0 0 5px;
+            /* margin-top: 3px; */
         }
 
         .details-barcode {
             float: left;
             width: 53%;
-            margin-left:1%;
+            /* margin-left:1%; */
         }
 
         .details {
             float: left;
-            width: 48%;
-            margin-left:1%;
+            width: 50%;
+            /* margin-left:1%; */
+            /* margin-top: 3px; */
         }
 
         .barcode {
             float: left;
-            width: 48%;
-            margin-left:1%;
+            width: 46%;
+            /* margin-left:1%; */
         }
 
         .barcode img {
-            height: 50px;
+            height: 28px !important;
             width: auto;
             display: block;
+            margin-left: 2px;
         }
+
     </style>
 </head>
 
@@ -67,7 +71,7 @@
                 <div class="rfid-item">
                     <!-- Left: Item Name -->
                     <div class="item-name">
-                        <b>BAPA</b><br>
+                        <b>BAPA 1</b><br>
                         <b>ORNAMENTS</b><br>
                         <?php if (isset($rfid['item_name'])) { ?>
                             <b><?php echo $rfid['item_name']; ?></b>

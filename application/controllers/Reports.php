@@ -5589,7 +5589,8 @@ class Reports extends CI_Controller
 
 
             // $pdf = new mPDF('utf-8', array(60, 12));
-            $pdf = new mPDF('utf-8');
+            $pdf = new mPDF('utf-8', array(50, 10));
+            // $pdf = new mPDF('utf-8');
             // $pdf = new mPDF('utf-8', [$labelWidth, $labelHeight]);
             /*$pdf->AddPage(
                 'P', // orientation
@@ -5604,22 +5605,25 @@ class Reports extends CI_Controller
                 0, // margin-header
                 0 // margin-footer
             );*/
+            
 
             $pdf->AddPage(
-                'P', // orientation
-                '', // type
-                '', // resetpagenum
-                '', // pagenumstyle
-                '', // suppress
-                '1px', // margin-left
-                '1px', // margin-right
-                '0px', // margin-top
-                '0px', // margin-bottom
-                0, // margin-header
-                0 // margin-footer
+                'P', //orientation
+                '', //type
+                '', //resetpagenum
+                '', //pagenumstyle
+                '', //suppress
+                '1px', //margin-left
+                '1px', //margin-right
+                '1px', //margin-top
+                '1px', //margin-bottom
+                0, //margin-header
+                0 //margin-footer
             );
 
             $html = $this->load->view('reports/print_all_tags', $data, true);
+            // echo $html;
+            // exit;
             $pdf->WriteHTML($html);
             $pdfFilePath = "RFID_Tags.pdf";
             $pdf->Output($pdfFilePath, "I");
