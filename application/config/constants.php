@@ -103,6 +103,7 @@ define('CANCELED_STATUS', 2);
 define('COMPLETED_STATUS', 3);
 
 //Account Group id
+define('SUPPLIER', 48);
 define('CUSTOMER_GROUP', 49);
 define('BANK_ACCOUNT_GROUP', 21);
 define('DEPARTMENT_GROUP', 50);
@@ -114,6 +115,9 @@ define('EXPENSE_ACCOUNT_GROUP', 9);
 define('INCOME_OTHER_THEN_SALES_ACCOUNT_GROUP', 15);
 define('SUNDRY_CREDITORS_ACCOUNT_GROUP', 39);
 define('SUNDRY_DEBTORS_ACCOUNT_GROUP', 42);
+
+//Default Dtate in Account
+define('DEFAULT_STATE_ID', 1);
 
 /****************** Account Ids Start *********************/
 // Administrator User //

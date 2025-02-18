@@ -393,6 +393,18 @@ $segment3 = $this->uri->segment(3);
                                                 <a href="<?php echo base_url() ?>account/account_list/"><i
                                                         class="fa fa-list"></i> Account List</a></li>
                                         <?php } ?>
+                                        <?php if ($this->applib->have_access_role(ACCOUNT_MODULE_ID, "view")) { ?>
+                                            <li
+                                                class="<?= ($segment1 == 'account' && $segment2 == 'account_list_customer') ? 'active' : '' ?>">
+                                                <a href="<?php echo base_url() ?>account/account_list_customer/"><i
+                                                        class="fa fa-list"></i> Account Customer List</a></li>
+                                        <?php } ?>
+                                        <?php if ($this->applib->have_access_role(ACCOUNT_MODULE_ID, "view")) { ?>
+                                            <li
+                                                class="<?= ($segment1 == 'account' && $segment2 == 'account_list_supplier') ? 'active' : '' ?>">
+                                                <a href="<?php echo base_url() ?>account/account_list_supplier/"><i
+                                                        class="fa fa-list"></i> Account Supplier List</a></li>
+                                        <?php } ?>
                                         <?php if ($this->applib->have_access_role(ACCOUNT_GROUP_MODULE_ID, "view")) { ?>
                                             <li
                                                 class="<?= ($segment1 == 'account' && $segment2 == 'account_group') ? 'active' : '' ?>">

@@ -3122,7 +3122,7 @@ if (isset($order_lot_item)) { ?>
             var postData = new FormData(this);
             var href_url = '<?= base_url('sell/save_sell') ?>';
             if(is_grater == 1){
-                if (confirm('Credit Limit : ' + credit_limit)) {
+                // if (confirm('Credit Limit : ' + credit_limit)) {
                     var allow_to_save_cl_out = <?php echo $this->app_model->have_access_role(SELL_PURCHASE_MODULE_ID, "allow to save out of credit limit"); ?>;
                     if(allow_to_save_cl_out != 1){
                         show_notify('You have Not Allow to Save Out of Credit Limit.', false);
@@ -3156,7 +3156,7 @@ if (isset($order_lot_item)) { ?>
                     <?php } else { ?>
                         save_form(postData, href_url);
                     <?php } ?>
-                }
+                // }
             } else {
                 <?php if (isset($sell_data->sell_id) && !empty($sell_data->sell_id)) { ?>
                     if (($("#deleted_sell_item_id").length > 0)){

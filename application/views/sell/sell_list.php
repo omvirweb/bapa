@@ -83,7 +83,7 @@
                                                     <th>Account Name</th>
                                                     <th>Department</th>
                                                     <th>Sell No</th>
-                                                    <th  width="80px" class="text-nowrap">Sell Date</th>
+                                                    <th  width="80px" class="text-nowrap">Date</th>
                                                     <th>Remark</th>
                                                     <th>Delivered / Not Delivered</th>
                                                     <?php if(isset($view_not) && !empty($view_not)){ ?>
