@@ -839,6 +839,7 @@ class Sell extends CI_Controller
                         $insert_item['li_narration'] = (isset($lineitem->li_narration) && !empty($lineitem->li_narration)) ? $lineitem->li_narration : NULL;
                         $insert_item['gold_silver_rate'] = (isset($lineitem->gold_silver_rate) && !empty($lineitem->gold_silver_rate)) ? $lineitem->gold_silver_rate : 0;
                         $insert_item['grwt'] = $lineitem->grwt;
+                        $insert_item['purchase_less'] = $lineitem->purchase_less;
                         $insert_item['less'] = $lineitem->less;
                         $insert_item['net_wt'] = $lineitem->net_wt;
                         $insert_item['touch_id'] = $lineitem->touch_id;
@@ -1332,6 +1333,7 @@ class Sell extends CI_Controller
                         $insert_item['li_narration'] = (isset($lineitem->li_narration) && !empty($lineitem->li_narration)) ? $lineitem->li_narration : NULL;
                         $insert_item['gold_silver_rate'] = (isset($lineitem->gold_silver_rate) && !empty($lineitem->gold_silver_rate)) ? $lineitem->gold_silver_rate : 0;
                         $insert_item['grwt'] = $lineitem->grwt;
+                        $insert_item['purchase_less'] = $lineitem->purchase_less;
                         $insert_item['less'] = $lineitem->less;
                         $insert_item['net_wt'] = $lineitem->net_wt;
                         $insert_item['touch_id'] = $lineitem->touch_id;

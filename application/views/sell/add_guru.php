@@ -165,10 +165,14 @@
                                             <label for="grwt">Gr.Wt.<span class="required-sign">&nbsp;*</span></label>
                                             <input type="text" name="line_items_data[grwt]" class="form-control grwt num_only" id="grwt" placeholder="" value="">
                                         </div>
+                                        <div class="col-md-1">
+                                            <label for="purchase_less" style="font-size: 12px;">Purch Less</label>
+                                            <input type="text" name="line_items_data[purchase_less]" class="form-control purchase_less num_only" id="purchase_less" placeholder="" value="">
+                                        </div>
                                         <?php if($less_netwt_2 == '1') { ?>
                                             <div class="col-md-1">
                                                 <label for="less" style="font-size: 12px;">
-                                                    Less
+                                                    Sell Less
                                                     <?php if($ask_less_ad_details_in_sell_purchase == '1' ) { ?>
                                                         <a href="javascript:void(0)" id="less_ad_details" class="module_save_btn" style="margin: 0; font-size: 9px;">Details[F8]</a>
                                                     <?php } ?>
@@ -265,7 +269,8 @@
                                                     <th width="8%">Description</th>
                                                     <th width="5%" class="text-right">Gr.Wt.</th>
                                                     <?php if($less_netwt_2 == '1') { ?>
-                                                        <th width="5%" class="text-right">Less</th>
+                                                        <th width="5%" class="text-right">Purchase Less</th>
+                                                        <th width="5%" class="text-right">Sell Less</th>
                                                         <th width="5%" class="text-right">Net.Wt</th>
                                                     <?php } ?>
                                                     <th width="5%" class="text-right">Tunch</th>
@@ -295,6 +300,7 @@
                                                     <th>Total</th>
                                                     <th class="text-right"><span id="total_grwt"></span></th>
                                                     <?php if($less_netwt_2 == '1') { ?>
+                                                        <th class="text-right"><span id="total_purchase_less"></span></th>
                                                         <th class="text-right"><span id="total_less"></span></th>
                                                         <th class="text-right"><span id="total_ntwt"></span></th>
                                                     <?php } ?>
@@ -1182,7 +1188,8 @@
                                     <th>Particulars</th>
                                     <th>Item</th>
                                     <th class="text-right">Gr.Wt.</th>
-                                    <th class="text-right">Less</th>
+                                    <th class="text-right">Purchase Less</th>
+                                    <th class="text-right">Sell Less</th>
                                     <th class="text-right">Net.Wt.</th>
                                     <th class="text-right">Tunch</th>
                                     <th class="text-right">Wstg</th>
@@ -1405,6 +1412,9 @@ if (isset($order_lot_item)) { ?>
     
     $(document).ready(function () {
         $('.select2').select2();
+        $('#purchase_less').on('input', function () {
+            $('#less').val($(this).val()).trigger('input').trigger('change'); 
+        });
         <?php if(GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
             $.fn.select2.amd.require(['select2/compat/matcher'], function (oldMatcherSelect2) {
                 $("#item_id").select2({
@@ -1597,6 +1607,7 @@ if (isset($order_lot_item)) { ?>
                 $('#transfer_account_id').val(null).trigger('change');
             }
             var sell_type_id = $('#sell_type_id').val();
+            console.log(sell_type_id);
             if(sell_type_id == <?php echo SELL_TYPE_SELL_ID; ?>){
                 get_wstg_from_account();
             }
@@ -1949,6 +1960,7 @@ if (isset($order_lot_item)) { ?>
                 
             }
             $("#grwt").val('');
+            $("#purchase_less").val('');
             $("#less").val('');
             $("#net_wt").val('');
             $("#touch_id").val(null).trigger("change");
@@ -1976,6 +1988,7 @@ if (isset($order_lot_item)) { ?>
             } else {
                 $('#item_id').val(null).trigger('change');
                 $("#grwt").val('');
+                $("#purchase_less").val('');
                 $("#less").val('');
                 $("#net_wt").val('');
                 $("#touch_id").val(null).trigger("change");
@@ -1988,6 +2001,7 @@ if (isset($order_lot_item)) { ?>
                 $("#fine").val('');
             }
             $('#item_id').val(null).trigger('change');
+            $("#purchase_less").val('');
             $("#grwt").val('');
             $("#less").val('');
             $("#net_wt").val('');
@@ -2003,6 +2017,7 @@ if (isset($order_lot_item)) { ?>
 
         $(document).on('change', '#item_id', function () {
             $("#grwt").val('');
+            $("#purchase_less").val('');
             $("#less").val('');
             $("#net_wt").val('');
             $("#touch_id").val(null).trigger("change");
@@ -2035,7 +2050,7 @@ if (isset($order_lot_item)) { ?>
                             $('#less_ad_details').removeClass('hide');
                             $("#grwt").focus();
                             $(document).on('change', '#grwt', function () {
-                                $('#less').focus();
+                                $('#purchase_less').focus();
                             });
                         }
                         <?php if($use_category == '1') { ?>
@@ -2071,7 +2086,7 @@ if (isset($order_lot_item)) { ?>
                             }
                         }
                         var sell_type_id = $('#sell_type_id').val();
-                        if(sell_type_id == <?php echo SELL_TYPE_SELL_ID; ?>){
+                        if(sell_type_id == <?php echo SELL_TYPE_SELL_ID; ?> || sell_type_id == <?php echo SELL_TYPE_PURCHASE_ID; ?>){
                             get_wstg_from_account();
                         }
                     }
@@ -2884,6 +2899,7 @@ if (isset($order_lot_item)) { ?>
                 var selected_index = $(this).data('selected_index');
                 ots_lineitem_objectdata[selected_index].sell_item_delete = 'allow';
                 ots_lineitem_objectdata[selected_index].grwt = order_grwt[selected_index];
+                ots_lineitem_objectdata[selected_index].purchase_less = order_grwt[purchase_less];
                 ots_lineitem_objectdata[selected_index].less = order_less[selected_index];
                 ots_lineitem_objectdata[selected_index].net_wt = parseFloat(ots_lineitem_objectdata[selected_index].grwt) - parseFloat(ots_lineitem_objectdata[selected_index].less);
                 ots_lineitem_objectdata[selected_index].net_wt = round(ots_lineitem_objectdata[selected_index].net_wt, 3).toFixed(3);
@@ -2953,6 +2969,7 @@ if (isset($order_lot_item)) { ?>
                 var pts_selected_index = $(this).data('pts_selected_index');
                 pts_lineitem_objectdata[pts_selected_index].sell_item_delete = 'allow';
                 pts_lineitem_objectdata[pts_selected_index].grwt = pts_grwt[pts_selected_index] || 0;
+                pts_lineitem_objectdata[pts_selected_index].purchase_less = pts_grwt[pts_selected_index] || 0;
                 pts_lineitem_objectdata[pts_selected_index].less = pts_less[pts_selected_index] || 0;
                 pts_lineitem_objectdata[pts_selected_index].wstg = pts_wstg[pts_selected_index];
                 pts_lineitem_objectdata[pts_selected_index].net_wt = parseFloat(pts_lineitem_objectdata[pts_selected_index].grwt || 0) - parseFloat(pts_lineitem_objectdata[pts_selected_index].less || 0);
@@ -3010,6 +3027,7 @@ if (isset($order_lot_item)) { ?>
             $("#category_id").val(null).trigger("change");
             $("#item_id").val(null).trigger("change");
             $("#grwt").val('');
+            $("#purchase_less").val('');
             $("#less").val('');
             $('#less').removeAttr('readonly', 'readonly');
             $('#less_ad_details').removeClass('hide');
@@ -3293,6 +3311,7 @@ if (isset($order_lot_item)) { ?>
                     $("#category_id").val(null).trigger("change");
                     $("#item_id").val(null).trigger("change");
                     $("#grwt").val('');
+                    $("#purchase_less").val('');
                     $("#less").val('');
                     $("#net_wt").val('');
                     $(".touch_id").val(null).trigger("change");
@@ -3411,11 +3430,13 @@ if (isset($order_lot_item)) { ?>
                         lineitem['group_name'] = json;
                         if(lineitem['group_name'] == 1){
                             lineitem['grwt'] = round(lineitem['grwt'], 3).toFixed(3);
+                            lineitem['purchase_less'] = round(lineitem['purchase_less'], 3).toFixed(3);
                             lineitem['less'] = round(lineitem['less'], 3).toFixed(3);
                             lineitem['net_wt'] = round(lineitem['net_wt'], 3).toFixed(3);
                             lineitem['fine'] = round(lineitem['fine'], 3).toFixed(3);
                         } else {
                             lineitem['grwt'] = round(lineitem['grwt'], 1).toFixed(3);
+                            lineitem['purchase_less'] = round(lineitem['purchase_less'], 1).toFixed(3);
                             lineitem['less'] = round(lineitem['less'], 1).toFixed(3);
                             lineitem['net_wt'] = round(lineitem['net_wt'], 1).toFixed(3);
                             lineitem['fine'] = round(lineitem['fine'], 1).toFixed(3);
@@ -3465,6 +3486,7 @@ if (isset($order_lot_item)) { ?>
                                     $("#item_id").val(null).trigger("change");
                                     $("#li_narration").val('');
                                     $("#grwt").val('');
+                                    $("#purchase_less").val('');
                                     $("#less").val('');
                                     $('#less').removeAttr('readonly', 'readonly');
                                     $('#less_ad_details').removeClass('hide');
@@ -3520,6 +3542,7 @@ if (isset($order_lot_item)) { ?>
                             $("#item_id").val(null).trigger("change");
                             $("#li_narration").val('');
                             $("#grwt").val('');
+                            $("#purchase_less").val('');
                             $("#less").val('');
                             $('#less').removeAttr('readonly', 'readonly');
                             $('#less_ad_details').removeClass('hide');
@@ -3616,6 +3639,7 @@ if (isset($order_lot_item)) { ?>
                             <?php } ?>
                             
                             $("#grwt").val(json.grwt);
+                            $("#purchase_less").val(json.purchase_less);
                             $("#less").val(json.less);
                             $("#net_wt").val(json.net_wt);
                             $(".touch_id").val(json.touch_id).trigger("change");
@@ -3817,6 +3841,7 @@ if (isset($order_lot_item)) { ?>
                                 '<td>' + value.account_name + ' ['+ value.sell_date +']</td>' +
                                 '<td>' + value.item_name + '</td>' +
                                 '<td class="text-right"><input type="text" name="pts_grwt[]" id="pts_grwt_' + index + '" data-pts_selected_index="' + index + '" class="pts_grwt num_only" value="'+ li_value.grwt + '" style="width:100px;"> ' + value.grwt + ' </td>' +
+                                '<td class="text-right"><input type="text" name="pts_purchase_less[]" id="pts_purchase_less_' + index + '" data-pts_selected_index="' + index + '" class="pts_purchase_less num_only" value="'+ li_value.purchase_less + '" style="width:100px;"> ' + value.purchase_less + ' </td>' +
                                 '<td class="text-right">' + input_less + '</td>' +
                                 '<td class="text-right" id="pts_net_wt_' + index + '">' + li_value.net_wt + '</td>' +
                                 '<td class="text-right">' + value.touch_id + '</td>' +
@@ -3824,6 +3849,7 @@ if (isset($order_lot_item)) { ?>
                                 '<td class="text-right" id="pts_fine_' + index + '">' + li_value.fine + '</td>';
                                 pts_item_delete = pts_item_delete + parseFloat(li_value.pts_item_delete);
                                 pts_total_grwt = pts_total_grwt + parseFloat(li_value.grwt);
+                                pts_total_purchase_less = pts_total_purchase_less + parseFloat(li_value.purchase_less);
                                 pts_total_less = pts_total_less + parseFloat(li_value.less);
                                 pts_total_ntwt = pts_total_ntwt + parseFloat(li_value.net_wt);
                                 pts_total_fine = pts_total_fine + parseFloat(li_value.fine);
@@ -3842,6 +3868,7 @@ if (isset($order_lot_item)) { ?>
                         '<td>' + value.account_name + ' ['+ value.sell_date +']</td>' +
                         '<td>' + value.item_name + '</td>' +
                         '<td class="text-right"><input type="text" name="pts_grwt[]" id="pts_grwt_' + index + '" data-pts_selected_index="' + index + '" class="pts_grwt num_only" value="'+ value.grwt + '" style="width:100px;"></td>' +
+                        '<td class="text-right"><input type="text" name="pts_purchase_less[]" id="pts_purchase_less_' + index + '" data-pts_selected_index="' + index + '" class="pts_purchase_less num_only" value="'+ value.purchase_less + '" style="width:100px;"></td>' +
                         '<td class="text-right">' + input_less + '</td>' +
                         '<td class="text-right" id="pts_net_wt_' + index + '">' + value.net_wt + '</td>' +
                         '<td class="text-right">' + value.touch_id + '</td>' +
@@ -3849,6 +3876,7 @@ if (isset($order_lot_item)) { ?>
                         '<td class="text-right" id="pts_fine_' + index + '">' + value.fine + '</td>';
                         pts_item_delete = pts_item_delete + parseFloat(value.pts_item_delete);
                         pts_total_grwt = pts_total_grwt + parseFloat(value.grwt);
+                        pts_total_grwt = pts_total_purchase_less + parseFloat(value.purchase_less);
                         pts_total_less = pts_total_less + parseFloat(value.less);
                         pts_total_ntwt = pts_total_ntwt + parseFloat(value.net_wt);
                         pts_total_fine = pts_total_fine + parseFloat(value.fine);
@@ -3866,6 +3894,7 @@ if (isset($order_lot_item)) { ?>
                     '<td>' + value.account_name + ' ['+ value.sell_date +']</td>' +
                     '<td>' + value.item_name + '</td>' +
                     '<td class="text-right"><input type="text" name="pts_grwt[]" id="pts_grwt_' + index + '" data-pts_selected_index="' + index + '" class="pts_grwt num_only" value="'+ value.grwt + '" style="width:100px;"></td>' +
+                    '<td class="text-right"><input type="text" name="pts_purchase_less[]" id="pts_purchase_less_' + index + '" data-pts_selected_index="' + index + '" class="pts_purchase_less num_only" value="'+ value.purchase_less + '" style="width:100px;"></td>' +
                     '<td class="text-right">' + input_less + '</td>' +
                     '<td class="text-right" id="pts_net_wt_' + index + '">' + value.net_wt + '</td>' +
                     '<td class="text-right">' + value.touch_id + '</td>' +
@@ -3873,6 +3902,7 @@ if (isset($order_lot_item)) { ?>
                     '<td class="text-right" id="pts_fine_' + index + '">' + value.fine + '</td>';
                     pts_item_delete = pts_item_delete + parseFloat(value.pts_item_delete);
                     pts_total_grwt = pts_total_grwt + parseFloat(value.grwt);
+                    pts_total_purchase_less = pts_total_purchase_less + parseFloat(value.purchase_less);
                     pts_total_less = pts_total_less + parseFloat(value.less);
                     pts_total_ntwt = pts_total_ntwt + parseFloat(value.net_wt);
                     pts_total_fine = pts_total_fine + parseFloat(value.fine);
@@ -4017,6 +4047,7 @@ if (isset($order_lot_item)) { ?>
         $('#ajax-loader').show();
         var new_lineitem_html = '';
         var total_grwt = 0;
+        var total_purchase_less  = 0;
         var total_less = 0;
         var total_ntwt = 0;
         li_total_gold_fine = 0;
@@ -4034,6 +4065,7 @@ if (isset($order_lot_item)) { ?>
             var lineitem_delete_btn = '';
 
             var grwt = value.grwt || 0;
+            var purchase_less = value.purchase_less || 0;
             var less = value.less || 0;
             var net_wt = value.net_wt || 0;
             var touch_id = value.touch_id;
@@ -4047,6 +4079,7 @@ if (isset($order_lot_item)) { ?>
             if(value.type_name == 'S'){
             } else {
                 grwt = zero_value - parseFloat(grwt);
+                purchase_less = zero_value - parseFloat(purchase_less);
                 less = (less != '') ? 0 - parseFloat(less) : less;
                 net_wt = zero_value - parseFloat(net_wt);
                 touch_id = zero_value - parseFloat(touch_id);
@@ -4059,6 +4092,7 @@ if (isset($order_lot_item)) { ?>
             }
 
             total_grwt = total_grwt + parseFloat(grwt);
+            total_purchase_less = total_purchase_less + parseFloat(purchase_less);
             total_less = total_less + parseFloat(less);
             total_ntwt = total_ntwt + parseFloat(net_wt);
             if(value.group_name == '<?php echo CATEGORY_GROUP_GOLD_ID; ?>'){
@@ -4092,6 +4126,7 @@ if (isset($order_lot_item)) { ?>
             }
             row_html += '<td>' + value.item_name + '<br><small>' + value_li_narration + '</small></td>' +
                     '<td class="text-right">' + parseFloat(grwt).toFixed(3) + '</td>';
+                    row_html += '<td class="text-right">' + purchase_less + '</td>';
             <?php if($less_netwt_2 == '1') { ?>
                 <?php if (isset($order_lot_item)) { ?>
                     row_html += '<td class="text-right">' + parseFloat(value.less).toFixed(3) + '</td>';
@@ -4136,6 +4171,7 @@ if (isset($order_lot_item)) { ?>
         $('tbody#lineitem_list').html(new_lineitem_html);
 
         $('#total_grwt').html(round(total_grwt, 3).toFixed(3));
+        $('#total_purchase_less').html(round(total_purchase_less, 3).toFixed(3));
         $('#total_less').html(round(total_less, 3).toFixed(3));
         $('#total_ntwt').html(round(total_ntwt, 3).toFixed(3));
         $('#li_total_gold_fine').html(parseFloat(li_total_gold_fine).toFixed(3));
@@ -4188,6 +4224,7 @@ if (isset($order_lot_item)) { ?>
             $("#purchase_sell_item_id").val(value.purchase_sell_item_id);
             $("#stock_type").val(value.stock_type);
             $("#grwt").val(value.grwt);
+            $("#purchase_less").val(value.purchase_less);
             $("#less").val(value.less);
             $("#net_wt").val(value.net_wt);
             $(".touch_id").val(value.touch_id).trigger("change");
