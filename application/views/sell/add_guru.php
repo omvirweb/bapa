@@ -1188,7 +1188,7 @@
                                     <th>Particulars</th>
                                     <th>Item</th>
                                     <th class="text-right">Gr.Wt.</th>
-                                    <th class="text-right">Purchase Less</th>
+                                    <!--<th class="text-right">Purchase Less</th>-->
                                     <th class="text-right">Sell Less</th>
                                     <th class="text-right">Net.Wt.</th>
                                     <th class="text-right">Tunch</th>
@@ -3816,6 +3816,7 @@ if (isset($order_lot_item)) { ?>
         var pts_lineitem_html = '';
         var pts_item_delete = 'allow';
         var pts_total_grwt = 0;
+        var pts_total_purchase_less = 0;
         var pts_total_less = 0;
         var pts_total_ntwt = 0;
         var pts_total_average = 0;
@@ -3841,7 +3842,7 @@ if (isset($order_lot_item)) { ?>
                                 '<td>' + value.account_name + ' ['+ value.sell_date +']</td>' +
                                 '<td>' + value.item_name + '</td>' +
                                 '<td class="text-right"><input type="text" name="pts_grwt[]" id="pts_grwt_' + index + '" data-pts_selected_index="' + index + '" class="pts_grwt num_only" value="'+ li_value.grwt + '" style="width:100px;"> ' + value.grwt + ' </td>' +
-                                '<td class="text-right"><input type="text" name="pts_purchase_less[]" id="pts_purchase_less_' + index + '" data-pts_selected_index="' + index + '" class="pts_purchase_less num_only" value="'+ li_value.purchase_less + '" style="width:100px;"> ' + value.purchase_less + ' </td>' +
+                                //'<td class="text-right"><input type="text" name="pts_purchase_less[]" id="pts_purchase_less_' + index + '" data-pts_selected_index="' + index + '" class="pts_purchase_less num_only" value="'+ li_value.purchase_less + '" style="width:100px;"> ' + value.purchase_less + ' </td>' +
                                 '<td class="text-right">' + input_less + '</td>' +
                                 '<td class="text-right" id="pts_net_wt_' + index + '">' + li_value.net_wt + '</td>' +
                                 '<td class="text-right">' + value.touch_id + '</td>' +
@@ -3868,7 +3869,7 @@ if (isset($order_lot_item)) { ?>
                         '<td>' + value.account_name + ' ['+ value.sell_date +']</td>' +
                         '<td>' + value.item_name + '</td>' +
                         '<td class="text-right"><input type="text" name="pts_grwt[]" id="pts_grwt_' + index + '" data-pts_selected_index="' + index + '" class="pts_grwt num_only" value="'+ value.grwt + '" style="width:100px;"></td>' +
-                        '<td class="text-right"><input type="text" name="pts_purchase_less[]" id="pts_purchase_less_' + index + '" data-pts_selected_index="' + index + '" class="pts_purchase_less num_only" value="'+ value.purchase_less + '" style="width:100px;"></td>' +
+                        //'<td class="text-right"><input type="text" name="pts_purchase_less[]" id="pts_purchase_less_' + index + '" data-pts_selected_index="' + index + '" class="pts_purchase_less num_only" value="'+ value.purchase_less + '" style="width:100px;"></td>' +
                         '<td class="text-right">' + input_less + '</td>' +
                         '<td class="text-right" id="pts_net_wt_' + index + '">' + value.net_wt + '</td>' +
                         '<td class="text-right">' + value.touch_id + '</td>' +
@@ -3894,7 +3895,7 @@ if (isset($order_lot_item)) { ?>
                     '<td>' + value.account_name + ' ['+ value.sell_date +']</td>' +
                     '<td>' + value.item_name + '</td>' +
                     '<td class="text-right"><input type="text" name="pts_grwt[]" id="pts_grwt_' + index + '" data-pts_selected_index="' + index + '" class="pts_grwt num_only" value="'+ value.grwt + '" style="width:100px;"></td>' +
-                    '<td class="text-right"><input type="text" name="pts_purchase_less[]" id="pts_purchase_less_' + index + '" data-pts_selected_index="' + index + '" class="pts_purchase_less num_only" value="'+ value.purchase_less + '" style="width:100px;"></td>' +
+                    //'<td class="text-right"><input type="text" name="pts_purchase_less[]" id="pts_purchase_less_' + index + '" data-pts_selected_index="' + index + '" class="pts_purchase_less num_only" value="'+ value.purchase_less + '" style="width:100px;"></td>' +
                     '<td class="text-right">' + input_less + '</td>' +
                     '<td class="text-right" id="pts_net_wt_' + index + '">' + value.net_wt + '</td>' +
                     '<td class="text-right">' + value.touch_id + '</td>' +

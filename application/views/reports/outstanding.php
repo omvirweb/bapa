@@ -40,12 +40,12 @@
                                     <div class="col-md-2">
                                         <label>Account Group</label>
                                         <select name="account_group_id" id="account_group_id"
-                                            class="form-control select2">
+                                            class="form-control select2" multiple>
                                             <option value="0">All</option>
                                             <?php if (!empty($account_groups)) {
                                                 foreach ($account_groups as $grp) { ?>
                                                     <option value="<?php echo $grp->account_group_id ?>"
-                                                        <?= !empty($account_group_id) && $account_group_id == $grp->account_group_id ? 'selected' : '' ?>>
+                                                        <?php if(in_array($grp->account_group_id,$selected_account_group_ids)){ ?> selected <?php }?>>
                                                         <?php echo $grp->account_group_name; ?>
                                                     </option>
                                                 <?php }
@@ -257,6 +257,9 @@
             initAjaxSelect2($("#account_id"), "<?= base_url('app/account_name_with_number_select2_source') ?>/" + account_group_id);
         });
 
+        /*var array_acc = <?php //echo json_encode($selected_account_group_ids); ?>;
+        $('#account_group_id').val(array_acc).trigger("change");*/
+
         $('.account_address').tooltip('fixTitle');
 
         table = $('#outstanding_table').DataTable({
@@ -448,6 +451,8 @@
 
         $(document).on('click', '#search', function () {
             $('#ajax-loader').show();
+            /*var array_acc = <?php //echo json_encode($selected_account_group_ids); ?>;
+            $('#account_group_id').val(array_acc).trigger("change");*/
             table.draw();
         });
 

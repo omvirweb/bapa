@@ -2600,6 +2600,38 @@ class Crud extends CI_Model
 //        print_r($this->db->last_query());die;
         return $query->result();
     }
+    function get_sell_items_for_outstanding_ids_report($upto_balance_date, $account_group_ids) {
+        if(PACKAGE_FOR == 'manek'){
+            $this->db->select("si.*, IF(`si`.`spi_rate` = 0, IF(`c`.`category_group_id` = 1, IF(`si`.`type` = 1, si.fine, '".ZERO_VALUE."'-si.fine), '0'), '0') AS gold_fine, IF(`si`.`spi_rate` = 0, IF(`c`.`category_group_id` = 2, IF(`si`.`type` = 1, si.fine, '".ZERO_VALUE."'-si.fine), '0'), '0') AS silver_fine, IF(`si`.`type` = 1, si.amount, '".ZERO_VALUE."'-si.amount) AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+        } else {
+            $sell_purchase_type_3_menu = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'sell_purchase_type_3'));
+            if($sell_purchase_type_3_menu == '1' ) {
+                $this->db->select("si.*, IF(`si`.`spi_rate_of` = 2 AND `si`.`spi_rate` != 0, '0', IF(`c`.`category_group_id` = 1, IF(`si`.`type` = 1, si.fine, '".ZERO_VALUE."'-si.fine), '0')) AS gold_fine, IF(`si`.`spi_rate_of` = 2 AND `si`.`spi_rate` != 0, '0', IF(`c`.`category_group_id` = 2, IF(`si`.`type` = 1, si.fine, '".ZERO_VALUE."'-si.fine), '0')) AS silver_fine, IF(`si`.`type` = 1, si.charges_amt, '".ZERO_VALUE."'-si.charges_amt) AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+            } else {
+                $this->db->select("si.*, IF(`c`.`category_group_id` = 1, IF(`si`.`type` = 1, si.fine, '".ZERO_VALUE."'-si.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, IF(`si`.`type` = 1, si.fine, '".ZERO_VALUE."'-si.fine), '0') AS silver_fine, si.charges_amt AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+            }
+        }
+        $this->db->from('sell_items si');
+        $this->db->join('sell s', 's.sell_id = si.sell_id', 'left');
+        $this->db->join('category c', 'c.category_id = si.category_id', 'left');
+        $this->db->join('item_master item', 'item.item_id = si.item_id', 'left');
+        $this->db->join('account a', 'a.account_id = s.account_id', 'left');
+        $this->db->where('s.sell_date <= ',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
     function get_sell_items_for_mfloss_outstanding_report($upto_balance_date, $account_group_id) {
         $sell_purchase_type_3_menu = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'sell_purchase_type_3'));
         if($sell_purchase_type_3_menu == '1' ) {
@@ -2625,6 +2657,34 @@ class Crud extends CI_Model
 //        print_r($this->db->last_query());die;
         return $query->result();
     }
+
+    function get_sell_items_for_mfloss_outstanding_ids_report($upto_balance_date, $account_group_ids) {
+        $sell_purchase_type_3_menu = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'sell_purchase_type_3'));
+        $group_ids_string = implode(',', $account_group_ids);
+        if($sell_purchase_type_3_menu == '1' ) {
+            $this->db->select("si.*, '0' AS gold_fine, '0' AS silver_fine, IF(`si`.`type` = 1, '".ZERO_VALUE."'-si.charges_amt, si.charges_amt) AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id AND a.account_group_id IN(".$group_ids_string.")");
+        } else {
+            $this->db->select("si.*, '0' AS gold_fine, '0' AS silver_fine, '".ZERO_VALUE."'-si.charges_amt AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id AND a.account_group_id IN(".$group_ids_string.")");
+        }
+        $this->db->from('sell_items si');
+        $this->db->join('sell s', 's.sell_id = si.sell_id', 'left');
+        $this->db->join('category c', 'c.category_id = si.category_id', 'left');
+        $this->db->join('item_master item', 'item.item_id = si.item_id', 'left');
+        $this->db->join('account a', 'a.account_id = '.MF_LOSS_EXPENSE_ACCOUNT_ID, 'left');
+        $this->db->where('s.sell_date <= ',$upto_balance_date);
+        $this->db->where('si.charges_amt !=', '0');
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
+    
     function get_sell_discount_for_outstanding_report($upto_balance_date, $account_group_id) {
         $this->db->select("s.*, '0' AS gold_fine, '0' AS silver_fine, '".ZERO_VALUE."' - s.discount_amount AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
         $this->db->from('sell s');
@@ -2644,6 +2704,26 @@ class Crud extends CI_Model
 //        print_r($this->db->last_query());die;
         return $query->result();
     }
+    function get_sell_discount_for_outstanding_ids_report($upto_balance_date, $account_group_ids) {
+        $this->db->select("s.*, '0' AS gold_fine, '0' AS silver_fine, '".ZERO_VALUE."' - s.discount_amount AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->from('sell s');
+        $this->db->join('account a', 'a.account_id = s.account_id', 'left');
+        $this->db->where('s.sell_date <= ',$upto_balance_date);
+        if(!empty($account_group_id)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
     function get_sell_with_gst_amount_for_outstanding_report($upto_balance_date, $account_group_id) {
         $this->db->select("s.*, '0' AS gold_fine, '0' AS silver_fine, s.total_amount AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
         $this->db->from('sell_with_gst s');
@@ -2651,6 +2731,27 @@ class Crud extends CI_Model
         $this->db->where('s.sell_date <= ',$upto_balance_date);
         if(!empty($account_group_id)){
             $this->db->where('a.account_group_id', $account_group_id);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
+
+    function get_sell_with_gst_amount_for_outstanding_ids_report($upto_balance_date, $account_group_ids) {
+        $this->db->select("s.*, '0' AS gold_fine, '0' AS silver_fine, s.total_amount AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->from('sell_with_gst s');
+        $this->db->join('account a', 'a.account_id = s.account_id', 'left');
+        $this->db->where('s.sell_date <= ',$upto_balance_date);        
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
         }
         if($upto_balance_date == $this->today_date){
             $this->db->group_start();
@@ -2684,6 +2785,28 @@ class Crud extends CI_Model
         $query = $this->db->get();
         return $query->result();
     }
+
+    function get_payment_receipt_for_outstanding_ids_report($upto_balance_date, $account_group_ids) {
+        //        $this->db->select("pr.*, '0' AS gold_fine, '0' AS silver_fine, CONCAT(IF(pr.payment_receipt = 1, '', '-'), pr.amount) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->select("pr.*, '0' AS gold_fine, '0' AS silver_fine, IF(pr.payment_receipt = 1, pr.amount, '".ZERO_VALUE."'-pr.amount) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->from('payment_receipt pr');
+                $this->db->join('sell s', 's.sell_id = pr.sell_id', 'left');
+                $this->db->join('account a', 'a.account_id = s.account_id', 'left');
+                $this->db->where('s.sell_date <= ',$upto_balance_date);
+                if(!empty($account_group_ids)){
+                    $group_ids_string = implode(',', $account_group_ids);
+                    $this->db->where_in('a.account_group_id', $group_ids_string);
+                }
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query = $this->db->get();
+                return $query->result();
+            }
     
     function get_payment_receipt_for_outstanding_report_bank($upto_balance_date, $account_group_id) {
 //        $this->db->select("pr.*, '0' AS gold_fine, '0' AS silver_fine, CONCAT(IF(pr.payment_receipt = 1, '-', ''), pr.amount) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
@@ -2706,6 +2829,29 @@ class Crud extends CI_Model
         $query = $this->db->get();
         return $query->result();
     }
+
+    function get_payment_receipt_for_outstanding_ids_report_bank($upto_balance_date, $account_group_ids) {
+        //        $this->db->select("pr.*, '0' AS gold_fine, '0' AS silver_fine, CONCAT(IF(pr.payment_receipt = 1, '-', ''), pr.amount) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->select("pr.*, '0' AS gold_fine, '0' AS silver_fine, IF(pr.payment_receipt = 1, '".ZERO_VALUE."'-pr.amount, pr.amount) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->from('payment_receipt pr');
+                $this->db->join('sell s', 's.sell_id = pr.sell_id', 'left');
+                $this->db->join('account a', 'a.account_id = pr.bank_id', 'left');
+                $this->db->where('s.sell_date <= ',$upto_balance_date);
+                if(!empty($account_group_ids)){
+                    $group_ids_string = implode(',', $account_group_ids);
+                    $this->db->where_in('a.account_group_id', $group_ids_string);
+                }
+                $this->db->where('pr.cash_cheque', '2');
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query = $this->db->get();
+                return $query->result();
+            }
 
     function get_metal_payment_receipt_for_outstanding_report($upto_balance_date, $account_group_id) {
 //        $this->db->select("mpr.*, IF(`c`.`category_group_id` = 1, CONCAT(IF(mpr.metal_payment_receipt = 1, '', '-'), mpr.metal_fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, CONCAT(IF(mpr.metal_payment_receipt = 1, '', '-'), mpr.metal_fine), '0') AS silver_fine, '0' AS amount, mpr.metal_payment_receipt as type,a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
@@ -2731,6 +2877,31 @@ class Crud extends CI_Model
         return $query->result();
     }
 
+    function get_metal_payment_receipt_for_outstanding_ids_report($upto_balance_date, $account_group_ids) {
+        //        $this->db->select("mpr.*, IF(`c`.`category_group_id` = 1, CONCAT(IF(mpr.metal_payment_receipt = 1, '', '-'), mpr.metal_fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, CONCAT(IF(mpr.metal_payment_receipt = 1, '', '-'), mpr.metal_fine), '0') AS silver_fine, '0' AS amount, mpr.metal_payment_receipt as type,a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->select("mpr.*, IF(`c`.`category_group_id` = 1, IF(mpr.metal_payment_receipt = 1, mpr.metal_fine, '".ZERO_VALUE."'-mpr.metal_fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, IF(mpr.metal_payment_receipt = 1, mpr.metal_fine, '".ZERO_VALUE."'-mpr.metal_fine), '0') AS silver_fine, '0' AS amount, mpr.metal_payment_receipt as type,a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->from('metal_payment_receipt mpr');
+                $this->db->join('sell s', 's.sell_id = mpr.sell_id', 'left');
+                $this->db->join('category c', 'c.category_id = mpr.metal_category_id', 'left');
+                $this->db->join('item_master item', 'item.item_id = mpr.metal_item_id', 'left');
+                $this->db->join('account a', 'a.account_id = s.account_id', 'left');
+                $this->db->where('s.sell_date <= ',$upto_balance_date);
+                if(!empty($account_group_ids)){
+                    $group_ids_string = implode(',', $account_group_ids);
+                    $this->db->where_in('a.account_group_id', $group_ids_string);
+                }
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query = $this->db->get();
+                //print_r($this->db->last_query());die;
+                return $query->result();
+            }
+
     function get_gold_bhav_for_outstanding_report($upto_balance_date, $account_group_id) {
 //        $this->db->select("gb.*,  CONCAT(IF(gb.gold_sale_purchase = 1, '-', ''), gb.gold_weight) AS gold_fine, CONCAT(IF(gb.gold_sale_purchase = 1, '', '-'), gb.gold_value) AS amount, '0' AS silver_fine, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
         $this->db->select("gb.*,  IF(gb.gold_sale_purchase = 1, '".ZERO_VALUE."'-gb.gold_weight, gb.gold_weight) AS gold_fine, IF(gb.gold_sale_purchase = 1, gb.gold_value, '".ZERO_VALUE."'-gb.gold_value) AS amount, '0' AS silver_fine, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
@@ -2752,6 +2923,28 @@ class Crud extends CI_Model
         return $query->result();
     }
 
+    function get_gold_bhav_for_outstanding_ids_report($upto_balance_date, $account_group_ids) {
+        //        $this->db->select("gb.*,  CONCAT(IF(gb.gold_sale_purchase = 1, '-', ''), gb.gold_weight) AS gold_fine, CONCAT(IF(gb.gold_sale_purchase = 1, '', '-'), gb.gold_value) AS amount, '0' AS silver_fine, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->select("gb.*,  IF(gb.gold_sale_purchase = 1, '".ZERO_VALUE."'-gb.gold_weight, gb.gold_weight) AS gold_fine, IF(gb.gold_sale_purchase = 1, gb.gold_value, '".ZERO_VALUE."'-gb.gold_value) AS amount, '0' AS silver_fine, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->from('gold_bhav gb');
+                $this->db->join('sell s', 's.sell_id = gb.sell_id', 'left');
+                $this->db->join('account a', 'a.account_id = s.account_id', 'left');
+                $this->db->where('s.sell_date <= ',$upto_balance_date);
+                if(!empty($account_group_ids)){
+                    $group_ids_string = implode(',', $account_group_ids);
+                    $this->db->where_in('a.account_group_id', $group_ids_string);
+                }
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query = $this->db->get();
+                return $query->result();
+            }
+
     function get_silver_bhav_for_outstanding_report($upto_balance_date, $account_group_id) {
 //        $this->db->select("sb.*, CONCAT(IF(sb.silver_sale_purchase = 1, '-', ''), sb.silver_weight) AS silver_fine, '0' AS gold_fine, CONCAT(IF(sb.silver_sale_purchase = 1, '', '-'), sb.silver_value) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
         $this->db->select("sb.*, IF(sb.silver_sale_purchase = 1, '".ZERO_VALUE."'-sb.silver_weight, sb.silver_weight) AS silver_fine, '0' AS gold_fine, IF(sb.silver_sale_purchase = 1, sb.silver_value, '".ZERO_VALUE."'-sb.silver_value) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
@@ -2761,6 +2954,29 @@ class Crud extends CI_Model
         $this->db->where('s.sell_date <= ',$upto_balance_date);
         if(!empty($account_group_id)){
             $this->db->where('a.account_group_id', $account_group_id);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        echo "<pre>"; print_r($query->result()); exit;
+        return $query->result();
+    }
+
+    function get_silver_bhav_for_outstanding_ids_report($upto_balance_date, $account_group_ids) {
+//        $this->db->select("sb.*, CONCAT(IF(sb.silver_sale_purchase = 1, '-', ''), sb.silver_weight) AS silver_fine, '0' AS gold_fine, CONCAT(IF(sb.silver_sale_purchase = 1, '', '-'), sb.silver_value) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->select("sb.*, IF(sb.silver_sale_purchase = 1, '".ZERO_VALUE."'-sb.silver_weight, sb.silver_weight) AS silver_fine, '0' AS gold_fine, IF(sb.silver_sale_purchase = 1, sb.silver_value, '".ZERO_VALUE."'-sb.silver_value) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->from('silver_bhav sb');
+        $this->db->join('sell s', 's.sell_id = sb.sell_id', 'left');
+        $this->db->join('account a', 'a.account_id = s.account_id', 'left');
+        $this->db->where('s.sell_date <= ',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
         }
         if($upto_balance_date == $this->today_date){
             $this->db->group_start();
@@ -2836,6 +3052,69 @@ class Crud extends CI_Model
         return array_merge($result1, $result2);
     }
 
+    function get_transfer_naam_jama_for_outstanding_ids_report($upto_balance_date, $account_id, $type_sort, $account_group_id) {
+        //        $this->db->select("tr.*, CONCAT(IF(tr.naam_jama = 1, '-', ''), tr.transfer_gold) AS gold_fine, CONCAT(IF(tr.naam_jama = 1, '-', ''), tr.transfer_silver) AS silver_fine, CONCAT(IF(tr.naam_jama = 1, '-', ''), tr.transfer_amount) AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, '". $type_sort ."' as type_sort, a.credit_limit, a.account_group_id");
+                $this->db->select("tr.*, IF(tr.naam_jama = 1, '".ZERO_VALUE."'-tr.transfer_gold, tr.transfer_gold) AS gold_fine, IF(tr.naam_jama = 1, '".ZERO_VALUE."'-tr.transfer_silver, tr.transfer_silver) AS silver_fine, IF(tr.naam_jama = 1, '".ZERO_VALUE."'-tr.transfer_amount, tr.transfer_amount) AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, '". $type_sort ."' as type_sort, a.credit_limit, a.account_group_id");
+                $this->db->from('transfer tr');
+                $this->db->join('sell s', 's.sell_id = tr.sell_id', 'left');
+        //        $this->db->join('account a', 'a.account_id = tr.transfer_account_id', 'left');
+                $this->db->join('account a', 'a.account_id = s.account_id', 'left');
+                $this->db->where('s.sell_date <= ',$upto_balance_date);
+               if(!empty($account_group_id)){
+                    $group_ids_string = implode(',', $account_group_id);
+                   $this->db->where_in('a.account_group_id', $group_ids_string);
+               }
+                if(!empty($account_id)){
+                    $this->db->where('s.account_id', $account_id);
+                }
+                if($type_sort == 'TR Naam'){
+                    $this->db->where('tr.naam_jama', '1');
+                }
+                if($type_sort == 'TR Jama'){
+                    $this->db->where('tr.naam_jama', '2');
+                }
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query1 = $this->db->get();
+                $result1 = $query1->result();
+                
+        //        $this->db->select("tr.*, CONCAT(IF(tr.naam_jama = 2, '-', ''), tr.transfer_gold) AS gold_fine, CONCAT(IF(tr.naam_jama = 2, '-', ''), tr.transfer_silver) AS silver_fine, CONCAT(IF(tr.naam_jama = 2, '-', ''), tr.transfer_amount) AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, '". $type_sort ."' as type_sort, a.credit_limit, a.account_group_id");
+                $this->db->select("tr.*, IF(tr.naam_jama = 2, '".ZERO_VALUE."'-tr.transfer_gold, tr.transfer_gold) AS gold_fine, IF(tr.naam_jama = 2, '".ZERO_VALUE."'-tr.transfer_silver, tr.transfer_silver) AS silver_fine, IF(tr.naam_jama = 2, '".ZERO_VALUE."'-tr.transfer_amount, tr.transfer_amount) AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, '". $type_sort ."' as type_sort, a.credit_limit, a.account_group_id");
+                $this->db->from('transfer tr');
+                $this->db->join('sell s', 's.sell_id = tr.sell_id', 'left');
+                $this->db->join('account a', 'a.account_id = tr.transfer_account_id', 'left');
+                $this->db->where('s.sell_date <= ',$upto_balance_date);
+                if(!empty($account_id)){
+                    $this->db->where('tr.transfer_account_id', $account_id);
+                }
+                if($type_sort == 'TR Naam'){
+                    $this->db->where('tr.naam_jama', '1');
+                }
+                if($type_sort == 'TR Jama'){
+                    $this->db->where('tr.naam_jama', '2');
+                }
+        //        if(!empty($account_group_id)){
+        //            $this->db->where('a.account_group_id', $account_group_id);
+        //        }
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query2 = $this->db->get();
+                $result2 = $query2->result();
+                
+        //        echo "<pre>"; print_r($query->result()); exit;
+                return array_merge($result1, $result2);
+            }
+
     function get_journal_naam_jama_for_outstanding_report($upto_balance_date, $account_group_id) {
 //        $this->db->select("jr.*, '0' AS gold_fine, '0' AS silver_fine, CONCAT(IF(jr.type = 2, '-', ''), jr.amount) AS amount, j.journal_date as st_date, a.account_id, a.account_name, a.account_mobile, j.journal_id, a.credit_limit, a.account_group_id");
         $this->db->select("jr.*, '0' AS gold_fine, '0' AS silver_fine, IF(jr.type = 2, '".ZERO_VALUE."'-jr.amount, jr.amount) AS amount, j.journal_date as st_date, a.account_id, a.account_name, a.account_mobile, j.journal_id, a.credit_limit, a.account_group_id");
@@ -2857,6 +3136,29 @@ class Crud extends CI_Model
  //       echo "<pre>"; print_r($this->db->last_query()); exit;
         return $query->result();
     }
+
+    function get_journal_naam_jama_for_outstanding_ids_report($upto_balance_date, $account_group_ids) {
+        //        $this->db->select("jr.*, '0' AS gold_fine, '0' AS silver_fine, CONCAT(IF(jr.type = 2, '-', ''), jr.amount) AS amount, j.journal_date as st_date, a.account_id, a.account_name, a.account_mobile, j.journal_id, a.credit_limit, a.account_group_id");
+                $this->db->select("jr.*, '0' AS gold_fine, '0' AS silver_fine, IF(jr.type = 2, '".ZERO_VALUE."'-jr.amount, jr.amount) AS amount, j.journal_date as st_date, a.account_id, a.account_name, a.account_mobile, j.journal_id, a.credit_limit, a.account_group_id");
+                $this->db->from('journal_details jr');
+                $this->db->join('journal j', 'j.journal_id = jr.journal_id', 'LEFT');
+                $this->db->join('account a', 'a.account_id = jr.account_id', 'LEFT');
+                $this->db->where('j.journal_date <=',$upto_balance_date);
+                if(!empty($account_group_ids)){
+                    $group_ids_string = implode(',', $account_group_ids);
+                    $this->db->where_in('a.account_group_id', $group_ids_string);
+                }
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query = $this->db->get();
+         //       echo "<pre>"; print_r($this->db->last_query()); exit;
+                return $query->result();
+            }
 
     function get_cashbook_for_outstanding_report($upto_balance_date, $account_group_id) {
 //        $this->db->select("pr.*, CONCAT(IF(pr.payment_receipt = 1, '', '-'), pr.amount) AS amount, '0' AS gold_fine, '0' AS silver_fine, pr.transaction_date as st_date,a.account_id, a.account_name, a.account_mobile, a.credit_limit, a.account_group_id");
@@ -2881,6 +3183,31 @@ class Crud extends CI_Model
  //       echo "<pre>"; print_r($this->db->last_query()); exit;
         return $query->result();
     }
+
+    function get_cashbook_for_outstanding_ids_report($upto_balance_date, $account_group_ids) {
+        //        $this->db->select("pr.*, CONCAT(IF(pr.payment_receipt = 1, '', '-'), pr.amount) AS amount, '0' AS gold_fine, '0' AS silver_fine, pr.transaction_date as st_date,a.account_id, a.account_name, a.account_mobile, a.credit_limit, a.account_group_id");
+                $this->db->select("pr.*, IF(pr.payment_receipt = 1, pr.amount, '".ZERO_VALUE."'-pr.amount) AS amount, '0' AS gold_fine, '0' AS silver_fine, pr.transaction_date as st_date,a.account_id, a.account_name, a.account_mobile, a.credit_limit, a.account_group_id");
+                $this->db->from('payment_receipt pr');
+                //$this->db->join('sell s', 's.sell_id = pr.sell_id', 'left');
+                $this->db->join('account a', 'a.account_id = pr.account_id', 'left');
+                $this->db->where('pr.sell_id IS NULL', null, true);
+                $this->db->where('pr.other_id IS NULL', null, true);
+                $this->db->where('pr.transaction_date <=',$upto_balance_date);
+                if(!empty($account_group_ids)){
+                    $group_ids_string = implode(',', $account_group_ids);
+                    $this->db->where_in('a.account_group_id', $group_ids_string);
+                }
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query = $this->db->get();
+         //       echo "<pre>"; print_r($this->db->last_query()); exit;
+                return $query->result();
+            }
     
     function get_manufacture_issue_receive_for_outstanding_report($upto_balance_date, $account_group_id){
 //        $this->db->select("ird.*, IF(`c`.`category_group_id` = 1, CONCAT(IF(`ird`.`type_id` = 1,'','-'),ird.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, CONCAT(IF(`ird`.`type_id` = 1,'','-'),ird.fine), '0') AS silver_fine, '0' AS amount, ird.ird_date as st_date,a.account_id, a.account_name, a.account_mobile, ird.ird_id as st_id, a.credit_limit, a.account_group_id");
@@ -2905,6 +3232,31 @@ class Crud extends CI_Model
 //        print_r($this->db->last_query());die;
         return $query->result();
     }
+
+    function get_manufacture_issue_receive_for_outstanding_ids_report($upto_balance_date, $account_group_ids){
+        //        $this->db->select("ird.*, IF(`c`.`category_group_id` = 1, CONCAT(IF(`ird`.`type_id` = 1,'','-'),ird.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, CONCAT(IF(`ird`.`type_id` = 1,'','-'),ird.fine), '0') AS silver_fine, '0' AS amount, ird.ird_date as st_date,a.account_id, a.account_name, a.account_mobile, ird.ird_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->select("ird.*, IF(`ird`.`type_id` = 1, ird.fine, '".ZERO_VALUE."'-ird.fine) AS gold_fine, '0' AS silver_fine, '0' AS amount, ird.ird_date as st_date,a.account_id, a.account_name, a.account_mobile, ird.ird_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->from('issue_receive_details ird');
+                $this->db->join('issue_receive ir', 'ir.ir_id = ird.ir_id', 'left');
+                $this->db->join('category c', 'c.category_id = ird.category_id', 'left');
+                $this->db->join('item_master item', 'item.item_id = ird.item_id', 'left');
+                $this->db->join('account a', 'a.account_id = ir.worker_id', 'left');
+                $this->db->where('ird.ird_date <=',$upto_balance_date);
+                if(!empty($account_group_ids)){
+                    $group_ids_string = implode(',', $account_group_ids);
+                    $this->db->where_in('a.account_group_id', $group_ids_string);
+                }
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query = $this->db->get();
+        //        print_r($this->db->last_query());die;
+                return $query->result();
+            }
     
     function get_manufacture_issue_receive_silver_for_outstanding_report($upto_balance_date, $account_group_id){
         $this->db->select("irsd.*, '0' AS gold_fine, IF(`irsd`.`type_id` = 1, irsd.fine, '".ZERO_VALUE."'-irsd.fine) AS silver_fine, '0' AS amount, irsd.irsd_date as st_date,a.account_id, a.account_name, a.account_mobile, irsd.irsd_id as st_id, a.credit_limit, a.account_group_id");
@@ -2916,6 +3268,30 @@ class Crud extends CI_Model
         $this->db->where('irsd.irsd_date <=',$upto_balance_date);
         if(!empty($account_group_id)){
             $this->db->where('a.account_group_id', $account_group_id);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
+
+    function get_manufacture_issue_receive_silver_for_outstanding_ids_report($upto_balance_date, $account_group_ids){
+        $this->db->select("irsd.*, '0' AS gold_fine, IF(`irsd`.`type_id` = 1, irsd.fine, '".ZERO_VALUE."'-irsd.fine) AS silver_fine, '0' AS amount, irsd.irsd_date as st_date,a.account_id, a.account_name, a.account_mobile, irsd.irsd_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->from('issue_receive_silver_details irsd');
+        $this->db->join('issue_receive_silver irs', 'irs.irs_id = irsd.irs_id', 'left');
+        $this->db->join('category c', 'c.category_id = irsd.category_id', 'left');
+        $this->db->join('item_master item', 'item.item_id = irsd.item_id', 'left');
+        $this->db->join('account a', 'a.account_id = irs.worker_id', 'left');
+        $this->db->where('irsd.irsd_date <=',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
         }
         if($upto_balance_date == $this->today_date){
             $this->db->group_start();
@@ -2951,6 +3327,30 @@ class Crud extends CI_Model
 //        print_r($this->db->last_query());die;
         return $query->result();
     }
+
+    function get_manufacture_manu_hand_made_for_outstanding_ids_report($upto_balance_date, $account_group_ids){
+        $this->db->select("mhm_detail.*, IF(`mhm_detail`.`type_id` = '".MANUFACTURE_HM_TYPE_ISSUE_FINISH_WORK_ID."' || `mhm_detail`.`type_id` = '".MANUFACTURE_HM_TYPE_ISSUE_SCRAP_ID."', mhm_detail.fine, '".ZERO_VALUE."'-mhm_detail.fine) AS gold_fine, '0' AS silver_fine, '0' AS amount, mhm_detail.mhm_detail_date as st_date,a.account_id, a.account_name, a.account_mobile, mhm_detail.mhm_detail_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->from('manu_hand_made_details mhm_detail');
+        $this->db->join('manu_hand_made mhm', 'mhm.mhm_id = mhm_detail.mhm_id', 'left');
+        $this->db->join('category c', 'c.category_id = mhm_detail.category_id', 'left');
+        $this->db->join('item_master item', 'item.item_id = mhm_detail.item_id', 'left');
+        $this->db->join('account a', 'a.account_id = mhm.worker_id', 'left');
+        $this->db->where('mhm_detail.mhm_detail_date <=',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
     
     function get_manufacture_casting_for_outstanding_report($upto_balance_date, $account_group_id){
         $this->db->select("ce_detail.*, IF(`ce_detail`.`type_id` = '".CASTING_ENTRY_TYPE_ISSUE_FINISH_WORK_ID."' || `ce_detail`.`type_id` = '".CASTING_ENTRY_TYPE_ISSUE_SCRAP_ID."', ce_detail.fine, '".ZERO_VALUE."'-ce_detail.fine) AS gold_fine, '0' AS silver_fine, '0' AS amount, ce_detail.ce_detail_date as st_date,a.account_id, a.account_name, a.account_mobile, ce_detail.ce_detail_id as st_id, a.credit_limit, a.account_group_id");
@@ -2962,6 +3362,30 @@ class Crud extends CI_Model
         $this->db->where('ce_detail.ce_detail_date <=',$upto_balance_date);
         if(!empty($account_group_id)){
             $this->db->where('a.account_group_id', $account_group_id);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
+
+    function get_manufacture_casting_for_outstanding_ids_report($upto_balance_date, $account_group_ids){
+        $this->db->select("ce_detail.*, IF(`ce_detail`.`type_id` = '".CASTING_ENTRY_TYPE_ISSUE_FINISH_WORK_ID."' || `ce_detail`.`type_id` = '".CASTING_ENTRY_TYPE_ISSUE_SCRAP_ID."', ce_detail.fine, '".ZERO_VALUE."'-ce_detail.fine) AS gold_fine, '0' AS silver_fine, '0' AS amount, ce_detail.ce_detail_date as st_date,a.account_id, a.account_name, a.account_mobile, ce_detail.ce_detail_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->from('casting_entry_details ce_detail');
+        $this->db->join('casting_entry ce', 'ce.ce_id = ce_detail.ce_id', 'left');
+        $this->db->join('category c', 'c.category_id = ce_detail.category_id', 'left');
+        $this->db->join('item_master item', 'item.item_id = ce_detail.item_id', 'left');
+        $this->db->join('account a', 'a.account_id = ce.worker_id', 'left');
+        $this->db->where('ce_detail.ce_detail_date <=',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
         }
         if($upto_balance_date == $this->today_date){
             $this->db->group_start();
@@ -2997,6 +3421,30 @@ class Crud extends CI_Model
 //        print_r($this->db->last_query());die;
         return $query->result();
     }
+
+    function get_manufacture_machin_chain_for_outstanding_ids_report($upto_balance_date, $account_group_ids){
+        $this->db->select("mc_detail.*, IF(`mc_detail`.`type_id` = '".MACHINE_CHAIN_TYPE_ISSUE_FINISH_WORK_ID."' || `mc_detail`.`type_id` = '".MACHINE_CHAIN_TYPE_ISSUE_SCRAP_ID."', mc_detail.fine, '".ZERO_VALUE."'-mc_detail.fine) AS gold_fine, '0' AS silver_fine, '0' AS amount, mc_detail.machine_chain_detail_date as st_date,a.account_id, a.account_name, a.account_mobile, mc_detail.machine_chain_detail_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->from('machine_chain_details mc_detail');
+        $this->db->join('machine_chain mc', 'mc.machine_chain_id = mc_detail.machine_chain_id', 'left');
+        $this->db->join('category c', 'c.category_id = mc_detail.category_id', 'left');
+        $this->db->join('item_master item', 'item.item_id = mc_detail.item_id', 'left');
+        $this->db->join('account a', 'a.account_id = mc.worker_id', 'left');
+        $this->db->where('mc_detail.machine_chain_detail_date <=',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
     
     function get_other_sell_items_for_outstanding_report($upto_balance_date, $account_group_id){
         $this->db->select("oi.*, '0' AS gold_fine, '0' AS silver_fine, IF(`oi`.`type` = 1, oi.amount, '".ZERO_VALUE."'-oi.amount) AS amount, o.department_id AS department_id, oi.other_item_id as id, o.other_date as st_date, o.other_id as st_id,a.account_id, a.account_name, a.account_mobile, a.credit_limit, a.account_group_id");
@@ -3008,6 +3456,30 @@ class Crud extends CI_Model
         $this->db->where('o.other_date <=',$upto_balance_date);
         if(!empty($account_group_id)){
             $this->db->where('a.account_group_id', $account_group_id);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
+
+    function get_other_sell_items_for_outstanding_ids_report($upto_balance_date, $account_group_ids){
+        $this->db->select("oi.*, '0' AS gold_fine, '0' AS silver_fine, IF(`oi`.`type` = 1, oi.amount, '".ZERO_VALUE."'-oi.amount) AS amount, o.department_id AS department_id, oi.other_item_id as id, o.other_date as st_date, o.other_id as st_id,a.account_id, a.account_name, a.account_mobile, a.credit_limit, a.account_group_id");
+        $this->db->from('other_items oi');
+        $this->db->join('other o', 'o.other_id = oi.other_id', 'left');
+        $this->db->join('category c', 'c.category_id = oi.category_id', 'left');
+        $this->db->join('item_master item', 'item.item_id = oi.item_id', 'left');
+        $this->db->join('account a', 'a.account_id = o.account_id', 'left');
+        $this->db->where('o.other_date <=',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
         }
         if($upto_balance_date == $this->today_date){
             $this->db->group_start();
@@ -3041,6 +3513,28 @@ class Crud extends CI_Model
         $query = $this->db->get();
         return $query->result();
     }
+
+    function get_other_payment_receipt_for_outstanding_ids_report($upto_balance_date, $account_group_ids) {
+//        $this->db->select("pr.*, '0' AS gold_fine, '0' AS silver_fine, CONCAT(IF(pr.payment_receipt = 1, '', '-'), pr.amount) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->select("pr.*, '0' AS gold_fine, '0' AS silver_fine, IF(pr.payment_receipt = 1, pr.amount, '".ZERO_VALUE."'-pr.amount) AS amount, a.account_id, a.account_name, a.account_mobile, o.other_date as st_date, o.other_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->from('payment_receipt pr');
+        $this->db->join('other o', 'o.other_id = pr.other_id', 'left');
+        $this->db->join('account a', 'a.account_id = o.account_id', 'left');
+        $this->db->where('o.other_date <= ',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+        return $query->result();
+    }
     
     function get_other_payment_receipt_for_outstanding_report_bank($upto_balance_date, $account_group_id) {
 //        $this->db->select("pr.*, '0' AS gold_fine, '0' AS silver_fine, CONCAT(IF(pr.payment_receipt = 1, '-', ''), pr.amount) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
@@ -3061,10 +3555,45 @@ class Crud extends CI_Model
         $query = $this->db->get();
         return $query->result();
     }
+
+    function get_other_payment_receipt_for_outstanding_ids_report_bank($upto_balance_date, $account_group_ids) {
+//        $this->db->select("pr.*, '0' AS gold_fine, '0' AS silver_fine, CONCAT(IF(pr.payment_receipt = 1, '-', ''), pr.amount) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->select("pr.*, '0' AS gold_fine, '0' AS silver_fine, IF(pr.payment_receipt = 1, '".ZERO_VALUE."'-pr.amount, pr.amount) AS amount, a.account_id, a.account_name, a.account_mobile, o.other_date as st_date, o.other_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->from('payment_receipt pr');
+        $this->db->join('other o', 'o.other_id = pr.other_id', 'left');
+        $this->db->join('account a', 'a.account_id = pr.bank_id', 'left');
+        $this->db->where('o.other_date <= ',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
+        }
+        $this->db->where('pr.cash_cheque', '2');
+        $this->db->group_start();
+            $this->db->or_where('a.gold_fine !=', '0');
+            $this->db->or_where('a.silver_fine !=', '0');
+            $this->db->or_where('a.amount !=', '0');
+        $this->db->group_end();
+        $query = $this->db->get();
+        return $query->result();
+    }
     
     function get_account_ids_from_account_group_id($account_group_id){
+        if(is_array($account_group_id)){
+            $this->get_account_ids_from_account_group_ids($account_group_id);
+        } else {
+            $account_ids = array();
+            $account_arr = $this->getFromSQL('SELECT `account_id` FROM `account` WHERE `account_group_id` = "' . $account_group_id . '"');
+            foreach ($account_arr as $account){
+                $account_ids[] = $account->account_id;
+            }
+            return $account_ids;
+        }        
+    }
+
+    function get_account_ids_from_account_group_ids($account_group_ids){
         $account_ids = array();
-        $account_arr = $this->getFromSQL('SELECT `account_id` FROM `account` WHERE `account_group_id` = "' . $account_group_id . '"');
+        $group_ids_string = implode(',', $account_group_ids);
+        $account_arr = $this->getFromSQL('SELECT `account_id` FROM `account` WHERE `account_group_id` IN ('.$group_ids_string.')');
         foreach ($account_arr as $account){
             $account_ids[] = $account->account_id;
         }
@@ -3092,6 +3621,41 @@ class Crud extends CI_Model
         $this->db->where('s.sell_date <=',$upto_balance_date);
         if(!empty($account_group_id)){
             $this->db->where('a.account_group_id', $account_group_id);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        echo $this->db->last_query(); exit;
+        return $query->result();
+    }
+
+    function get_sell_ad_charges_for_outstanding_ids_report($upto_balance_date, $account_group_ids, $for_account = ''){
+        $account_ids = $this->get_account_ids_from_account_group_ids($account_group_ids);
+        if(in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)){
+            $this->db->select("ad_c.*, '0' AS gold_fine, '0' AS silver_fine, '".ZERO_VALUE."' - ad_c.ad_amount AS amount, s.sell_date as st_date, a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+        } else if($for_account == 'mfloss'){
+            $this->db->select("ad_c.*, '0' AS gold_fine, '0' AS silver_fine, '".ZERO_VALUE."' - ad_c.ad_amount AS amount, s.sell_date as st_date, a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+        } else {
+            $this->db->select("ad_c.*, '0' AS gold_fine, '0' AS silver_fine, ad_c.ad_amount AS amount, s.sell_date as st_date, a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+        }
+        $this->db->from('sell_ad_charges ad_c');
+        $this->db->join('sell s', 's.sell_id = ad_c.sell_id', 'left');
+        if(in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)){
+            $this->db->join('account a', 'a.account_id = '.MF_LOSS_EXPENSE_ACCOUNT_ID, 'left');
+        } else if($for_account == 'mfloss'){
+            $this->db->join('account a', 'a.account_id = '.MF_LOSS_EXPENSE_ACCOUNT_ID, 'left');
+        } else {
+            $this->db->join('account a', 'a.account_id = s.account_id', 'left');
+        }
+        $this->db->where('s.sell_date <=',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
         }
         if($upto_balance_date == $this->today_date){
             $this->db->group_start();
@@ -3142,6 +3706,45 @@ class Crud extends CI_Model
         return $query->result();
     }
     
+
+    function get_hisab_fine_for_outstanding_ids_report($upto_balance_date, $account_group_ids, $for_account = ''){
+        $account_ids = $this->get_account_ids_from_account_group_ids($account_group_ids);
+        if(in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)){
+            $this->db->select("wh.*, '".ZERO_VALUE."'-wh.fine AS gold_fine, '0' AS silver_fine, '0' AS amount, wh.hisab_date as st_date, a.account_id, a.account_name, a.account_mobile, wh.worker_hisab_id as st_id, a.credit_limit, a.account_group_id");
+        } else if($for_account == 'mfloss'){
+            $this->db->select("wh.*, '".ZERO_VALUE."'-wh.fine AS gold_fine, '0' AS silver_fine, '0' AS amount, wh.hisab_date as st_date, a.account_id, a.account_name, a.account_mobile, wh.worker_hisab_id as st_id, a.credit_limit, a.account_group_id");
+        } else {
+            $this->db->select("wh.*, wh.fine AS gold_fine, '0' AS silver_fine, '0' AS amount, wh.hisab_date as st_date, a.account_id, a.account_name, a.account_mobile, wh.worker_hisab_id as st_id, a.credit_limit, a.account_group_id");
+        }
+        $this->db->from('worker_hisab wh');
+        if(in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)){
+            $this->db->join('account a', 'a.account_id = wh.against_account_id', 'left');
+            $this->db->join('account a_w', 'a_w.account_id = wh.worker_id', 'left');
+        } else if($for_account == 'mfloss'){
+            $this->db->join('account a', 'a.account_id = wh.against_account_id', 'left');
+            $this->db->join('account a_w', 'a_w.account_id = wh.worker_id', 'left');
+        } else {
+            $this->db->join('account a', 'a.account_id = wh.worker_id', 'left');
+            $this->db->join('account a_mf', 'a_mf.account_id = wh.against_account_id', 'left');
+        }
+        $this->db->where('wh.hisab_date <=',$upto_balance_date);
+        $this->db->where('wh.is_module !=',HISAB_DONE_IS_MODULE_MIR_SILVER);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        echo $this->db->last_query(); exit;
+        return $query->result();
+    }
+    
     function get_hisab_done_ir_for_outstanding_report($upto_balance_date, $account_group_id, $for_account = ''){
         $account_ids = $this->get_account_ids_from_account_group_id($account_group_id);
         if(in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)){
@@ -3178,6 +3781,44 @@ class Crud extends CI_Model
         $query = $this->db->get();
         return $query->result();
     }
+
+    function get_hisab_done_ir_for_outstanding_ids_report($upto_balance_date, $account_group_ids, $for_account = ''){
+        $account_ids = $this->get_account_ids_from_account_group_ids($account_group_ids);
+        if(in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)){
+            $this->db->select("whd.*, IF(`whd`.`type_id` = 1, '".ZERO_VALUE."'-whd.fine_adjusted, whd.fine_adjusted) AS gold_fine, '0' AS silver_fine, '0' AS amount, wh.hisab_date as st_date, a.account_id, a.account_name, a.account_mobile, whd.wsd_id as st_id, a.credit_limit, a.account_group_id");
+        } else if($for_account == 'mfloss'){
+            $this->db->select("whd.*, IF(`whd`.`type_id` = 1, '".ZERO_VALUE."'-whd.fine_adjusted, whd.fine_adjusted) AS gold_fine, '0' AS silver_fine, '0' AS amount, wh.hisab_date as st_date, a.account_id, a.account_name, a.account_mobile, whd.wsd_id as st_id, a.credit_limit, a.account_group_id");
+        } else {
+            $this->db->select("whd.*, IF(`whd`.`type_id` = 1, whd.fine_adjusted, '".ZERO_VALUE."'-whd.fine_adjusted) AS gold_fine, '0' AS silver_fine, '0' AS amount, wh.hisab_date as st_date, a.account_id, a.account_name, a.account_mobile, whd.wsd_id as st_id, a.credit_limit, a.account_group_id");
+        }
+        $this->db->from('worker_hisab_detail whd');
+        $this->db->join('worker_hisab wh', 'wh.worker_hisab_id = whd.worker_hisab_id', 'left');
+        if(in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)){
+            $this->db->join('account a', 'a.account_id = wh.against_account_id', 'left');
+            $this->db->join('account a_w', 'a_w.account_id = wh.worker_id', 'left');
+        } else if($for_account == 'mfloss'){
+            $this->db->join('account a', 'a.account_id = wh.against_account_id', 'left');
+            $this->db->join('account a_w', 'a_w.account_id = wh.worker_id', 'left');
+        } else {
+            $this->db->join('account a', 'a.account_id = wh.worker_id', 'left');
+            $this->db->join('account a_mf', 'a_mf.account_id = wh.against_account_id', 'left');
+        }
+        $this->db->where('wh.hisab_date <=',$upto_balance_date);
+        $this->db->where('wh.is_module !=',HISAB_DONE_IS_MODULE_MIR_SILVER);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+        return $query->result();
+    }
     
     function get_hisab_fine_silver_for_outstanding_report($upto_balance_date, $account_group_id, $for_account = ''){
         $account_ids = $this->get_account_ids_from_account_group_id($account_group_id);
@@ -3203,6 +3844,44 @@ class Crud extends CI_Model
         $this->db->where('wh.is_module',HISAB_DONE_IS_MODULE_MIR_SILVER);
         if(!empty($account_group_id)){
             $this->db->where('a.account_group_id', $account_group_id);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        echo $this->db->last_query(); exit;
+        return $query->result();
+    }
+
+    function get_hisab_fine_silver_for_outstanding_ids_report($upto_balance_date, $account_group_ids, $for_account = ''){
+        $account_ids = $this->get_account_ids_from_account_group_ids($account_group_ids);
+        if(in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)){
+            $this->db->select("wh.*, '0' AS gold_fine, '".ZERO_VALUE."'-wh.fine AS silver_fine, '0' AS amount, wh.hisab_date as st_date, a.account_id, a.account_name, a.account_mobile, wh.worker_hisab_id as st_id, a.credit_limit, a.account_group_id");
+        } else if($for_account == 'mfloss'){
+            $this->db->select("wh.*, '0' AS gold_fine, '".ZERO_VALUE."'-wh.fine AS silver_fine, '0' AS amount, wh.hisab_date as st_date, a.account_id, a.account_name, a.account_mobile, wh.worker_hisab_id as st_id, a.credit_limit, a.account_group_id");
+        } else {
+            $this->db->select("wh.*, '0' AS gold_fine, wh.fine AS silver_fine, '0' AS amount, wh.hisab_date as st_date, a.account_id, a.account_name, a.account_mobile, wh.worker_hisab_id as st_id, a.credit_limit, a.account_group_id");
+        }
+        $this->db->from('worker_hisab wh');
+        if(in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)){
+            $this->db->join('account a', 'a.account_id = wh.against_account_id', 'left');
+            $this->db->join('account a_w', 'a_w.account_id = wh.worker_id', 'left');
+        } else if($for_account == 'mfloss'){
+            $this->db->join('account a', 'a.account_id = wh.against_account_id', 'left');
+            $this->db->join('account a_w', 'a_w.account_id = wh.worker_id', 'left');
+        } else {
+            $this->db->join('account a', 'a.account_id = wh.worker_id', 'left');
+            $this->db->join('account a_mf', 'a_mf.account_id = wh.against_account_id', 'left');
+        }
+        $this->db->where('wh.hisab_date <=',$upto_balance_date);
+        $this->db->where('wh.is_module',HISAB_DONE_IS_MODULE_MIR_SILVER);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
         }
         if($upto_balance_date == $this->today_date){
             $this->db->group_start();
@@ -3252,6 +3931,44 @@ class Crud extends CI_Model
         $query = $this->db->get();
         return $query->result();
     }
+
+    function get_hisab_done_irs_for_outstanding_ids_report($upto_balance_date, $account_group_ids, $for_account = ''){
+        $account_ids = $this->get_account_ids_from_account_group_ids($account_group_ids);
+        if(in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)){
+            $this->db->select("whd.*, '0' AS gold_fine, IF(`whd`.`type_id` = 1, '".ZERO_VALUE."'-whd.fine_adjusted, whd.fine_adjusted) AS silver_fine, '0' AS amount, wh.hisab_date as st_date, a.account_id, a.account_name, a.account_mobile, whd.wsd_id as st_id, a.credit_limit, a.account_group_id");
+        } else if($for_account == 'mfloss'){
+            $this->db->select("whd.*, '0' AS gold_fine, IF(`whd`.`type_id` = 1, '".ZERO_VALUE."'-whd.fine_adjusted, whd.fine_adjusted) AS silver_fine, '0' AS amount, wh.hisab_date as st_date, a.account_id, a.account_name, a.account_mobile, whd.wsd_id as st_id, a.credit_limit, a.account_group_id");
+        } else {
+            $this->db->select("whd.*, '0' AS gold_fine, IF(`whd`.`type_id` = 1, whd.fine_adjusted, '".ZERO_VALUE."'-whd.fine_adjusted) AS silver_fine, '0' AS amount, wh.hisab_date as st_date, a.account_id, a.account_name, a.account_mobile, whd.wsd_id as st_id, a.credit_limit, a.account_group_id");
+        }
+        $this->db->from('worker_hisab_detail whd');
+        $this->db->join('worker_hisab wh', 'wh.worker_hisab_id = whd.worker_hisab_id', 'left');
+        if(in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)){
+            $this->db->join('account a', 'a.account_id = wh.against_account_id', 'left');
+            $this->db->join('account a_w', 'a_w.account_id = wh.worker_id', 'left');
+        } else if($for_account == 'mfloss'){
+            $this->db->join('account a', 'a.account_id = wh.against_account_id', 'left');
+            $this->db->join('account a_w', 'a_w.account_id = wh.worker_id', 'left');
+        } else {
+            $this->db->join('account a', 'a.account_id = wh.worker_id', 'left');
+            $this->db->join('account a_mf', 'a_mf.account_id = wh.against_account_id', 'left');
+        }
+        $this->db->where('wh.hisab_date <=',$upto_balance_date);
+        $this->db->where('wh.is_module',HISAB_DONE_IS_MODULE_MIR_SILVER);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+        return $query->result();
+    }
     
     function get_hallmark_xrf_for_outstanding_report($upto_balance_date, $account_group_id, $for_account = ''){
         $account_ids = $this->get_account_ids_from_account_group_id($account_group_id);
@@ -3286,11 +4003,63 @@ class Crud extends CI_Model
         return $query->result();
     }
 
+    function get_hallmark_xrf_for_outstanding_ids_report($upto_balance_date, $account_group_ids, $for_account = ''){
+        $account_ids = $this->get_account_ids_from_account_group_ids($account_group_ids);
+        if(in_array(XRF_HM_LASER_PL_EXPENSE_ACCOUNT_ID, $account_ids)){
+            $this->db->select("xrf.*, '0' AS gold_fine, '0' AS silver_fine, '".ZERO_VALUE."' - xrf.total_amount AS amount, xrf.posting_date as st_date, a.account_id, a.account_name, a.account_mobile, xrf.xrf_id as st_id, a.credit_limit, a.account_group_id");
+        } else if($for_account == 'xrf_hm_laser_pl'){
+            $this->db->select("xrf.*, '0' AS gold_fine, '0' AS silver_fine, '".ZERO_VALUE."' - xrf.total_amount AS amount, xrf.posting_date as st_date, a.account_id, a.account_name, a.account_mobile, xrf.xrf_id as st_id, a.credit_limit, a.account_group_id");
+        } else {
+            $this->db->select("xrf.*, '0' AS gold_fine, '0' AS silver_fine, xrf.total_amount AS amount, xrf.posting_date as st_date, a.account_id, a.account_name, a.account_mobile, xrf.xrf_id as st_id, a.credit_limit, a.account_group_id");
+        }
+        $this->db->from('hallmark_xrf xrf');
+        if(in_array(XRF_HM_LASER_PL_EXPENSE_ACCOUNT_ID, $account_ids)){
+            $this->db->join('account a', 'a.account_id = '.XRF_HM_LASER_PL_EXPENSE_ACCOUNT_ID, 'left');
+        } else if($for_account == 'xrf_hm_laser_pl'){
+            $this->db->join('account a', 'a.account_id = '.XRF_HM_LASER_PL_EXPENSE_ACCOUNT_ID, 'left');
+        } else {
+            $this->db->join('account a', 'a.account_id = xrf.account_id', 'left');
+        }
+        $this->db->where('xrf.posting_date <=',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        echo $this->db->last_query(); exit;
+        return $query->result();
+    }
+
     function get_opening_for_outstanding_report($upto_balance_date, $account_group_id) {
         $this->db->select("a.*, CONCAT(IF(a.gold_ob_credit_debit = 1, '-', ''), a.opening_balance_in_gold) AS gold_fine, CONCAT(IF(a.silver_ob_credit_debit = 1, '-', ''), a.opening_balance_in_silver) AS silver_fine, CONCAT(IF(a.rupees_ob_credit_debit = 1, '-', ''), a.opening_balance_in_rupees) AS amount, a.created_at as st_date,a.account_id, a.account_name, a.account_mobile, a.credit_limit, a.account_group_id");
         $this->db->from('account a');
         if(!empty($account_group_id)){
             $this->db->where('a.account_group_id', $account_group_id);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    function get_opening_for_outstanding_ids_report($upto_balance_date, $account_group_ids) {
+        $this->db->select("a.*, CONCAT(IF(a.gold_ob_credit_debit = 1, '-', ''), a.opening_balance_in_gold) AS gold_fine, CONCAT(IF(a.silver_ob_credit_debit = 1, '-', ''), a.opening_balance_in_silver) AS silver_fine, CONCAT(IF(a.rupees_ob_credit_debit = 1, '-', ''), a.opening_balance_in_rupees) AS amount, a.created_at as st_date,a.account_id, a.account_name, a.account_mobile, a.credit_limit, a.account_group_id");
+        $this->db->from('account a');
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
         }
         if($upto_balance_date == $this->today_date){
             $this->db->group_start();
@@ -3334,6 +4103,40 @@ class Crud extends CI_Model
 //        print_r($this->db->last_query());die;
         return $query->result();
     }
+
+    function get_sell_items_for_outstanding_ids_report_department($upto_balance_date, $account_group_ids) {
+        if(PACKAGE_FOR == 'manek'){
+            $this->db->select("si.*, IF(`si`.`spi_rate` = 0, IF(`c`.`category_group_id` = 1, IF(`si`.`type` = 1, '".ZERO_VALUE."'-si.fine, si.fine), '0'), '0') AS gold_fine, IF(`si`.`spi_rate` = 0, IF(`c`.`category_group_id` = 2, IF(`si`.`type` = 1, '".ZERO_VALUE."'-si.fine, si.fine), '0'), '0') AS silver_fine, IF(`si`.`type` = 1, (si.amount - si.charges_amt), '".ZERO_VALUE."' - (si.amount - si.charges_amt)) AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+        } else {
+            $sell_purchase_type_3_menu = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'sell_purchase_type_3'));
+            if($sell_purchase_type_3_menu == '1' ) {
+                $this->db->select("si.*, IF(`si`.`spi_rate_of` = 2 AND `si`.`spi_rate` != 0, '0', IF(`c`.`category_group_id` = 1, IF(`si`.`type` = 1, '".ZERO_VALUE."'-si.fine, si.fine), '0')) AS gold_fine, IF(`si`.`spi_rate_of` = 2 AND `si`.`spi_rate` != 0, '0', IF(`c`.`category_group_id` = 2, IF(`si`.`type` = 1, '".ZERO_VALUE."'-si.fine, si.fine), '0')) AS silver_fine, '0' AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+            } else {
+                $this->db->select("si.*, IF(`c`.`category_group_id` = 1, IF(`si`.`type` = 1, '".ZERO_VALUE."'-si.fine, si.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, IF(`si`.`type` = 1, '".ZERO_VALUE."'-si.fine, si.fine), '0') AS silver_fine, '0' AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+            }
+        }
+        $this->db->from('sell_items si');
+        $this->db->join('sell s', 's.sell_id = si.sell_id', 'left');
+        $this->db->join('category c', 'c.category_id = si.category_id', 'left');
+        $this->db->join('item_master item', 'item.item_id = si.item_id', 'left');
+        $this->db->join('account a', 'a.account_id = s.process_id', 'left');
+        $this->db->where('s.sell_date <= ',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
+    
     function get_sell_with_gst_amount_for_outstanding_report_department($upto_balance_date, $account_group_id) {
         $this->db->select("s.*, '0' AS gold_fine, '0' AS silver_fine, '".ZERO_VALUE."'-s.total_amount AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
         $this->db->from('sell_with_gst s');
@@ -3341,6 +4144,27 @@ class Crud extends CI_Model
         $this->db->where('s.sell_date <= ',$upto_balance_date);
         if(!empty($account_group_id)){
             $this->db->where('a.account_group_id', $account_group_id);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
+
+    function get_sell_with_gst_amount_for_outstanding_ids_report_department($upto_balance_date, $account_group_ids) {
+        $this->db->select("s.*, '0' AS gold_fine, '0' AS silver_fine, '".ZERO_VALUE."'-s.total_amount AS amount, s.sell_date as st_date,a.account_id, a.account_name, a.account_mobile, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->from('sell_with_gst s');
+        $this->db->join('account a', 'a.account_id = s.process_id', 'left');
+        $this->db->where('s.sell_date <= ',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
         }
         if($upto_balance_date == $this->today_date){
             $this->db->group_start();
@@ -3376,6 +4200,29 @@ class Crud extends CI_Model
         return $query->result();
     }
 
+    function get_payment_receipt_for_outstanding_ids_report_department($upto_balance_date, $account_group_ids) {
+        //        $this->db->select("pr.*, '0' AS gold_fine, '0' AS silver_fine, CONCAT(IF(pr.payment_receipt = 1, '-', ''), pr.amount) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->select("pr.*, '0' AS gold_fine, '0' AS silver_fine, IF(pr.payment_receipt = 1, '".ZERO_VALUE."'-pr.amount, pr.amount) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->from('payment_receipt pr');
+                $this->db->join('sell s', 's.sell_id = pr.sell_id', 'left');
+                $this->db->join('account a', 'a.account_id = s.process_id', 'left');
+                $this->db->where('s.sell_date <= ',$upto_balance_date);
+                if(!empty($account_group_ids)){
+                    $group_ids_string = implode(',', $account_group_ids);
+                    $this->db->where_in('a.account_group_id', $group_ids_string);
+                }
+                $this->db->where('pr.cash_cheque', '1');
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query = $this->db->get();
+                return $query->result();
+            }
+
     function get_metal_payment_receipt_for_outstanding_report_department($upto_balance_date, $account_group_id) {
 //        $this->db->select("mpr.*, IF(`c`.`category_group_id` = 1, CONCAT(IF(mpr.metal_payment_receipt = 1, '-', ''), mpr.metal_fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, CONCAT(IF(mpr.metal_payment_receipt = 1, '-', ''), mpr.metal_fine), '0') AS silver_fine, '0' AS amount, mpr.metal_payment_receipt as type,a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
         $this->db->select("mpr.*, IF(`c`.`category_group_id` = 1, IF(mpr.metal_payment_receipt = 1, '".ZERO_VALUE."'-mpr.metal_fine, mpr.metal_fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, IF(mpr.metal_payment_receipt = 1, '".ZERO_VALUE."'-mpr.metal_fine, mpr.metal_fine), '0') AS silver_fine, '0' AS amount, mpr.metal_payment_receipt as type,a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
@@ -3399,6 +4246,31 @@ class Crud extends CI_Model
         //print_r($this->db->last_query());die;
         return $query->result();
     }
+
+    function get_metal_payment_receipt_for_outstanding_ids_report_department($upto_balance_date, $account_group_ids) {
+        //        $this->db->select("mpr.*, IF(`c`.`category_group_id` = 1, CONCAT(IF(mpr.metal_payment_receipt = 1, '-', ''), mpr.metal_fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, CONCAT(IF(mpr.metal_payment_receipt = 1, '-', ''), mpr.metal_fine), '0') AS silver_fine, '0' AS amount, mpr.metal_payment_receipt as type,a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->select("mpr.*, IF(`c`.`category_group_id` = 1, IF(mpr.metal_payment_receipt = 1, '".ZERO_VALUE."'-mpr.metal_fine, mpr.metal_fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, IF(mpr.metal_payment_receipt = 1, '".ZERO_VALUE."'-mpr.metal_fine, mpr.metal_fine), '0') AS silver_fine, '0' AS amount, mpr.metal_payment_receipt as type,a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->from('metal_payment_receipt mpr');
+                $this->db->join('sell s', 's.sell_id = mpr.sell_id', 'left');
+                $this->db->join('category c', 'c.category_id = mpr.metal_category_id', 'left');
+                $this->db->join('item_master item', 'item.item_id = mpr.metal_item_id', 'left');
+                $this->db->join('account a', 'a.account_id = s.process_id', 'left');
+                $this->db->where('s.sell_date <= ',$upto_balance_date);
+                if(!empty($account_group_ids)){
+                    $group_ids_string = implode(',', $account_group_ids);
+                    $this->db->where_in('a.account_group_id', $group_ids_string);
+                }
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query = $this->db->get();
+                //print_r($this->db->last_query());die;
+                return $query->result();
+            }
     
     function get_stock_transfer_for_outstanding_report_department($upto_balance_date, $account_group_id, $type_sort) {
 //        $this->db->select("std.*, IF(`c`.`category_group_id` = 1, CONCAT(IF('".$type_sort."' = 'ST F', '-', ''), std.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, CONCAT(IF('".$type_sort."' = 'ST F', '-', ''), std.fine), '0') AS silver_fine, '0' AS amount, '".$type_sort."' as type,a.account_id, a.account_name, a.account_mobile, st.transfer_date as st_date, st.stock_transfer_id as st_id, a.credit_limit, a.account_group_id");
@@ -3427,6 +4299,35 @@ class Crud extends CI_Model
 //        echo $this->db->last_query(); exit;
         return $query->result();
     }
+
+    function get_stock_transfer_for_outstanding_ids_report_department($upto_balance_date, $account_group_ids, $type_sort) {
+        //        $this->db->select("std.*, IF(`c`.`category_group_id` = 1, CONCAT(IF('".$type_sort."' = 'ST F', '-', ''), std.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, CONCAT(IF('".$type_sort."' = 'ST F', '-', ''), std.fine), '0') AS silver_fine, '0' AS amount, '".$type_sort."' as type,a.account_id, a.account_name, a.account_mobile, st.transfer_date as st_date, st.stock_transfer_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->select("std.*, IF(`c`.`category_group_id` = 1, IF('".$type_sort."' = 'ST F', '".ZERO_VALUE."'-std.fine, std.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, IF('".$type_sort."' = 'ST F', '".ZERO_VALUE."'-std.fine, std.fine), '0') AS silver_fine, '0' AS amount, '".$type_sort."' as type,a.account_id, a.account_name, a.account_mobile, st.transfer_date as st_date, st.stock_transfer_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->from('stock_transfer_detail std');
+                $this->db->join('stock_transfer st', 'st.stock_transfer_id = std.stock_transfer_id', 'left');
+                $this->db->join('category c', 'c.category_id = std.category_id', 'left');
+        //        $this->db->join('item_master item', 'item.item_id = std.item_id', 'left');
+                if($type_sort == 'ST F'){
+                    $this->db->join('account a', 'a.account_id = st.from_department', 'left');
+                } else if($type_sort == 'ST T'){
+                    $this->db->join('account a', 'a.account_id = st.to_department', 'left');
+                }
+                if(!empty($account_group_ids)){
+                    $group_ids_string = implode(',', $account_group_ids);
+                    $this->db->where_in('a.account_group_id', $group_ids_string);
+                }
+                $this->db->where('st.transfer_date <= ',$upto_balance_date);
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query = $this->db->get();
+        //        echo $this->db->last_query(); exit;
+                return $query->result();
+            }
     
     function get_cashbook_for_outstanding_report_department($upto_balance_date, $account_group_id) {
 //        $this->db->select("pr.*, CONCAT(IF(pr.payment_receipt = 1, '-', ''), pr.amount) AS amount, '0' AS gold_fine, '0' AS silver_fine, pr.transaction_date as st_date,a.account_id, a.account_name, a.account_mobile, a.credit_limit, a.account_group_id");
@@ -3451,6 +4352,31 @@ class Crud extends CI_Model
  //       echo "<pre>"; print_r($this->db->last_query()); exit;
         return $query->result();
     }
+
+    function get_cashbook_for_outstanding_ids_report_department($upto_balance_date, $account_group_ids) {
+        //        $this->db->select("pr.*, CONCAT(IF(pr.payment_receipt = 1, '-', ''), pr.amount) AS amount, '0' AS gold_fine, '0' AS silver_fine, pr.transaction_date as st_date,a.account_id, a.account_name, a.account_mobile, a.credit_limit, a.account_group_id");
+                $this->db->select("pr.*, IF(pr.payment_receipt = 1, '".ZERO_VALUE."'-pr.amount, pr.amount) AS amount, '0' AS gold_fine, '0' AS silver_fine, pr.transaction_date as st_date,a.account_id, a.account_name, a.account_mobile, a.credit_limit, a.account_group_id");
+                $this->db->from('payment_receipt pr');
+                //$this->db->join('sell s', 's.sell_id = pr.sell_id', 'left');
+                $this->db->join('account a', 'a.account_id = pr.department_id', 'left');
+                $this->db->where('pr.sell_id IS NULL', null, true);
+                $this->db->where('pr.other_id IS NULL', null, true);
+                $this->db->where('pr.transaction_date <=',$upto_balance_date);
+                if(!empty($account_group_ids)){
+                    $group_ids_string = implode(',', $account_group_ids);
+                    $this->db->where('a.account_group_id', $group_ids_string);
+                }
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query = $this->db->get();
+         //       echo "<pre>"; print_r($this->db->last_query()); exit;
+                return $query->result();
+            }
     
     function get_manufacture_issue_receive_for_outstanding_report_department($upto_balance_date, $account_group_id){
 //        $this->db->select("ird.*, IF(`c`.`category_group_id` = 1, CONCAT(IF(`ird`.`type_id` = 1,'-',''),ird.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, CONCAT(IF(`ird`.`type_id` = 1,'-',''),ird.fine), '0') AS silver_fine, '0' AS amount, ird.ird_date as st_date,a.account_id, a.account_name, a.account_mobile, ird.ird_id as st_id, a.credit_limit, a.account_group_id");
@@ -3475,6 +4401,31 @@ class Crud extends CI_Model
 //        print_r($this->db->last_query());die;
         return $query->result();
     }
+
+    function get_manufacture_issue_receive_for_outstanding_ids_report_department($upto_balance_date, $account_group_ids){
+        //        $this->db->select("ird.*, IF(`c`.`category_group_id` = 1, CONCAT(IF(`ird`.`type_id` = 1,'-',''),ird.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, CONCAT(IF(`ird`.`type_id` = 1,'-',''),ird.fine), '0') AS silver_fine, '0' AS amount, ird.ird_date as st_date,a.account_id, a.account_name, a.account_mobile, ird.ird_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->select("ird.*, IF(`c`.`category_group_id` = 1, IF(`ird`.`type_id` = 1, '".ZERO_VALUE."'-ird.fine, ird.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, IF(`ird`.`type_id` = 1, '".ZERO_VALUE."'-ird.fine, ird.fine), '0') AS silver_fine, '0' AS amount, ird.ird_date as st_date,a.account_id, a.account_name, a.account_mobile, ird.ird_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->from('issue_receive_details ird');
+                $this->db->join('issue_receive ir', 'ir.ir_id = ird.ir_id', 'left');
+                $this->db->join('category c', 'c.category_id = ird.category_id', 'left');
+                $this->db->join('item_master item', 'item.item_id = ird.item_id', 'left');
+                $this->db->join('account a', 'a.account_id = ir.department_id', 'left');
+                $this->db->where('ird.ird_date <=',$upto_balance_date);
+                if(!empty($account_group_ids)){
+                    $group_ids_string = implode(',', $account_group_ids);
+                    $this->db->where_in('a.account_group_id', $group_ids_string);
+                }
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query = $this->db->get();
+        //        print_r($this->db->last_query());die;
+                return $query->result();
+            }
     
     function get_manufacture_issue_receive_silver_for_outstanding_report_department($upto_balance_date, $account_group_id){
         $this->db->select("irsd.*, IF(`c`.`category_group_id` = 1, IF(`irsd`.`type_id` = 1, '".ZERO_VALUE."'-irsd.fine, irsd.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, IF(`irsd`.`type_id` = 1, '".ZERO_VALUE."'-irsd.fine, irsd.fine), '0') AS silver_fine, '0' AS amount, irsd.irsd_date as st_date,a.account_id, a.account_name, a.account_mobile, irsd.irsd_id as st_id, a.credit_limit, a.account_group_id");
@@ -3486,6 +4437,30 @@ class Crud extends CI_Model
         $this->db->where('irsd.irsd_date <=',$upto_balance_date);
         if(!empty($account_group_id)){
             $this->db->where('a.account_group_id', $account_group_id);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
+
+    function get_manufacture_issue_receive_silver_for_outstanding_ids_report_department($upto_balance_date, $account_group_ids){
+        $this->db->select("irsd.*, IF(`c`.`category_group_id` = 1, IF(`irsd`.`type_id` = 1, '".ZERO_VALUE."'-irsd.fine, irsd.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, IF(`irsd`.`type_id` = 1, '".ZERO_VALUE."'-irsd.fine, irsd.fine), '0') AS silver_fine, '0' AS amount, irsd.irsd_date as st_date,a.account_id, a.account_name, a.account_mobile, irsd.irsd_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->from('issue_receive_silver_details irsd');
+        $this->db->join('issue_receive_silver irs', 'irs.irs_id = irsd.irs_id', 'left');
+        $this->db->join('category c', 'c.category_id = irsd.category_id', 'left');
+        $this->db->join('item_master item', 'item.item_id = irsd.item_id', 'left');
+        $this->db->join('account a', 'a.account_id = irs.department_id', 'left');
+        $this->db->where('irsd.irsd_date <=',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
         }
         if($upto_balance_date == $this->today_date){
             $this->db->group_start();
@@ -3521,6 +4496,30 @@ class Crud extends CI_Model
 //        print_r($this->db->last_query());die;
         return $query->result();
     }
+
+    function get_manufacture_manu_hand_made_for_outstanding_ids_report_department($upto_balance_date, $account_group_ids){
+        $this->db->select("mhm_detail.*, IF(`c`.`category_group_id` = 1, IF(`mhm_detail`.`type_id` = '".MANUFACTURE_HM_TYPE_ISSUE_FINISH_WORK_ID."' || `mhm_detail`.`type_id` = '".MANUFACTURE_HM_TYPE_ISSUE_SCRAP_ID."', '".ZERO_VALUE."'-mhm_detail.fine, mhm_detail.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, IF(`mhm_detail`.`type_id` = '".MANUFACTURE_HM_TYPE_ISSUE_FINISH_WORK_ID."' || `mhm_detail`.`type_id` = '".MANUFACTURE_HM_TYPE_ISSUE_SCRAP_ID."', '".ZERO_VALUE."'-mhm_detail.fine, mhm_detail.fine), '0') AS silver_fine, '0' AS amount, mhm_detail.mhm_detail_date as st_date,a.account_id, a.account_name, a.account_mobile, mhm_detail.mhm_detail_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->from('manu_hand_made_details mhm_detail');
+        $this->db->join('manu_hand_made mhm', 'mhm.mhm_id = mhm_detail.mhm_id', 'left');
+        $this->db->join('category c', 'c.category_id = mhm_detail.category_id', 'left');
+        $this->db->join('item_master item', 'item.item_id = mhm_detail.item_id', 'left');
+        $this->db->join('account a', 'a.account_id = mhm.department_id', 'left');
+        $this->db->where('mhm_detail.mhm_detail_date <=',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
     
     function get_manufacture_casting_for_outstanding_report_department($upto_balance_date, $account_group_id){
         $this->db->select("ce_detail.*, IF(`c`.`category_group_id` = 1, IF(`ce_detail`.`type_id` = '".CASTING_ENTRY_TYPE_ISSUE_FINISH_WORK_ID."' || `ce_detail`.`type_id` = '".CASTING_ENTRY_TYPE_ISSUE_SCRAP_ID."', '".ZERO_VALUE."'-ce_detail.fine, ce_detail.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, IF(`ce_detail`.`type_id` = '".CASTING_ENTRY_TYPE_ISSUE_FINISH_WORK_ID."' || `ce_detail`.`type_id` = '".CASTING_ENTRY_TYPE_ISSUE_SCRAP_ID."', '".ZERO_VALUE."'-ce_detail.fine, ce_detail.fine), '0') AS silver_fine, '0' AS amount, ce_detail.ce_detail_date as st_date,a.account_id, a.account_name, a.account_mobile, ce_detail.ce_detail_id as st_id, a.credit_limit, a.account_group_id");
@@ -3532,6 +4531,30 @@ class Crud extends CI_Model
         $this->db->where('ce_detail.ce_detail_date <=',$upto_balance_date);
         if(!empty($account_group_id)){
             $this->db->where('a.account_group_id', $account_group_id);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
+
+    function get_manufacture_casting_for_outstanding_ids_report_department($upto_balance_date, $account_group_ids){
+        $this->db->select("ce_detail.*, IF(`c`.`category_group_id` = 1, IF(`ce_detail`.`type_id` = '".CASTING_ENTRY_TYPE_ISSUE_FINISH_WORK_ID."' || `ce_detail`.`type_id` = '".CASTING_ENTRY_TYPE_ISSUE_SCRAP_ID."', '".ZERO_VALUE."'-ce_detail.fine, ce_detail.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, IF(`ce_detail`.`type_id` = '".CASTING_ENTRY_TYPE_ISSUE_FINISH_WORK_ID."' || `ce_detail`.`type_id` = '".CASTING_ENTRY_TYPE_ISSUE_SCRAP_ID."', '".ZERO_VALUE."'-ce_detail.fine, ce_detail.fine), '0') AS silver_fine, '0' AS amount, ce_detail.ce_detail_date as st_date,a.account_id, a.account_name, a.account_mobile, ce_detail.ce_detail_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->from('casting_entry_details ce_detail');
+        $this->db->join('casting_entry ce', 'ce.ce_id = ce_detail.ce_id', 'left');
+        $this->db->join('category c', 'c.category_id = ce_detail.category_id', 'left');
+        $this->db->join('item_master item', 'item.item_id = ce_detail.item_id', 'left');
+        $this->db->join('account a', 'a.account_id = ce.department_id', 'left');
+        $this->db->where('ce_detail.ce_detail_date <=',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
         }
         if($upto_balance_date == $this->today_date){
             $this->db->group_start();
@@ -3567,6 +4590,30 @@ class Crud extends CI_Model
 //        print_r($this->db->last_query());die;
         return $query->result();
     }
+
+    function get_manufacture_machin_chain_for_outstanding_ids_report_department($upto_balance_date, $account_group_ids){
+        $this->db->select("mc_detail.*, IF(`c`.`category_group_id` = 1, IF(`mc_detail`.`type_id` = '".MACHINE_CHAIN_TYPE_ISSUE_FINISH_WORK_ID."' || `mc_detail`.`type_id` = '".MACHINE_CHAIN_TYPE_ISSUE_SCRAP_ID."', '".ZERO_VALUE."'-mc_detail.fine, mc_detail.fine), '0') AS gold_fine, IF(`c`.`category_group_id` = 2, IF(`mc_detail`.`type_id` = '".MACHINE_CHAIN_TYPE_ISSUE_FINISH_WORK_ID."' || `mc_detail`.`type_id` = '".MACHINE_CHAIN_TYPE_ISSUE_SCRAP_ID."', '".ZERO_VALUE."'-mc_detail.fine, mc_detail.fine), '0') AS silver_fine, '0' AS amount, mc_detail.machine_chain_detail_date as st_date,a.account_id, a.account_name, a.account_mobile, mc_detail.machine_chain_detail_id as st_id, a.credit_limit, a.account_group_id");
+        $this->db->from('machine_chain_details mc_detail');
+        $this->db->join('machine_chain mc', 'mc.machine_chain_id = mc_detail.machine_chain_id', 'left');
+        $this->db->join('category c', 'c.category_id = mc_detail.category_id', 'left');
+        $this->db->join('item_master item', 'item.item_id = mc_detail.item_id', 'left');
+        $this->db->join('account a', 'a.account_id = mc.department_id', 'left');
+        $this->db->where('mc_detail.machine_chain_detail_date <=',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where('a.account_group_id', $group_ids_string);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
     
     function get_other_sell_items_for_outstanding_report_department($upto_balance_date, $account_group_id){
         $this->db->select("oi.*, '0' AS gold_fine, '0' AS silver_fine, IF(`oi`.`type` = 1, '".ZERO_VALUE."'-oi.amount, oi.amount) AS amount, o.department_id AS department_id, oi.other_item_id as id, o.other_date as st_date, o.other_id as st_id,a.account_id, a.account_name, a.account_mobile, a.credit_limit, a.account_group_id");
@@ -3578,6 +4625,30 @@ class Crud extends CI_Model
         $this->db->where('o.other_date <=',$upto_balance_date);
         if(!empty($account_group_id)){
             $this->db->where('a.account_group_id', $account_group_id);
+        }
+        if($upto_balance_date == $this->today_date){
+            $this->db->group_start();
+                $this->db->or_where('a.gold_fine !=', '0');
+                $this->db->or_where('a.silver_fine !=', '0');
+                $this->db->or_where('a.amount !=', '0');
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+//        print_r($this->db->last_query());die;
+        return $query->result();
+    }
+
+    function get_other_sell_items_for_outstanding_ids_report_department($upto_balance_date, $account_group_ids){
+        $this->db->select("oi.*, '0' AS gold_fine, '0' AS silver_fine, IF(`oi`.`type` = 1, '".ZERO_VALUE."'-oi.amount, oi.amount) AS amount, o.department_id AS department_id, oi.other_item_id as id, o.other_date as st_date, o.other_id as st_id,a.account_id, a.account_name, a.account_mobile, a.credit_limit, a.account_group_id");
+        $this->db->from('other_items oi');
+        $this->db->join('other o', 'o.other_id = oi.other_id', 'left');
+        $this->db->join('category c', 'c.category_id = oi.category_id', 'left');
+        $this->db->join('item_master item', 'item.item_id = oi.item_id', 'left');
+        $this->db->join('account a', 'a.account_id = o.department_id', 'left');
+        $this->db->where('o.other_date <=',$upto_balance_date);
+        if(!empty($account_group_ids)){
+            $group_ids_string = implode(',', $account_group_ids);
+            $this->db->where_in('a.account_group_id', $group_ids_string);
         }
         if($upto_balance_date == $this->today_date){
             $this->db->group_start();
@@ -3612,6 +4683,28 @@ class Crud extends CI_Model
         $query = $this->db->get();
         return $query->result();
     }
+    function get_other_payment_receipt_for_outstanding_ids_report_department($upto_balance_date, $account_group_ids) {
+        //        $this->db->select("pr.*, '0' AS gold_fine, '0' AS silver_fine, CONCAT(IF(pr.payment_receipt = 1, '-', ''), pr.amount) AS amount, a.account_id, a.account_name, a.account_mobile, s.sell_date as st_date, s.sell_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->select("pr.*, '0' AS gold_fine, '0' AS silver_fine, IF(pr.payment_receipt = 1, '".ZERO_VALUE."'-pr.amount, pr.amount) AS amount, a.account_id, a.account_name, a.account_mobile, o.other_date as st_date, o.other_id as st_id, a.credit_limit, a.account_group_id");
+                $this->db->from('payment_receipt pr');
+                $this->db->join('other o', 'o.other_id = pr.other_id', 'left');
+                $this->db->join('account a', 'a.account_id = o.department_id', 'left');
+                $this->db->where('o.other_date <= ',$upto_balance_date);
+                if(!empty($account_group_ids)){
+                    $group_ids_string = implode(',', $account_group_ids);
+                    $this->db->where_in('a.account_group_id', $group_ids_string);
+                }
+                $this->db->where('pr.cash_cheque', '1');
+                if($upto_balance_date == $this->today_date){
+                    $this->db->group_start();
+                        $this->db->or_where('a.gold_fine !=', '0');
+                        $this->db->or_where('a.silver_fine !=', '0');
+                        $this->db->or_where('a.amount !=', '0');
+                    $this->db->group_end();
+                }
+                $query = $this->db->get();
+                return $query->result();
+            }
     /*********  Outstanding Report Related Function End ***********/
 
 

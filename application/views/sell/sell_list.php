@@ -82,7 +82,7 @@
                                                     <th style="width: 20%;">Action</th>
                                                     <th>Account Name</th>
                                                     <th>Department</th>
-                                                    <th>Sell No</th>
+                                                    <th>Voucher No</th>
                                                     <th  width="80px" class="text-nowrap">Date</th>
                                                     <th>Remark</th>
                                                     <th>Delivered / Not Delivered</th>

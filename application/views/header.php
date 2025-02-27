@@ -976,11 +976,11 @@ $segment3 = $this->uri->segment(3);
                                                             href="<?= base_url(); ?>reports/stock_status/"><i
                                                                 class="fa fa-line-chart"></i>Stock Status</a></li>
                                                 <?php } ?>
-                                                <?php if ($this->applib->have_access_role(STOCK_STATUS_MODULE_ID, "stock_check")) { ?>
-                                                    <li class="<?= ($segment2 == 'stock_check') ? 'active' : '' ?>"><a
+                                                <?php //if ($this->applib->have_access_role(STOCK_STATUS_MODULE_ID, "stock_check")) { ?>
+                                                    <!--<li class="<?= ($segment2 == 'stock_check') ? 'active' : '' ?>"><a
                                                             href="<?= base_url(); ?>reports/stock_check/"><i
-                                                                class="fa fa-line-chart"></i>Stock Check</a></li>
-                                                <?php } ?>
+                                                                class="fa fa-line-chart"></i>Stock Check</a></li>-->
+                                                <?php //} ?>
                                                 <?php if ($this->applib->have_access_role(BALANCE_SHEET_MODULE_ID, "view")) { ?>
                                                     <?php if ($sell_purchase_type_3_menu == '1') { ?>
                                                         <li class="<?= ($segment2 == 'balance_sheet') ? 'active' : '' ?>"><a
@@ -999,11 +999,11 @@ $segment3 = $this->uri->segment(3);
                                                                 class="fa fa-book"></i>Balance Sheet Gold</a></li>
 
                                                 <?php } ?>
-                                                <?php if ($this->applib->have_access_role(CALCULATIONS_MODULE_ID, "view")) { ?>
-                                                    <li class="<?= ($segment2 == 'calculations') ? 'active' : '' ?>"><a
+                                                <?php //if ($this->applib->have_access_role(CALCULATIONS_MODULE_ID, "view")) { ?>
+                                                    <!--<li class="<?= ($segment2 == 'calculations') ? 'active' : '' ?>"><a
                                                             href="<?= base_url(); ?>reports/calculations/"><i
-                                                                class="fa fa-book"></i>Calculations</a></li>
-                                                <?php } ?>
+                                                                class="fa fa-book"></i>Calculations</a></li>-->
+                                                <?php //} ?>
                                             </ul>
                                         </li>
                                         <li class="mega-menu-column">

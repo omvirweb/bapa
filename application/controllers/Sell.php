@@ -117,8 +117,10 @@ class Sell extends CI_Controller
                     $oreder_lot_item->group_name = $this->crud->get_column_value_by_id('category', 'category_group_id', array('category_id' => $lot_item->category_id));
                     $oreder_lot_item->item_name = $this->crud->get_column_value_by_id('item_master', 'item_name', array('item_id' => $lot_item->item_id));
                     $oreder_lot_item->less = $this->crud->get_column_value_by_id('item_master', 'less', array('item_id' => $lot_item->item_id));
+                    // $oreder_lot_item->purchase_less = $this->crud->get_column_value_by_id('item_master', 'purchase_less', array('item_id' => $lot_item->item_id));
                     $oreder_lot_item->purity = $this->crud->get_val_by_id('carat', $lot_item->touch_id, 'carat_id', 'purity');
                     $oreder_lot_item->grwt = number_format($lot_item->weight, 3, '.', '');
+                    $oreder_lot_item->purchase_less = number_format($lot_item->purchase_less, 3, '.', '');
                     $oreder_lot_item->net_wt = number_format($lot_item->weight, 3, '.', '');
                     $oreder_lot_item->type_name = 'S';
                     $oreder_lot_item->type = '1';
@@ -268,6 +270,7 @@ class Sell extends CI_Controller
                         $sell_items->group_name = $this->crud->get_column_value_by_id('category', 'category_group_id', array('category_id' => $lot_item->category_id));
                         $sell_items->item_name = $this->crud->get_column_value_by_id('item_master', 'item_name', array('item_id' => $lot_item->item_id));
                         $sell_items->grwt = $lot_item->grwt;
+                        $sell_items->purchase_less = $lot_item->purchase_less;
                         $sell_items->less = $lot_item->less;
                         $sell_items->net_wt = $lot_item->net_wt;
                         $sell_items->touch_id = $lot_item->touch_id;
@@ -625,44 +628,39 @@ class Sell extends CI_Controller
         exit;
     }
 
-    function save_sell($have_rfid = '')
-    {
+    function save_sell($have_rfid = '') {
         $return = array();
         $post_data = $this->input->post();
-        // echo '<pre>';
-        // print_r($post_data);
-        // echo '</pre>';
-        // exit;
         $line_items_data = array();
-        if (isset($post_data['line_items_data']) && !empty($post_data['line_items_data'])) {
+        if(isset($post_data['line_items_data']) && !empty($post_data['line_items_data'])){
             $line_items_data = json_decode($post_data['line_items_data']);
         }
         $metal_data = array();
-        if (isset($post_data['metal_data']) && !empty($post_data['metal_data'])) {
+        if(isset($post_data['metal_data']) && !empty($post_data['metal_data'])){
             $metal_data = json_decode($post_data['metal_data']);
         }
         $pay_rec_data = array();
-        if (isset($post_data['pay_rec_data']) && !empty($post_data['pay_rec_data'])) {
+        if(isset($post_data['pay_rec_data']) && !empty($post_data['pay_rec_data'])){
             $pay_rec_data = json_decode($post_data['pay_rec_data']);
         }
         $gold_data = array();
-        if (isset($post_data['gold_data']) && !empty($post_data['gold_data'])) {
+        if(isset($post_data['gold_data']) && !empty($post_data['gold_data'])){
             $gold_data = json_decode($post_data['gold_data']);
         }
         $silver_data = array();
-        if (isset($post_data['silver_data']) && !empty($post_data['silver_data'])) {
+        if(isset($post_data['silver_data']) && !empty($post_data['silver_data'])){
             $silver_data = json_decode($post_data['silver_data']);
         }
         $transfer_data = array();
-        if (isset($post_data['transfer_data']) && !empty($post_data['transfer_data'])) {
+        if(isset($post_data['transfer_data']) && !empty($post_data['transfer_data'])){
             $transfer_data = json_decode($post_data['transfer_data']);
         }
         $ad_lineitem_data = array();
-        if (isset($post_data['ad_lineitem_data']) && !empty($post_data['ad_lineitem_data'])) {
+        if(isset($post_data['ad_lineitem_data']) && !empty($post_data['ad_lineitem_data'])){
             $ad_lineitem_data = json_decode($post_data['ad_lineitem_data']);
         }
         $adjust_cr_lineitem_data = array();
-        if (isset($post_data['adjust_cr_lineitem_data']) && !empty($post_data['adjust_cr_lineitem_data'])) {
+        if(isset($post_data['adjust_cr_lineitem_data']) && !empty($post_data['adjust_cr_lineitem_data'])){
             $adjust_cr_lineitem_data = json_decode($post_data['adjust_cr_lineitem_data']);
         }
 
@@ -670,9 +668,9 @@ class Sell extends CI_Controller
             $return['error'] = "Something went Wrong";
             print json_encode($return);
             exit;
-        }
-        //    echo '<pre>'; print_r($post_data); exit;
-        //    echo '<pre>'; print_r($line_items_data); exit;
+	}
+//        echo '<pre>'; print_r($post_data); exit;
+//        echo '<pre>'; print_r($line_items_data); exit;
         $post_data['bank_id'] = isset($post_data['bank_id']) && !empty($post_data['bank_id']) ? $post_data['bank_id'] : NULL;
         $post_data['account_id'] = isset($post_data['account_id']) && !empty($post_data['account_id']) ? $post_data['account_id'] : NULL;
         $post_data['process_id'] = isset($post_data['process_id']) && !empty($post_data['process_id']) ? $post_data['process_id'] : NULL;
@@ -686,8 +684,8 @@ class Sell extends CI_Controller
 
             $old_sell_item_id_arr = array();
             $sell_items = $this->crud->get_all_with_where('sell_items', '', '', array('sell_id' => $post_data['sell_id']));
-            if (!empty($sell_items)) {
-                foreach ($sell_items as $sell_item) {
+            if(!empty($sell_items)){
+                foreach ($sell_items as $sell_item){
                     $old_sell_item_id_arr[] = $sell_item->sell_item_id;
                 }
             }
@@ -762,24 +760,24 @@ class Sell extends CI_Controller
             $this->update_ad_to_mfloss_balance_on_update($post_data['sell_id']);
             // Decrese Charges Amount in MF loss Account
             $this->update_charges_amt_to_mfloss_balance_on_update($post_data['sell_id']);
-
-            $update_arr['account_id'] = $post_data['account_id'];
-            $update_arr['process_id'] = $post_data['process_id'];
+            
+            $update_arr['account_id'] = $post_data['account_id'];            
+            $update_arr['process_id'] = $post_data['process_id'];            
             $update_arr['sell_date'] = date('Y-m-d', strtotime($post_data['sell_date']));
-            $update_arr['sell_remark'] = $post_data['sell_remark'];
+            $update_arr['sell_remark'] = $post_data['sell_remark'];           
             $update_arr['total_gold_fine'] = $post_data['sell_gold_fine'];
-            $update_arr['total_silver_fine'] = $post_data['sell_silver_fine'];
+            $update_arr['total_silver_fine'] = $post_data['sell_silver_fine'];           
             $update_arr['total_amount'] = $post_data['sell_amount'];
             $update_arr['total_c_amount'] = $post_data['bill_cr_c_amount'];
             $update_arr['total_r_amount'] = $post_data['bill_cr_r_amount'];
-            if (isset($post_data['discount_amount'])) {
+            if(isset($post_data['discount_amount'])){
                 $post_data['discount_amount'] = (!empty($post_data['discount_amount'])) ? $post_data['discount_amount'] : 0;
                 $update_arr['discount_amount'] = $post_data['discount_amount'];
-                if (PACKAGE_FOR == 'manek') {
+                if(PACKAGE_FOR == 'manek') {
                     $post_data['sell_amount'] = $post_data['sell_amount'] - $post_data['discount_amount'];
                 }
             }
-            $update_arr['delivery_type'] = $post_data['delivery_type'];
+            $update_arr['delivery_type'] = $post_data['delivery_type'];           
             $update_arr['order_id'] = $order_id;
             $update_arr['updated_at'] = $this->now_time;
             $update_arr['updated_by'] = $this->logged_in_id;
@@ -788,15 +786,15 @@ class Sell extends CI_Controller
                 $return['success'] = "Updated";
                 $this->session->set_flashdata('success', true);
                 $this->session->set_flashdata('message', 'Sell/purchase Updated Successfully');
-                if (isset($post_data['saveform_clickbtn']) && $post_data['saveform_clickbtn'] == 'saveformwithprint') {
+                if(isset($post_data['saveform_clickbtn']) && $post_data['saveform_clickbtn'] == 'saveformwithprint'){
                     $this->session->set_flashdata('saveformwithprint', true);
-                    $this->session->set_flashdata('saveformwithprinturl', 'sell/sell_print/' . $post_data['sell_id']);
+                    $this->session->set_flashdata('saveformwithprinturl', 'sell/sell_print/'.$post_data['sell_id']);
                 }
-
+                
                 // Increase fine and amount in Account
 //                $this->crud->update('account', array('gold_fine' => $post_data['gold_fine_total'], 'silver_fine' => $post_data['silver_fine_total'], 'amount' => $post_data['amount_total']), array('account_id' => $post_data['account_id']));
-                $update_accounts = $this->crud->get_row_by_id('account', array('account_id' => $post_data['account_id']));
-                if (!empty($update_accounts)) {
+                $update_accounts = $this->crud->get_row_by_id('account', array('account_id'=> $post_data['account_id']));
+                if(!empty($update_accounts)){
                     $acc_gold_fine = number_format((float) $update_accounts[0]->gold_fine, '3', '.', '') + number_format((float) $post_data['sell_gold_fine'], '3', '.', '');
                     $acc_gold_fine = number_format((float) $acc_gold_fine, '3', '.', '');
                     $acc_silver_fine = number_format((float) $update_accounts[0]->silver_fine, '3', '.', '') + number_format((float) $post_data['sell_silver_fine'], '3', '.', '');
@@ -809,28 +807,28 @@ class Sell extends CI_Controller
                     $acc_r_amount = number_format((float) $acc_r_amount, '2', '.', '');
                     $this->crud->update('account', array('gold_fine' => $acc_gold_fine, 'silver_fine' => $acc_silver_fine, 'amount' => $acc_amount, 'c_amount' => $acc_c_amount, 'r_amount' => $acc_r_amount), array('account_id' => $post_data['account_id']));
                 }
-
+                
                 // Decrease fine and amount in Department
-                $update_departments = $this->crud->get_row_by_id('account', array('account_id' => $post_data['process_id']));
-                if (!empty($update_departments)) {
+                $update_departments = $this->crud->get_row_by_id('account', array('account_id'=> $post_data['process_id']));
+                if(!empty($update_departments)){
                     $depart_gold_fine = number_format((float) $update_departments[0]->gold_fine, '3', '.', '') - number_format((float) $post_data['depart_gold_fine'], '3', '.', '');
                     $depart_gold_fine = number_format((float) $depart_gold_fine, '3', '.', '');
                     $depart_silver_fine = number_format((float) $update_departments[0]->silver_fine, '3', '.', '') - number_format((float) $post_data['depart_silver_fine'], '3', '.', '');
                     $depart_silver_fine = number_format((float) $depart_silver_fine, '3', '.', '');
                     $this->crud->update('account', array('gold_fine' => $depart_gold_fine, 'silver_fine' => $depart_silver_fine), array('account_id' => $post_data['process_id']));
                 }
-
+                
                 // Insert sell_purchase_items
-                if (!empty($line_items_data)) {
+                if(!empty($line_items_data)){
                     foreach ($line_items_data as $key => $lineitem) {
                         $insert_item = array();
                         $old_sell_item_grwt = 0;
                         $insert_item['sell_id'] = $post_data['sell_id'];
                         $insert_item['tunch_textbox'] = (isset($lineitem->tunch_textbox) && $lineitem->tunch_textbox == '1') ? '1' : '0';
                         $insert_item['type'] = $lineitem->type;
-                        $line_items_data[$key]->stock_method = $this->crud->get_column_value_by_id('item_master', 'stock_method', array('item_id' => $lineitem->item_id));
-                        if ($lineitem->type == SELL_TYPE_SELL_ID && $line_items_data[$key]->stock_method == '2') {
-                            if (isset($lineitem->stock_type)) {
+                        $line_items_data[$key]->stock_method = $this->crud->get_column_value_by_id('item_master','stock_method',array('item_id' => $lineitem->item_id));
+                        if($lineitem->type == SELL_TYPE_SELL_ID && $line_items_data[$key]->stock_method == '2'){
+                            if(isset($lineitem->stock_type)){
                                 $insert_item['stock_type'] = $lineitem->stock_type;
                             }
                         }
@@ -839,16 +837,15 @@ class Sell extends CI_Controller
                         $insert_item['li_narration'] = (isset($lineitem->li_narration) && !empty($lineitem->li_narration)) ? $lineitem->li_narration : NULL;
                         $insert_item['gold_silver_rate'] = (isset($lineitem->gold_silver_rate) && !empty($lineitem->gold_silver_rate)) ? $lineitem->gold_silver_rate : 0;
                         $insert_item['grwt'] = $lineitem->grwt;
-                        $insert_item['purchase_less'] = $lineitem->purchase_less;
                         $insert_item['less'] = $lineitem->less;
                         $insert_item['net_wt'] = $lineitem->net_wt;
                         $insert_item['touch_id'] = $lineitem->touch_id;
                         $insert_item['wstg'] = $lineitem->wstg;
                         $insert_item['fine'] = $lineitem->fine;
-                        if (isset($lineitem->item_stock_rfid_id)) {
+                        if(isset($lineitem->item_stock_rfid_id)){
                             $insert_item['item_stock_rfid_id'] = (isset($lineitem->item_stock_rfid_id) && !empty($lineitem->item_stock_rfid_id)) ? $lineitem->item_stock_rfid_id : NULL;
                         }
-                        if (isset($lineitem->rfid_number)) {
+                        if(isset($lineitem->rfid_number)){
                             $insert_item['rfid_number'] = (isset($lineitem->rfid_number) && !empty($lineitem->rfid_number)) ? $lineitem->rfid_number : NULL;
                         }
                         $insert_item['charges_amt'] = (isset($lineitem->charges_amt) && !empty($lineitem->charges_amt)) ? $lineitem->charges_amt : 0;
@@ -858,31 +855,31 @@ class Sell extends CI_Controller
                         $insert_item['c_amt'] = (isset($lineitem->c_amt) && !empty($lineitem->c_amt)) ? abs($lineitem->c_amt) : 0;
                         $insert_item['r_amt'] = (isset($lineitem->r_amt) && !empty($lineitem->r_amt)) ? abs($lineitem->r_amt) : 0;
                         $insert_item['image'] = $lineitem->image;
-                        $account_item_wstg = $this->crud->get_column_value_by_id('party_item_details', 'wstg', array('account_id' => $post_data['account_id'], 'item_id' => $lineitem->item_id));
-                        if (!empty($account_item_wstg)) {
+                        $account_item_wstg = $this->crud->get_column_value_by_id('party_item_details', 'wstg', array('account_id' => $post_data['account_id'],'item_id'=> $lineitem->item_id));
+                        if(!empty($account_item_wstg)){
                             $lineitem_default_wstg = (!empty($account_item_wstg)) ? $account_item_wstg : '0';
                         } else {
                             $lineitem_default_wstg = $this->crud->get_val_by_id('item_master', $lineitem->item_id, 'item_id', 'default_wastage');
                         }
-                        if ($lineitem_default_wstg != '' && $lineitem->type == SELL_TYPE_SELL_ID) {
-                            if ($lineitem_default_wstg != $lineitem->wstg) {
+                        if($lineitem_default_wstg != '' && $lineitem->type == SELL_TYPE_SELL_ID){
+                            if($lineitem_default_wstg != $lineitem->wstg){
                                 $insert_item['wastage_change_approve'] = '1_0';
                             }
-                            if ($lineitem_default_wstg == $lineitem->wstg) {
+                            if($lineitem_default_wstg == $lineitem->wstg){
                                 $insert_item['wastage_change_approve'] = '0_0';
                             }
                         }
-                        if (isset($lineitem->order_lot_item_id) && !empty($lineitem->order_lot_item_id)) {
+                        if(isset($lineitem->order_lot_item_id) && !empty($lineitem->order_lot_item_id)){
                             $insert_item['order_lot_item_id'] = $lineitem->order_lot_item_id;
                             // On Sell item add order lot item status to Completed
                             $this->crud->update('order_lot_item', array('item_status_id' => '3'), array('order_lot_item_id' => $lineitem->order_lot_item_id));
                         }
-                        if (isset($lineitem->purchase_sell_item_id) && !empty($lineitem->purchase_sell_item_id)) {
+                        if(isset($lineitem->purchase_sell_item_id) && !empty($lineitem->purchase_sell_item_id)){
                             $insert_item['purchase_sell_item_id'] = $lineitem->purchase_sell_item_id;
                         }
                         $insert_item['updated_at'] = $this->now_time;
                         $insert_item['updated_by'] = $this->logged_in_id;
-                        if (isset($lineitem->sell_item_id) && !empty($lineitem->sell_item_id)) {
+                        if(isset($lineitem->sell_item_id) && !empty($lineitem->sell_item_id)){
                             $old_sell_item_grwt = $this->crud->get_column_value_by_id('sell_items', 'grwt', array('sell_item_id' => $lineitem->sell_item_id));
                             $this->crud->update('sell_items', $insert_item, array('sell_item_id' => $lineitem->sell_item_id));
                             $old_sell_item_id_arr = array_diff($old_sell_item_id_arr, array($lineitem->sell_item_id));
@@ -900,14 +897,14 @@ class Sell extends CI_Controller
                             $sell_item_id = $this->db->insert_id();
                             $line_items_data[$key]->purchase_item_id = $sell_item_id;
                         }
-                        $line_items_data[$key]->stock_method = $this->crud->get_column_value_by_id('item_master', 'stock_method', array('item_id' => $lineitem->item_id));
+                        $line_items_data[$key]->stock_method = $this->crud->get_column_value_by_id('item_master','stock_method',array('item_id' => $lineitem->item_id));
 
                         // Delete lineitems less details
                         $this->crud->delete('sell_less_ad_details', array('sell_id' => $post_data['sell_id'], 'sell_item_id' => $sell_item_id));
                         // Insert lineitems less details
-                        if (isset($lineitem->sell_less_ad_details) && !empty($lineitem->sell_less_ad_details)) {
+                        if(isset($lineitem->sell_less_ad_details) && !empty($lineitem->sell_less_ad_details)){
                             $sell_less_ad_details = json_decode($lineitem->sell_less_ad_details);
-                            foreach ($sell_less_ad_details as $less_ad_detail) {
+                            foreach ($sell_less_ad_details as $less_ad_detail){
                                 $insert_less_ad_detail = array();
                                 $insert_less_ad_detail['sell_id'] = $post_data['sell_id'];
                                 $insert_less_ad_detail['sell_item_id'] = $sell_item_id;
@@ -925,9 +922,9 @@ class Sell extends CI_Controller
                         // Delete lineitems charges details
                         $this->crud->delete('sell_item_charges_details', array('sell_id' => $post_data['sell_id'], 'sell_item_id' => $sell_item_id));
                         // Insert lineitems charges details
-                        if (isset($lineitem->sell_item_charges_details) && !empty($lineitem->sell_item_charges_details)) {
+                        if(isset($lineitem->sell_item_charges_details) && !empty($lineitem->sell_item_charges_details)){
                             $sell_item_charges_details = json_decode($lineitem->sell_item_charges_details);
-                            foreach ($sell_item_charges_details as $less_ad_detail) {
+                            foreach ($sell_item_charges_details as $less_ad_detail){
                                 $insert_less_ad_detail = array();
                                 $insert_less_ad_detail['sell_id'] = $post_data['sell_id'];
                                 $insert_less_ad_detail['sell_item_id'] = $sell_item_id;
@@ -935,7 +932,7 @@ class Sell extends CI_Controller
                                 $insert_less_ad_detail['sell_item_charges_details_net_wt'] = $less_ad_detail->sell_item_charges_details_net_wt;
                                 $insert_less_ad_detail['sell_item_charges_details_per_gram'] = $less_ad_detail->sell_item_charges_details_per_gram;
                                 $insert_less_ad_detail['sell_item_charges_details_ad_amount'] = $less_ad_detail->sell_item_charges_details_ad_amount;
-                                if (isset($less_ad_detail->sell_item_charges_details_remark)) {
+                                if(isset($less_ad_detail->sell_item_charges_details_remark)){
                                     $insert_less_ad_detail['sell_item_charges_details_remark'] = $less_ad_detail->sell_item_charges_details_remark;
                                 }
                                 $insert_less_ad_detail['created_at'] = $this->now_time;
@@ -947,7 +944,7 @@ class Sell extends CI_Controller
                         }
 
                         // Update rfid_number rfid_used status and rfid_created_grwt
-                        if (isset($lineitem->item_stock_rfid_id) && !empty($lineitem->item_stock_rfid_id)) {
+                        if(isset($lineitem->item_stock_rfid_id) && !empty($lineitem->item_stock_rfid_id)){
                             $this->crud->update('item_stock_rfid', array('rfid_used' => '1', 'to_relation_id' => $sell_item_id, 'to_module' => RFID_RELATION_MODULE_SELL), array('item_stock_rfid_id' => $lineitem->item_stock_rfid_id));
                             $item_stock_rfid = $this->crud->get_data_row_by_id('item_stock_rfid', 'item_stock_rfid_id', $lineitem->item_stock_rfid_id);
                             $old_rfid_created_grwt = $this->crud->get_column_value_by_id('item_stock', 'rfid_created_grwt', array('item_stock_id' => $item_stock_rfid->item_stock_id));
@@ -956,21 +953,20 @@ class Sell extends CI_Controller
                         }
 
                     }
-                    $temp = $this->update_stock_on_sell_item_insert($line_items_data, $post_data['process_id']);
-                    print_r($temp);exit;
+                    $this->update_stock_on_sell_item_insert($line_items_data,$post_data['process_id']);
                     $this->update_charges_amt_to_mfloss_balance_on_insert($line_items_data, $post_data['sell_id']);
                 }
-
+                
                 // Delete Deleted lineitems
                 if (!empty($old_sell_item_id_arr)) {
                     // Update rfid_number rfid_used status and rfid_created_grwt
                     $before_delete_sell_items_data = $this->crud->get_where_in_result('sell_items', 'sell_item_id', $old_sell_item_id_arr);
-                    if (!empty($before_delete_sell_items_data)) {
-                        foreach ($before_delete_sell_items_data as $before_delete_sell_item) {
-                            if (isset($before_delete_sell_item->item_stock_rfid_id) && !empty($before_delete_sell_item->item_stock_rfid_id)) {
+                    if(!empty($before_delete_sell_items_data)){
+                        foreach ($before_delete_sell_items_data as $before_delete_sell_item){
+                            if(isset($before_delete_sell_item->item_stock_rfid_id) && !empty($before_delete_sell_item->item_stock_rfid_id)){
                                 $check_item_stock_rfid = $this->crud->get_row_by_id('item_stock_rfid', array('real_rfid' => $before_delete_sell_item->rfid_number, 'rfid_used' => '0'));
-                                if (empty($check_item_stock_rfid)) {
-                                    if ($have_rfid == '1') {
+                                if(empty($check_item_stock_rfid)){
+                                    if($have_rfid == '1'){
                                         $this->crud->update('item_stock_rfid', array('rfid_used' => '0', 'to_relation_id' => NULL, 'to_module' => NULL), array('item_stock_rfid_id' => $before_delete_sell_item->item_stock_rfid_id));
                                         $item_stock_rfid = $this->crud->get_data_row_by_id('item_stock_rfid', 'item_stock_rfid_id', $before_delete_sell_item->item_stock_rfid_id);
                                         $old_rfid_created_grwt = $this->crud->get_column_value_by_id('item_stock', 'rfid_created_grwt', array('item_stock_id' => $item_stock_rfid->item_stock_id));
@@ -985,7 +981,7 @@ class Sell extends CI_Controller
                             }
                         }
                     }
-                    //                    $old_sell_item_ids = implode(',', $old_sell_item_id_arr);
+//                    $old_sell_item_ids = implode(',', $old_sell_item_id_arr);
                     $this->crud->delete_where_in('sell_items', 'sell_item_id', $old_sell_item_id_arr);
                     // Delete lineitems less ad details
                     $this->crud->delete_where_in('sell_less_ad_details', 'sell_item_id', $old_sell_item_id_arr);
@@ -994,8 +990,8 @@ class Sell extends CI_Controller
                 }
 
                 // Insert Payment Receipt Data
-                if (!empty($pay_rec_data)) {
-                    foreach ($pay_rec_data as $pay_rec) {
+                if(!empty($pay_rec_data)){
+                    foreach ($pay_rec_data as $pay_rec){
                         $insert_pay_rec = array();
                         $insert_pay_rec['sell_id'] = $post_data['sell_id'];
                         $insert_pay_rec['payment_receipt'] = $pay_rec->payment_receipt;
@@ -1011,7 +1007,7 @@ class Sell extends CI_Controller
                         $insert_pay_rec['narration'] = isset($pay_rec->narration) ? $pay_rec->narration : '';
                         $insert_pay_rec['updated_at'] = $this->now_time;
                         $insert_pay_rec['updated_by'] = $this->logged_in_id;
-                        if (isset($pay_rec->pay_rec_id) && !empty($pay_rec->pay_rec_id)) {
+                        if(isset($pay_rec->pay_rec_id) && !empty($pay_rec->pay_rec_id)){
                             $this->crud->update('payment_receipt', $insert_pay_rec, array('pay_rec_id' => $pay_rec->pay_rec_id));
                             $old_pay_rec_id_arr = array_diff($old_pay_rec_id_arr, array($pay_rec->pay_rec_id));
                         } else {
@@ -1020,9 +1016,9 @@ class Sell extends CI_Controller
                             $this->crud->insert('payment_receipt', $insert_pay_rec);
                         }
 
-                        if ($pay_rec->cash_cheque == '1') { // Update Department Amount
+                        if($pay_rec->cash_cheque == '1'){ // Update Department Amount
                             $depart_amount = $this->crud->get_column_value_by_id('account', 'amount', array('account_id' => $post_data['process_id']));
-                            if ($pay_rec->payment_receipt == '1') {
+                            if($pay_rec->payment_receipt == '1'){
                                 $depart_amount = $depart_amount - $pay_rec->amount;
                             } else {
                                 $depart_amount = $depart_amount + $pay_rec->amount;
@@ -1030,9 +1026,9 @@ class Sell extends CI_Controller
                             $depart_amount = number_format((float) $depart_amount, '2', '.', '');
                             $this->crud->update('account', array('amount' => $depart_amount), array('account_id' => $post_data['process_id']));
                         }
-                        if ($pay_rec->cash_cheque == '2') { // Update Bank Amount
+                        if($pay_rec->cash_cheque == '2'){ // Update Bank Amount
                             $bank_amount = $this->crud->get_column_value_by_id('account', 'amount', array('account_id' => $pay_rec->bank_id));
-                            if ($pay_rec->payment_receipt == '1') {
+                            if($pay_rec->payment_receipt == '1'){
                                 $bank_amount = $bank_amount - $pay_rec->amount;
                             } else {
                                 $bank_amount = $bank_amount + $pay_rec->amount;
@@ -1044,15 +1040,15 @@ class Sell extends CI_Controller
                 }
                 // Delete Deleted Payment Receipt Data
                 if (!empty($old_pay_rec_id_arr)) {
-                    //                    $old_pay_rec_ids = implode(',', $old_pay_rec_id_arr);
+//                    $old_pay_rec_ids = implode(',', $old_pay_rec_id_arr);
                     $this->crud->delete_where_in('payment_receipt', 'pay_rec_id', $old_pay_rec_id_arr);
                 }
 
                 // Insert Metal Payment Receipt Data
-                if (!empty($metal_data)) {
+                if(!empty($metal_data)){
                     foreach ($metal_data as $metal) {
                         $category_id = $this->crud->get_id_by_val('item_master', 'category_id', 'item_id', $metal->metal_item_id);
-                        $insert_metal_pr = array();
+                         $insert_metal_pr = array();
                         $insert_metal_pr['sell_id'] = $post_data['sell_id'];
                         $insert_metal_pr['metal_payment_receipt'] = $metal->metal_payment_receipt;
                         $insert_metal_pr['metal_category_id'] = $category_id;
@@ -1067,7 +1063,7 @@ class Sell extends CI_Controller
                         $insert_metal_pr['total_other_fine'] = $post_data['metal_other_total_fine'];
                         $insert_metal_pr['updated_at'] = $this->now_time;
                         $insert_metal_pr['updated_by'] = $this->logged_in_id;
-                        if (isset($metal->metal_pr_id) && !empty($metal->metal_pr_id)) {
+                        if(isset($metal->metal_pr_id) && !empty($metal->metal_pr_id)){
                             $this->crud->update('metal_payment_receipt', $insert_metal_pr, array('metal_pr_id' => $metal->metal_pr_id));
                             $old_metal_pr_id_arr = array_diff($old_metal_pr_id_arr, array($metal->metal_pr_id));
                         } else {
@@ -1080,13 +1076,13 @@ class Sell extends CI_Controller
                 }
                 // Delete Deleted Payment Receipt Data
                 if (!empty($old_metal_pr_id_arr)) {
-                    //                    $old_metal_pr_ids = implode(',', $old_metal_pr_id_arr);
+//                    $old_metal_pr_ids = implode(',', $old_metal_pr_id_arr);
                     $this->crud->delete_where_in('metal_payment_receipt', 'metal_pr_id', $old_metal_pr_id_arr);
                 }
-
+                
                 // Insert Gold bhav Data
-                if (!empty($gold_data)) {
-                    foreach ($gold_data as $gold) {
+                if(!empty($gold_data)){
+                    foreach ($gold_data as $gold){
                         $insert_gold = array();
                         $insert_gold['sell_id'] = $post_data['sell_id'];
                         $insert_gold['gold_sale_purchase'] = $gold->gold_sale_purchase;
@@ -1099,7 +1095,7 @@ class Sell extends CI_Controller
                         $insert_gold['gold_narration'] = $gold->gold_narration;
                         $insert_gold['updated_at'] = $this->now_time;
                         $insert_gold['updated_by'] = $this->logged_in_id;
-                        if (isset($gold->gold_id) && !empty($gold->gold_id)) {
+                        if(isset($gold->gold_id) && !empty($gold->gold_id)){
                             $this->crud->update('gold_bhav', $insert_gold, array('gold_id' => $gold->gold_id));
                             $old_gold_id_arr = array_diff($old_gold_id_arr, array($gold->gold_id));
                         } else {
@@ -1111,13 +1107,13 @@ class Sell extends CI_Controller
                 }
                 // Delete Deleted Gold bhav Data
                 if (!empty($old_gold_id_arr)) {
-                    //                    $old_gold_ids = implode(',', $old_gold_id_arr);
+//                    $old_gold_ids = implode(',', $old_gold_id_arr);
                     $this->crud->delete_where_in('gold_bhav', 'gold_id', $old_gold_id_arr);
                 }
 
                 // Insert Silver bhav Data
-                if (!empty($silver_data)) {
-                    foreach ($silver_data as $silver) {
+                if(!empty($silver_data)){
+                    foreach ($silver_data as $silver){
                         $insert_silver = array();
                         $insert_silver['sell_id'] = $post_data['sell_id'];
                         $insert_silver['silver_sale_purchase'] = $silver->silver_sale_purchase;
@@ -1132,7 +1128,7 @@ class Sell extends CI_Controller
                         $insert_silver['created_by'] = $this->logged_in_id;
                         $insert_silver['updated_at'] = $this->now_time;
                         $insert_silver['updated_by'] = $this->logged_in_id;
-                        if (isset($silver->silver_id) && !empty($silver->silver_id)) {
+                        if(isset($silver->silver_id) && !empty($silver->silver_id)){
                             $this->crud->update('silver_bhav', $insert_silver, array('silver_id' => $silver->silver_id));
                             $old_silver_id_arr = array_diff($old_silver_id_arr, array($silver->silver_id));
                         } else {
@@ -1144,13 +1140,13 @@ class Sell extends CI_Controller
                 }
                 // Delete Deleted Silver bhav Data
                 if (!empty($old_silver_id_arr)) {
-                    //                    $old_silver_ids = implode(',', $old_silver_id_arr);
+//                    $old_silver_ids = implode(',', $old_silver_id_arr);
                     $this->crud->delete_where_in('silver_bhav', 'silver_id', $old_silver_id_arr);
                 }
 
                 // Insert Transfer Data
-                if (!empty($transfer_data)) {
-                    foreach ($transfer_data as $transfer) {
+                if(!empty($transfer_data)){
+                    foreach ($transfer_data as $transfer){
                         $insert_transfer = array();
                         $insert_transfer['sell_id'] = $post_data['sell_id'];
                         $insert_transfer['naam_jama'] = $transfer->naam_jama;
@@ -1163,8 +1159,8 @@ class Sell extends CI_Controller
                         $insert_transfer['transfer_narration'] = $transfer->transfer_narration;
                         $insert_transfer['updated_at'] = $this->now_time;
                         $insert_transfer['updated_by'] = $this->logged_in_id;
-                        //                            echo '<pre>'; print_r($transfer->transfer_entry_id); exit;
-                        if (isset($transfer->transfer_entry_id) && !empty($transfer->transfer_entry_id)) {
+//                            echo '<pre>'; print_r($transfer->transfer_entry_id); exit;
+                        if(isset($transfer->transfer_entry_id) && !empty($transfer->transfer_entry_id)){
                             $this->crud->update('transfer', $insert_transfer, array('transfer_id' => $transfer->transfer_entry_id));
                             $old_transfer_id_arr = array_diff($old_transfer_id_arr, array($transfer->transfer_entry_id));
                         } else {
@@ -1177,14 +1173,14 @@ class Sell extends CI_Controller
                 }
                 // Delete Deleted Transfer Data
                 if (!empty($old_transfer_id_arr)) {
-                    //                    $old_transfer_ids = implode(',', $old_transfer_id_arr);
+//                    $old_transfer_ids = implode(',', $old_transfer_id_arr);
                     $this->crud->delete_where_in('transfer', 'transfer_id', $old_transfer_id_arr);
                 }
 
                 // Insert Lineitem Ad Charges Data
-                if (!empty($ad_lineitem_data)) {
-                    //                    echo '<pre>'; print_r($ad_lineitem_data); exit;
-                    foreach ($ad_lineitem_data as $ad_lineitem) {
+                if(!empty($ad_lineitem_data)){
+//                    echo '<pre>'; print_r($ad_lineitem_data); exit;
+                    foreach ($ad_lineitem_data as $ad_lineitem){
                         $insert_ad_charges = array();
                         $insert_ad_charges['sell_id'] = $post_data['sell_id'];
                         $insert_ad_charges['ad_id'] = $ad_lineitem->ad_id;
@@ -1196,7 +1192,7 @@ class Sell extends CI_Controller
                         $insert_ad_charges['ad_charges_remark'] = (isset($ad_lineitem->ad_charges_remark) && !empty($ad_lineitem->ad_charges_remark)) ? $ad_lineitem->ad_charges_remark : null;
                         $insert_ad_charges['updated_at'] = $this->now_time;
                         $insert_ad_charges['updated_by'] = $this->logged_in_id;
-                        if (isset($ad_lineitem->sell_ad_charges_id) && !empty($ad_lineitem->sell_ad_charges_id)) {
+                        if(isset($ad_lineitem->sell_ad_charges_id) && !empty($ad_lineitem->sell_ad_charges_id)){
                             $this->crud->update('sell_ad_charges', $insert_ad_charges, array('sell_ad_charges_id' => $ad_lineitem->sell_ad_charges_id));
                             $old_sell_ad_charges_id_arr = array_diff($old_sell_ad_charges_id_arr, array($ad_lineitem->sell_ad_charges_id));
                         } else {
@@ -1209,14 +1205,14 @@ class Sell extends CI_Controller
                 }
                 // Delete Deleted Lineitem Ad Charges Data
                 if (!empty($old_sell_ad_charges_id_arr)) {
-                    //                    $old_sell_ad_charges_ids = implode(',', $old_sell_ad_charges_id_arr);
+//                    $old_sell_ad_charges_ids = implode(',', $old_sell_ad_charges_id_arr);
                     $this->crud->delete_where_in('sell_ad_charges', 'sell_ad_charges_id', $old_sell_ad_charges_id_arr);
                 }
 
                 // Insert Lineitem Adjust CR Data
-                if (!empty($adjust_cr_lineitem_data)) {
-                    //                    echo '<pre>'; print_r($adjust_cr_lineitem_data); exit;
-                    foreach ($adjust_cr_lineitem_data as $adjust_cr_lineitem) {
+                if(!empty($adjust_cr_lineitem_data)){
+//                    echo '<pre>'; print_r($adjust_cr_lineitem_data); exit;
+                    foreach ($adjust_cr_lineitem_data as $adjust_cr_lineitem){
                         $insert_adjust_cr_charges = array();
                         $insert_adjust_cr_charges['sell_id'] = $post_data['sell_id'];
                         $insert_adjust_cr_charges['adjust_to'] = $adjust_cr_lineitem->adjust_to;
@@ -1225,7 +1221,7 @@ class Sell extends CI_Controller
                         $insert_adjust_cr_charges['r_amt'] = (isset($adjust_cr_lineitem->r_amt) && !empty($adjust_cr_lineitem->r_amt)) ? abs($adjust_cr_lineitem->r_amt) : 0;
                         $insert_adjust_cr_charges['updated_at'] = $this->now_time;
                         $insert_adjust_cr_charges['updated_by'] = $this->logged_in_id;
-                        if (isset($adjust_cr_lineitem->sell_adjust_cr_id) && !empty($adjust_cr_lineitem->sell_adjust_cr_id)) {
+                        if(isset($adjust_cr_lineitem->sell_adjust_cr_id) && !empty($adjust_cr_lineitem->sell_adjust_cr_id)){
                             $this->crud->update('sell_adjust_cr', $insert_adjust_cr_charges, array('sell_adjust_cr_id' => $adjust_cr_lineitem->sell_adjust_cr_id));
                             $old_sell_adjust_cr_id_arr = array_diff($old_sell_adjust_cr_id_arr, array($adjust_cr_lineitem->sell_adjust_cr_id));
                         } else {
@@ -1237,11 +1233,11 @@ class Sell extends CI_Controller
                 }
                 // Delete Deleted Lineitem Adjust CR Data
                 if (!empty($old_sell_adjust_cr_id_arr)) {
-                    //                    $old_sell_adjust_cr_ids = implode(',', $old_sell_adjust_cr_id_arr);
+//                    $old_sell_adjust_cr_ids = implode(',', $old_sell_adjust_cr_id_arr);
                     $this->crud->delete_where_in('sell_adjust_cr', 'sell_adjust_cr_id', $old_sell_adjust_cr_id_arr);
                 }
             }
-
+            
         } else {
             $sell = $this->crud->get_max_number('sell', 'sell_no');
             $sell_no = 1;
@@ -1249,20 +1245,20 @@ class Sell extends CI_Controller
                 $sell_no = $sell->sell_no + 1;
             }
             $insert_arr = array();
-            $insert_arr['sell_no'] = $sell_no;
-            $insert_arr['account_id'] = $post_data['account_id'];
-            $insert_arr['process_id'] = $post_data['process_id'];
+            $insert_arr['sell_no'] = $sell_no;            
+            $insert_arr['account_id'] = $post_data['account_id'];            
+            $insert_arr['process_id'] = $post_data['process_id'];            
             $insert_arr['sell_date'] = date('Y-m-d', strtotime($post_data['sell_date']));
-            $insert_arr['sell_remark'] = $post_data['sell_remark'];
+            $insert_arr['sell_remark'] = $post_data['sell_remark'];           
             $insert_arr['total_gold_fine'] = $post_data['sell_gold_fine'];
-            $insert_arr['total_silver_fine'] = $post_data['sell_silver_fine'];
+            $insert_arr['total_silver_fine'] = $post_data['sell_silver_fine'];           
             $insert_arr['total_amount'] = $post_data['sell_amount'];
             $insert_arr['total_c_amount'] = $post_data['bill_cr_c_amount'];
             $insert_arr['total_r_amount'] = $post_data['bill_cr_r_amount'];
-            if (isset($post_data['discount_amount'])) {
+            if(isset($post_data['discount_amount'])){
                 $post_data['discount_amount'] = (!empty($post_data['discount_amount'])) ? $post_data['discount_amount'] : 0;
                 $insert_arr['discount_amount'] = $post_data['discount_amount'];
-                if (PACKAGE_FOR == 'manek') {
+                if(PACKAGE_FOR == 'manek') {
                     $post_data['sell_amount'] = $post_data['sell_amount'] - $post_data['discount_amount'];
                 }
             }
@@ -1279,14 +1275,14 @@ class Sell extends CI_Controller
                 $return['success'] = "Added";
                 $this->session->set_flashdata('success', true);
                 $this->session->set_flashdata('message', 'Sell/purchase Added Successfully');
-                if (isset($post_data['saveform_clickbtn']) && $post_data['saveform_clickbtn'] == 'saveformwithprint') {
+                if(isset($post_data['saveform_clickbtn']) && $post_data['saveform_clickbtn'] == 'saveformwithprint'){
                     $this->session->set_flashdata('saveformwithprint', true);
-                    $this->session->set_flashdata('saveformwithprinturl', 'sell/sell_print/' . $sell_id);
+                    $this->session->set_flashdata('saveformwithprinturl', 'sell/sell_print/'.$sell_id);
                 }
 
-                //                $this->crud->update('account', array('gold_fine' => $post_data['gold_fine_total'], 'silver_fine' => $post_data['silver_fine_total'], 'amount' => $post_data['amount_total']), array('account_id' => $post_data['account_id']));
-                $accounts = $this->crud->get_row_by_id('account', array('account_id' => $post_data['account_id']));
-                if (!empty($accounts)) {
+//                $this->crud->update('account', array('gold_fine' => $post_data['gold_fine_total'], 'silver_fine' => $post_data['silver_fine_total'], 'amount' => $post_data['amount_total']), array('account_id' => $post_data['account_id']));
+                $accounts = $this->crud->get_row_by_id('account', array('account_id'=> $post_data['account_id']));
+                if(!empty($accounts)){
                     $acc_gold_fine = number_format((float) $accounts[0]->gold_fine, '3', '.', '') + number_format((float) $post_data['sell_gold_fine'], '3', '.', '');
                     $acc_gold_fine = number_format((float) $acc_gold_fine, '3', '.', '');
                     $acc_silver_fine = number_format((float) $accounts[0]->silver_fine, '3', '.', '') + number_format((float) $post_data['sell_silver_fine'], '3', '.', '');
@@ -1299,17 +1295,18 @@ class Sell extends CI_Controller
                     $acc_r_amount = number_format((float) $acc_r_amount, '2', '.', '');
                     $this->crud->update('account', array('gold_fine' => $acc_gold_fine, 'silver_fine' => $acc_silver_fine, 'amount' => $acc_amount, 'c_amount' => $acc_c_amount, 'r_amount' => $acc_r_amount), array('account_id' => $post_data['account_id']));
                 }
-
+                
                 // Decrease fine and amount in Department
-                $departments = $this->crud->get_row_by_id('account', array('account_id' => $post_data['process_id']));
-                if (!empty($departments)) {
+                $departments = $this->crud->get_row_by_id('account', array('account_id'=> $post_data['process_id']));
+                if(!empty($departments)){
                     $depart_gold_fine = number_format((float) $departments[0]->gold_fine, '3', '.', '') - number_format((float) $post_data['depart_gold_fine'], '3', '.', '');
                     $depart_gold_fine = number_format((float) $depart_gold_fine, '3', '.', '');
                     $depart_silver_fine = number_format((float) $departments[0]->silver_fine, '3', '.', '') - number_format((float) $post_data['depart_silver_fine'], '3', '.', '');
                     $depart_silver_fine = number_format((float) $depart_silver_fine, '3', '.', '');
                     $this->crud->update('account', array('gold_fine' => $depart_gold_fine, 'silver_fine' => $depart_silver_fine), array('account_id' => $post_data['process_id']));
-                    //                    $this->crud->update('account', array('amount' => $depart_amount), array('account_id' => $post_data['process_id']));
+//                    $this->crud->update('account', array('amount' => $depart_amount), array('account_id' => $post_data['process_id']));
                 }
+//                echo '<pre>'; print_r($line_items_data); exit;
                 if (!empty($line_items_data)) {
                     foreach ($line_items_data as $key => $lineitem) {
                         $lot = $this->crud->get_max_number('sell_items', 'sell_item_no');
@@ -1322,30 +1319,29 @@ class Sell extends CI_Controller
                         $insert_item['sell_item_no'] = $sell_item_no;
                         $insert_item['tunch_textbox'] = (isset($lineitem->tunch_textbox) && $lineitem->tunch_textbox == '1') ? '1' : '0';
                         $insert_item['type'] = $lineitem->type;
-                        $line_items_data[$key]->stock_method = $this->crud->get_column_value_by_id('item_master', 'stock_method', array('item_id' => $lineitem->item_id));
-                        if ($lineitem->type == SELL_TYPE_SELL_ID && $line_items_data[$key]->stock_method == '2') {
-                            if (isset($lineitem->stock_type)) {
+                        $line_items_data[$key]->stock_method = $this->crud->get_column_value_by_id('item_master','stock_method',array('item_id' => $lineitem->item_id));
+                        if($lineitem->type == SELL_TYPE_SELL_ID && $line_items_data[$key]->stock_method == '2'){
+                            if(isset($lineitem->stock_type)){
                                 $insert_item['stock_type'] = $lineitem->stock_type;
                             }
-                        }
+                        } 
                         $insert_item['category_id'] = $lineitem->category_id;
                         $insert_item['item_id'] = $lineitem->item_id;
                         $insert_item['li_narration'] = (isset($lineitem->li_narration) && !empty($lineitem->li_narration)) ? $lineitem->li_narration : NULL;
                         $insert_item['gold_silver_rate'] = (isset($lineitem->gold_silver_rate) && !empty($lineitem->gold_silver_rate)) ? $lineitem->gold_silver_rate : 0;
                         $insert_item['grwt'] = $lineitem->grwt;
-                        $insert_item['purchase_less'] = $lineitem->purchase_less;
                         $insert_item['less'] = $lineitem->less;
                         $insert_item['net_wt'] = $lineitem->net_wt;
                         $insert_item['touch_id'] = $lineitem->touch_id;
                         $insert_item['wstg'] = $lineitem->wstg;
-                        $account_item_wstg = $this->crud->get_column_value_by_id('party_item_details', 'wstg', array('account_id' => $post_data['account_id'], 'item_id' => $lineitem->item_id));
-                        if (!empty($account_item_wstg)) {
+                        $account_item_wstg = $this->crud->get_column_value_by_id('party_item_details', 'wstg', array('account_id' => $post_data['account_id'],'item_id'=> $lineitem->item_id));
+                        if(!empty($account_item_wstg)){
                             $lineitem_default_wstg = (!empty($account_item_wstg)) ? $account_item_wstg : '0';
                         } else {
                             $lineitem_default_wstg = $this->crud->get_val_by_id('item_master', $lineitem->item_id, 'item_id', 'default_wastage');
                         }
-                        if ($lineitem_default_wstg != '' && $lineitem->type == SELL_TYPE_SELL_ID) {
-                            if ($lineitem_default_wstg != $lineitem->wstg) {
+                        if($lineitem_default_wstg != '' && $lineitem->type == SELL_TYPE_SELL_ID){
+                            if($lineitem_default_wstg != $lineitem->wstg){
                                 $insert_item['wastage_change_approve'] = '1_0';
                             }
                         }
@@ -1359,12 +1355,12 @@ class Sell extends CI_Controller
                         $insert_item['c_amt'] = (isset($lineitem->c_amt) && !empty($lineitem->c_amt)) ? abs($lineitem->c_amt) : 0;
                         $insert_item['r_amt'] = (isset($lineitem->r_amt) && !empty($lineitem->r_amt)) ? abs($lineitem->r_amt) : 0;
                         $insert_item['image'] = $lineitem->image;
-                        if (isset($lineitem->order_lot_item_id) && !empty($lineitem->order_lot_item_id)) {
+                        if(isset($lineitem->order_lot_item_id) && !empty($lineitem->order_lot_item_id)){
                             $insert_item['order_lot_item_id'] = $lineitem->order_lot_item_id;
                             // On Sell item add order lot item status to Completed
                             $this->crud->update('order_lot_item', array('item_status_id' => '3'), array('order_lot_item_id' => $lineitem->order_lot_item_id));
                         }
-                        if (isset($lineitem->purchase_sell_item_id) && !empty($lineitem->purchase_sell_item_id)) {
+                        if(isset($lineitem->purchase_sell_item_id) && !empty($lineitem->purchase_sell_item_id)){
                             $insert_item['purchase_sell_item_id'] = $lineitem->purchase_sell_item_id;
                         }
                         $insert_item['created_at'] = $this->now_time;
@@ -1374,10 +1370,10 @@ class Sell extends CI_Controller
                         $this->crud->insert('sell_items', $insert_item);
                         $sell_item_id = $this->db->insert_id();
                         $line_items_data[$key]->purchase_item_id = $sell_item_id;
-
-                        if (isset($lineitem->sell_less_ad_details) && !empty($lineitem->sell_less_ad_details)) {
+                        
+                        if(isset($lineitem->sell_less_ad_details) && !empty($lineitem->sell_less_ad_details)){
                             $sell_less_ad_details = json_decode($lineitem->sell_less_ad_details);
-                            foreach ($sell_less_ad_details as $less_ad_detail) {
+                            foreach ($sell_less_ad_details as $less_ad_detail){
                                 $insert_less_ad_detail = array();
                                 $insert_less_ad_detail['sell_id'] = $sell_id;
                                 $insert_less_ad_detail['sell_item_id'] = $sell_item_id;
@@ -1392,9 +1388,9 @@ class Sell extends CI_Controller
                             }
                         }
 
-                        if (isset($lineitem->sell_item_charges_details) && !empty($lineitem->sell_item_charges_details)) {
+                        if(isset($lineitem->sell_item_charges_details) && !empty($lineitem->sell_item_charges_details)){
                             $sell_item_charges_details = json_decode($lineitem->sell_item_charges_details);
-                            foreach ($sell_item_charges_details as $less_ad_detail) {
+                            foreach ($sell_item_charges_details as $less_ad_detail){
                                 $insert_less_ad_detail = array();
                                 $insert_less_ad_detail['sell_id'] = $sell_id;
                                 $insert_less_ad_detail['sell_item_id'] = $sell_item_id;
@@ -1402,7 +1398,7 @@ class Sell extends CI_Controller
                                 $insert_less_ad_detail['sell_item_charges_details_net_wt'] = $less_ad_detail->sell_item_charges_details_net_wt;
                                 $insert_less_ad_detail['sell_item_charges_details_per_gram'] = $less_ad_detail->sell_item_charges_details_per_gram;
                                 $insert_less_ad_detail['sell_item_charges_details_ad_amount'] = $less_ad_detail->sell_item_charges_details_ad_amount;
-                                if (isset($less_ad_detail->sell_item_charges_details_remark)) {
+                                if(isset($less_ad_detail->sell_item_charges_details_remark)){
                                     $insert_less_ad_detail['sell_item_charges_details_remark'] = $less_ad_detail->sell_item_charges_details_remark;
                                 }
                                 $insert_less_ad_detail['created_at'] = $this->now_time;
@@ -1412,23 +1408,23 @@ class Sell extends CI_Controller
                                 $result = $this->crud->insert('sell_item_charges_details', $insert_less_ad_detail);
                             }
                         }
-                        
+                    
                         // Update rfid_number rfid_used status and rfid_created_grwt
-                        if (isset($lineitem->item_stock_rfid_id) && !empty($lineitem->item_stock_rfid_id)) {
+                        if(isset($lineitem->item_stock_rfid_id) && !empty($lineitem->item_stock_rfid_id)){
                             $this->crud->update('item_stock_rfid', array('rfid_used' => '1', 'to_relation_id' => $sell_item_id, 'to_module' => RFID_RELATION_MODULE_SELL), array('item_stock_rfid_id' => $lineitem->item_stock_rfid_id));
                             $item_stock_rfid = $this->crud->get_data_row_by_id('item_stock_rfid', 'item_stock_rfid_id', $lineitem->item_stock_rfid_id);
                             $old_rfid_created_grwt = $this->crud->get_column_value_by_id('item_stock', 'rfid_created_grwt', array('item_stock_id' => $item_stock_rfid->item_stock_id));
                             $new_rfid_created_grwt = $old_rfid_created_grwt - $item_stock_rfid->rfid_grwt;
                             $this->crud->update('item_stock', array('rfid_created_grwt' => $new_rfid_created_grwt), array('item_stock_id' => $item_stock_rfid->item_stock_id));
                         }
-
+                        
                     }
-                    $this->update_stock_on_sell_item_insert($line_items_data, $post_data['process_id']);
-                    $this->update_charges_amt_to_mfloss_balance_on_insert($line_items_data, $sell_id);                    
+                    $this->update_stock_on_sell_item_insert($line_items_data,$post_data['process_id']);
+                    $this->update_charges_amt_to_mfloss_balance_on_insert($line_items_data, $sell_id);
                 }
-
-                if (!empty($pay_rec_data)) {
-                    foreach ($pay_rec_data as $pay_rec) {
+                
+                if(!empty($pay_rec_data)){
+                    foreach ($pay_rec_data as $pay_rec){
                         $insert_pay_rec = array();
                         $insert_pay_rec['sell_id'] = $sell_id;
                         $insert_pay_rec['payment_receipt'] = $pay_rec->payment_receipt;
@@ -1448,9 +1444,9 @@ class Sell extends CI_Controller
                         $insert_pay_rec['updated_by'] = $this->logged_in_id;
                         $result = $this->crud->insert('payment_receipt', $insert_pay_rec);
 
-                        if ($pay_rec->cash_cheque == '1') { // Update Department Amount
+                        if($pay_rec->cash_cheque == '1'){ // Update Department Amount
                             $depart_amount = $this->crud->get_column_value_by_id('account', 'amount', array('account_id' => $post_data['process_id']));
-                            if ($pay_rec->payment_receipt == '1') {
+                            if($pay_rec->payment_receipt == '1'){
                                 $depart_amount = $depart_amount - $pay_rec->amount;
                             } else {
                                 $depart_amount = $depart_amount + $pay_rec->amount;
@@ -1458,9 +1454,9 @@ class Sell extends CI_Controller
                             $depart_amount = number_format((float) $depart_amount, '2', '.', '');
                             $this->crud->update('account', array('amount' => $depart_amount), array('account_id' => $post_data['process_id']));
                         }
-                        if ($pay_rec->cash_cheque == '2') { // Update Bank Amount
+                        if($pay_rec->cash_cheque == '2'){ // Update Bank Amount
                             $bank_amount = $this->crud->get_column_value_by_id('account', 'amount', array('account_id' => $pay_rec->bank_id));
-                            if ($pay_rec->payment_receipt == '1') {
+                            if($pay_rec->payment_receipt == '1'){
                                 $bank_amount = $bank_amount - $pay_rec->amount;
                             } else {
                                 $bank_amount = $bank_amount + $pay_rec->amount;
@@ -1470,7 +1466,7 @@ class Sell extends CI_Controller
                         }
                     }
                 }
-
+                
                 if (!empty($metal_data)) {
                     foreach ($metal_data as $metal) {
                         $category_id = $this->crud->get_id_by_val('item_master', 'category_id', 'item_id', $metal->metal_item_id);
@@ -1493,11 +1489,11 @@ class Sell extends CI_Controller
                         $insert_metal_pr['updated_by'] = $this->logged_in_id;
                         $this->crud->insert('metal_payment_receipt', $insert_metal_pr);
                     }
-                    $this->update_stock_on_insert_of_metal($metal_data, $post_data['process_id']);
+                    $this->update_stock_on_insert_of_metal($metal_data,$post_data['process_id']);
                 }
-
-                if (!empty($gold_data)) {
-                    foreach ($gold_data as $gold) {
+                
+                if(!empty($gold_data)){
+                    foreach ($gold_data as $gold){
                         $insert_gold = array();
                         $insert_gold['sell_id'] = $sell_id;
                         $insert_gold['gold_sale_purchase'] = $gold->gold_sale_purchase;
@@ -1515,9 +1511,9 @@ class Sell extends CI_Controller
                         $result = $this->crud->insert('gold_bhav', $insert_gold);
                     }
                 }
-
-                if (!empty($silver_data)) {
-                    foreach ($silver_data as $silver) {
+                
+                if(!empty($silver_data)){
+                    foreach ($silver_data as $silver){
                         $insert_silver = array();
                         $insert_silver['sell_id'] = $sell_id;
                         $insert_silver['silver_sale_purchase'] = $silver->silver_sale_purchase;
@@ -1535,9 +1531,9 @@ class Sell extends CI_Controller
                         $result = $this->crud->insert('silver_bhav', $insert_silver);
                     }
                 }
-
-                if (!empty($transfer_data)) {
-                    foreach ($transfer_data as $transfer) {
+                
+                if(!empty($transfer_data)){
+                    foreach ($transfer_data as $transfer){
                         $insert_transfer = array();
                         $insert_transfer['sell_id'] = $sell_id;
                         $insert_transfer['naam_jama'] = $transfer->naam_jama;
@@ -1556,10 +1552,10 @@ class Sell extends CI_Controller
                     }
                     $this->update_account_balance_on_insert($transfer_data, $sell_id);
                 }
-
-                if (!empty($ad_lineitem_data)) {
-                    //                    echo '<pre>'; print_r($ad_lineitem_data); exit;
-                    foreach ($ad_lineitem_data as $ad_lineitem) {
+                
+                if(!empty($ad_lineitem_data)){
+//                    echo '<pre>'; print_r($ad_lineitem_data); exit;
+                    foreach ($ad_lineitem_data as $ad_lineitem){
                         $insert_ad_charges = array();
                         $insert_ad_charges['sell_id'] = $sell_id;
                         $insert_ad_charges['ad_id'] = $ad_lineitem->ad_id;
@@ -1579,9 +1575,9 @@ class Sell extends CI_Controller
                 }
 
                 // Insert Lineitem Adjust CR Data
-                if (!empty($adjust_cr_lineitem_data)) {
-                    //                    echo '<pre>'; print_r($adjust_cr_lineitem_data); exit;
-                    foreach ($adjust_cr_lineitem_data as $adjust_cr_lineitem) {
+                if(!empty($adjust_cr_lineitem_data)){
+//                    echo '<pre>'; print_r($adjust_cr_lineitem_data); exit;
+                    foreach ($adjust_cr_lineitem_data as $adjust_cr_lineitem){
                         $insert_adjust_cr_charges = array();
                         $insert_adjust_cr_charges['sell_id'] = $sell_id;
                         $insert_adjust_cr_charges['adjust_to'] = $adjust_cr_lineitem->adjust_to;
@@ -1596,11 +1592,11 @@ class Sell extends CI_Controller
                     }
                 }
             }
-            if (!empty($post_data['send_sms'])) {
+            if(!empty($post_data['send_sms'])){
                 $mobile_no = $this->crud->get_id_by_val('account', 'account_mobile', 'account_id', $post_data['account_id']);
-
+                
                 $order_status = $this->crud->get_id_by_val('new_order', 'order_status_id', 'order_id', $order_id);
-                if ($order_status == '3' && !empty($mobile_no)) {
+                if($order_status == '3' && !empty($mobile_no)){
                     $sms = SEND_ORDER_COMPLETE_SMS;
                     $account_name = $this->crud->get_id_by_val('account', 'account_name', 'account_id', $post_data['account_id']);
                     $order_no = $this->crud->get_id_by_val('new_order', 'order_no', 'order_id', $order_id);
@@ -1611,29 +1607,29 @@ class Sell extends CI_Controller
                     $sms = strtr($sms, $vars);
                     $this->applib->send_sms($mobile_no, $sms);
                 }
-
+                
                 $amt = $post_data['amount_total'];
-                if ($amt[0] == '-') {
+                if($amt[0] == '-'){
                     $type = substr($amt, 1);
-                    $amount = $type . 'Cr';
+                    $amount = $type.'Cr';
                 } else {
-                    $amount = $amt . 'Dr';
+                    $amount = $amt.'Dr';
                 }
                 $gold_fine_total = $post_data['gold_fine_total'];
-                if ($gold_fine_total[0] == '-') {
+                if($gold_fine_total[0] == '-'){
                     $gold_type = substr($gold_fine_total, 1);
-                    $gold_fine = $gold_type . 'Cr';
+                    $gold_fine = $gold_type.'Cr';
                 } else {
-                    $gold_fine = $gold_fine_total . 'Dr';
+                    $gold_fine = $gold_fine_total.'Dr';
                 }
                 $silver_fine_total = $post_data['silver_fine_total'];
-                if ($silver_fine_total[0] == '-') {
+                if($silver_fine_total[0] == '-'){
                     $silver_type = substr($silver_fine_total, 1);
-                    $silver_fine = $silver_type . 'Cr';
+                    $silver_fine = $silver_type.'Cr';
                 } else {
-                    $silver_fine = $silver_fine_total . ' Dr';
+                    $silver_fine = $silver_fine_total.' Dr';
                 }
-                if ($post_data['delivery_type'] == '1') {
+                if($post_data['delivery_type'] == '1'){
                     $delivery_type = 'Delivered';
                 } else {
                     $delivery_type = 'ready, but Not delivered';
@@ -1649,22 +1645,19 @@ class Sell extends CI_Controller
                     $sms = strtr($sms, $vars);
                     $this->applib->send_sms($mobile_no, $sms);
                 }
-                
             }
         }
         print json_encode($return);
         exit;
     }
-
-    function update_stock_on_sell_item_insert($lineitem_data = '', $department_id = '')
-    {
+    
+    function update_stock_on_sell_item_insert($lineitem_data='',$department_id=''){
         if (!empty($lineitem_data)) {
-                    //    echo '<pre>'; print_r($lineitem_data); exit;
+//            echo '<pre>'; print_r($lineitem_data); exit;
             foreach ($lineitem_data as $lineitem) {
-
-
-                if ($lineitem->type == '1') {
-                    if (isset($lineitem->purchase_sell_item_id) && !empty($lineitem->purchase_sell_item_id)) {
+                
+                if($lineitem->type == '1'){
+                    if(isset($lineitem->purchase_sell_item_id) && !empty($lineitem->purchase_sell_item_id)){
                         $wstg = $this->crud->get_id_by_val('sell_items', 'wstg', 'sell_item_id', $lineitem->purchase_sell_item_id);
                     } else {
                         $wstg = $this->crud->get_min_value('sell_items', 'wstg');
@@ -1673,15 +1666,15 @@ class Sell extends CI_Controller
                 } else {
                     $wstg = (!empty($lineitem->wstg)) ? $lineitem->wstg : 0;
                 }
-                $lineitem->fine = $lineitem->net_wt * ($lineitem->touch_id + $wstg) / 100;
+                $lineitem->fine = $lineitem->net_wt *($lineitem->touch_id + $wstg) / 100;
                 $category_group_id = $this->crud->get_column_value_by_id('category', 'category_group_id', array('category_id' => $lineitem->category_id));
-                if ($category_group_id == 1) {
-                    $lineitem->fine = number_format(round($lineitem->fine, 2), 3, '.', '');
+                if($category_group_id == 1){
+                    $lineitem->fine = number_format(round($lineitem->fine, 2) , 3, '.', '');
                 } else {
                     $lineitem->fine = number_format(round($lineitem->fine, 1), 3, '.', '');
                 }
-                if ((isset($lineitem->stock_method) && $lineitem->stock_method == '2') && $lineitem->type != SELL_TYPE_SELL_ID) {
-                    if (isset($lineitem->purchase_item_id) && !empty($lineitem->purchase_item_id)) {
+                if((isset($lineitem->stock_method) && $lineitem->stock_method == '2') && $lineitem->type != SELL_TYPE_SELL_ID){
+                    if(isset($lineitem->purchase_item_id) && !empty($lineitem->purchase_item_id)){
                         $insert_item_stock = array();
                         $insert_item_stock['department_id'] = $department_id;
                         $insert_item_stock['category_id'] = $lineitem->category_id;
@@ -1692,9 +1685,9 @@ class Sell extends CI_Controller
                         $insert_item_stock['ntwt'] = $lineitem->net_wt;
                         $insert_item_stock['fine'] = $lineitem->fine;
                         $insert_item_stock['purchase_sell_item_id'] = $lineitem->purchase_item_id;
-                        if ($lineitem->type == '2') {
+                        if($lineitem->type == '2'){
                             $insert_item_stock['stock_type'] = '1';
-                        } elseif ($lineitem->type == '3') {
+                        } elseif ($lineitem->type == '3'){
                             $insert_item_stock['stock_type'] = '2';
                         }
                         $insert_item_stock['created_at'] = $this->now_time;
@@ -1703,15 +1696,15 @@ class Sell extends CI_Controller
                         $insert_item_stock['updated_by'] = $this->logged_in_id;
                         $this->crud->insert('item_stock', $insert_item_stock);
                     } else {
-                        if (isset($lineitem->purchase_sell_item_id) && !empty($lineitem->purchase_sell_item_id)) {
+                        if(isset($lineitem->purchase_sell_item_id) && !empty($lineitem->purchase_sell_item_id)){
                             $purchase_item_id = $lineitem->purchase_sell_item_id;
-                        } elseif (isset($lineitem->sell_item_id) && !empty($lineitem->sell_item_id)) {
+                        } elseif(isset($lineitem->sell_item_id) && !empty($lineitem->sell_item_id)){
                             $purchase_item_id = $lineitem->sell_item_id;
-                        }
+                        } 
                         $where_stock_array = array('department_id' => $department_id, 'category_id' => $lineitem->category_id, 'item_id' => $lineitem->item_id, 'tunch' => $lineitem->touch_id, 'purchase_sell_item_id' => $purchase_item_id);
-                        $exist_item_id_for_pe = $this->crud->get_row_by_id('item_stock', $where_stock_array);
-                        if (!empty($exist_item_id_for_pe)) {
-                            if ($lineitem->type == '1') {
+                        $exist_item_id_for_pe = $this->crud->get_row_by_id('item_stock',$where_stock_array);
+                        if(!empty($exist_item_id_for_pe)){
+                            if($lineitem->type == '1'){
                                 $current_stock_less = number_format((float) $exist_item_id_for_pe[0]->less, '3', '.', '') - number_format((float) $lineitem->less, '3', '.', '');
                                 $current_stock_grwt = number_format((float) $exist_item_id_for_pe[0]->grwt, '3', '.', '') - number_format((float) $lineitem->grwt, '3', '.', '');
                                 $current_stock_ntwt = number_format((float) $exist_item_id_for_pe[0]->ntwt, '3', '.', '') - number_format((float) $lineitem->net_wt, '3', '.', '');
@@ -1741,34 +1734,34 @@ class Sell extends CI_Controller
                             $insert_item_stock['ntwt'] = $lineitem->net_wt;
                             $insert_item_stock['fine'] = $lineitem->fine;
                             $insert_item_stock['purchase_sell_item_id'] = $purchase_item_id;
-                            if ($lineitem->type == '2') {
+                            if($lineitem->type == '2'){
                                 $insert_item_stock['stock_type'] = '1';
-                            } elseif ($lineitem->type == '3') {
+                            } elseif ($lineitem->type == '3'){
                                 $insert_item_stock['stock_type'] = '2';
                             }
                             $insert_item_stock['created_at'] = $this->now_time;
                             $insert_item_stock['created_by'] = $this->logged_in_id;
                             $insert_item_stock['updated_at'] = $this->now_time;
                             $insert_item_stock['updated_by'] = $this->logged_in_id;
-                            $this->crud->insert('item_stock', $insert_item_stock);                            
+                            $this->crud->insert('item_stock', $insert_item_stock);
                         }
                     }
                 } else {
-                    if (isset($lineitem->stock_method) && $lineitem->stock_method == '2') {
-                        if (isset($lineitem->purchase_sell_item_id) && !empty($lineitem->purchase_sell_item_id)) {
+                    if(isset($lineitem->stock_method) && $lineitem->stock_method == '2'){
+                        if(isset($lineitem->purchase_sell_item_id) && !empty($lineitem->purchase_sell_item_id)){
                             $purchase_item_id = $lineitem->purchase_sell_item_id;
-                        } elseif (isset($lineitem->sell_item_id) && !empty($lineitem->sell_item_id)) {
+                        } elseif(isset($lineitem->sell_item_id) && !empty($lineitem->sell_item_id)){
                             $purchase_item_id = $lineitem->sell_item_id;
-                        } elseif (isset($lineitem->purchase_item_id) && !empty($lineitem->purchase_item_id)) {
+                        } elseif(isset($lineitem->purchase_item_id) && !empty($lineitem->purchase_item_id)){
                             $purchase_item_id = $lineitem->purchase_item_id;
                         }
                         $where_stock_array = array('department_id' => $department_id, 'category_id' => $lineitem->category_id, 'item_id' => $lineitem->item_id, 'tunch' => $lineitem->touch_id, 'purchase_sell_item_id' => $purchase_item_id);
                     } else {
                         $where_stock_array = array('department_id' => $department_id, 'category_id' => $lineitem->category_id, 'item_id' => $lineitem->item_id, 'tunch' => $lineitem->touch_id);
                     }
-                    $exist_item_id = $this->crud->get_row_by_id('item_stock', $where_stock_array);
-                    if (!empty($exist_item_id)) {
-                        if ($lineitem->type == '1') {
+                    $exist_item_id = $this->crud->get_row_by_id('item_stock',$where_stock_array);
+                    if(!empty($exist_item_id)){
+                        if($lineitem->type == '1'){
                             $current_stock_less = number_format((float) $exist_item_id[0]->less, '3', '.', '') - number_format((float) $lineitem->less, '3', '.', '');
                             $current_stock_grwt = number_format((float) $exist_item_id[0]->grwt, '3', '.', '') - number_format((float) $lineitem->grwt, '3', '.', '');
                             $current_stock_ntwt = number_format((float) $exist_item_id[0]->ntwt, '3', '.', '') - number_format((float) $lineitem->net_wt, '3', '.', '');
@@ -1787,8 +1780,8 @@ class Sell extends CI_Controller
                         $update_item_stock['updated_at'] = $this->now_time;
                         $update_item_stock['updated_by'] = $this->logged_in_id;
                         $this->crud->update('item_stock', $update_item_stock, array('item_stock_id' => $exist_item_id[0]->item_stock_id));
-                    } else {
-                        if ($lineitem->type == '1') {
+                    } else { 
+                        if($lineitem->type == '1'){
                             $lineitem->grwt = $this->zero_value - number_format((float) $lineitem->grwt, '3', '.', '');
                             $lineitem->less = $this->zero_value - number_format((float) $lineitem->less, '3', '.', '');
                             $lineitem->net_wt = $this->zero_value - number_format((float) $lineitem->net_wt, '3', '.', '');
@@ -1803,46 +1796,19 @@ class Sell extends CI_Controller
                         $insert_item_stock['less'] = $lineitem->less;
                         $insert_item_stock['ntwt'] = $lineitem->net_wt;
                         $insert_item_stock['fine'] = $lineitem->fine;
-                        if ($lineitem->type == '2') {
+                        if($lineitem->type == '2'){
                             $insert_item_stock['stock_type'] = '1';
-                        } elseif ($lineitem->type == '3') {
+                        } elseif ($lineitem->type == '3'){
                             $insert_item_stock['stock_type'] = '2';
                         }
                         $insert_item_stock['created_at'] = $this->now_time;
                         $insert_item_stock['created_by'] = $this->logged_in_id;
                         $insert_item_stock['updated_at'] = $this->now_time;
                         $insert_item_stock['updated_by'] = $this->logged_in_id;
-                        //                    echo '<pre>'; print_r($insert_item_stock); exit;
+    //                    echo '<pre>'; print_r($insert_item_stock); exit;
                         $this->crud->insert('item_stock', $insert_item_stock);
                     }
                 }
-
-                if ($lineitem->stock_method == 2 && $lineitem->type == 2) {
-                    $insert_rfid = array();
-                    $insert_rfid['item_stock_id'] = $exist_item_id_for_pe[0]->item_stock_id ?? $this->db->insert_id(); // Use the existing ID or the newly inserted one
-                    $insert_rfid['rfid_grwt'] = $lineitem->grwt;
-                    $insert_rfid['rfid_less'] = $lineitem->less;
-                    $insert_rfid['rfid_add'] = $lineitem->rfid_add ?? 0;
-                    $insert_rfid['rfid_ntwt'] = $lineitem->net_wt;
-                    $insert_rfid['rfid_tunch'] = $lineitem->touch_id;
-                    $insert_rfid['rfid_fine'] = $lineitem->fine;
-                    $insert_rfid['real_rfid'] = $lineitem->real_rfid ?? null;
-                    $insert_rfid['rfid_size'] = $lineitem->rfid_size ?? null;
-                    $insert_rfid['rfid_charges'] = $lineitem->rfid_charges ?? 0;
-                    $insert_rfid['rfid_ad_id'] = $lineitem->rfid_ad_id ?? null;
-                    $insert_rfid['rfid_used'] = 0; // Default as not used
-                    $insert_rfid['from_relation_id'] = $lineitem->from_relation_id ?? null;
-                    $insert_rfid['from_module'] = 1;
-                    $insert_rfid['to_relation_id'] = $lineitem->to_relation_id ?? null;
-                    $insert_rfid['to_module'] = $lineitem->to_module ?? null;
-                    $insert_rfid['created_by'] = $this->logged_in_id;
-                    $insert_rfid['created_at'] = $this->now_time;
-                    $insert_rfid['updated_by'] = $this->logged_in_id;
-                    $insert_rfid['updated_at'] = $this->now_time;
-                
-                    $this->crud->insert('item_stock_rfid', $insert_rfid);
-                } 
-            
             }
         }
     }
@@ -1950,6 +1916,7 @@ class Sell extends CI_Controller
                 if (!empty($exist_item_id)) {
                     if ($lineitem->type == '1') {
                         $current_stock_less = number_format((float) $exist_item_id[0]->less, '3', '.', '') + number_format((float) $lineitem->less, '3', '.', '');
+                        $current_stock_purchase_less = number_format((float) $exist_item_id[0]->purchase_less, '3', '.', '') + number_format((float) $lineitem->purchase_less, '3', '.', '');
                         $current_stock_grwt = number_format((float) $exist_item_id[0]->grwt, '3', '.', '') + number_format((float) $lineitem->grwt, '3', '.', '');
                         $current_stock_ntwt = number_format((float) $exist_item_id[0]->ntwt, '3', '.', '') + number_format((float) $lineitem->net_wt, '3', '.', '');
                         $current_stock_fine = number_format((float) $exist_item_id[0]->fine, '3', '.', '') + number_format((float) $lineitem->fine, '3', '.', '');
@@ -1957,6 +1924,7 @@ class Sell extends CI_Controller
                         $current_stock_ntwt = number_format((float) $exist_item_id[0]->ntwt, '3', '.', '') - number_format((float) $lineitem->net_wt, '3', '.', '');
                         $current_stock_fine = number_format((float) $exist_item_id[0]->fine, '3', '.', '') - number_format((float) $lineitem->fine, '3', '.', '');
                         $current_stock_less = number_format((float) $exist_item_id[0]->less, '3', '.', '') - number_format((float) $lineitem->less, '3', '.', '');
+                        $current_stock_purchase_less = number_format((float) $exist_item_id[0]->purchase_less, '3', '.', '') - number_format((float) $lineitem->purchase_less, '3', '.', '');
                         $current_stock_grwt = number_format((float) $exist_item_id[0]->grwt, '3', '.', '') - number_format((float) $lineitem->grwt, '3', '.', '');
                     }
                     $update_item_stock = array();
@@ -1964,6 +1932,7 @@ class Sell extends CI_Controller
                     $update_item_stock['fine'] = $current_stock_fine;
                     $update_item_stock['grwt'] = $current_stock_grwt;
                     $update_item_stock['less'] = $current_stock_less;
+                    $update_item_stock['purchase_less'] = $current_stock_purchase_less;
                     $update_item_stock['updated_at'] = $this->now_time;
                     $update_item_stock['updated_by'] = $this->logged_in_id;
 

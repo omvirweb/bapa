@@ -720,7 +720,7 @@ class Reports extends CI_Controller
             $o_p_data = $this->crud->get_other_sell_item_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'O P');
             $o_s_data = $this->crud->get_other_sell_item_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'O S');
             $stock_ledger_data = array_merge($p_data, $s_data, $e_data, $m_r_data, $m_p_data, $f_t_data, $t_t_data, $mfi_data, $mfr_data, $mfis_data, $mfrs_data, $mhmifw_data, $mhmis_data, $mhmrfw_data, $mhmrs_data, $castingifw_data, $castingis_data, $castingrfw_data, $castingrs_data, $mchainifw_data, $mchainis_data, $mchainrfw_data, $mchainrs_data, $o_p_data, $o_s_data);
-
+            // print_r($stock_ledger_data).exit;
             uasort($stock_ledger_data, function ($a, $b) {
                 $value1 = strtotime($a->st_date);
                 $value2 = strtotime($b->st_date);
@@ -1659,15 +1659,24 @@ class Reports extends CI_Controller
     // Outstanding related Functions
     function outstanding()
     {
+        $customer_and_supplier_ids = [48,49];
+        $imploded_ids = implode(",",$customer_and_supplier_ids);
         $this->crud->execuetSQL(" DELETE FROM reminder WHERE account_id IN (SELECT account_id FROM `account` WHERE gold_fine = 0 AND silver_fine = 0 AND amount = 0) ");
         if ($this->applib->have_access_role(OUTSTANDING_MODULE_ID, "view") && $this->applib->have_access_role(OUTSTANDING_MODULE_ID, 'view')) {
-            $data['account_groups'] = $this->crud->getFromSQL('SELECT g.account_group_id,g.account_group_name FROM `user_account_group` ug JOIN account_group g ON(g.account_group_id = ug.account_group_id) WHERE ug.user_id = "' . $this->logged_in_id . '"');
+            $data['account_groups'] = $this->crud->getFromSQL('SELECT g.account_group_id,g.account_group_name FROM `user_account_group` ug JOIN account_group g ON(g.account_group_id = ug.account_group_id) WHERE ug.user_id = "' . $this->logged_in_id . '" AND g.account_group_id IN ('.$imploded_ids.')');
+            // $data['account_groups'] = $this->crud->getFromSQL('SELECT g.account_group_id,g.account_group_name FROM `user_account_group` ug JOIN account_group g ON(g.account_group_id = ug.account_group_id) WHERE ug.user_id = "' . $this->logged_in_id . '"');
             $data['gold_rate'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'gold_rate'));
             $data['silver_rate'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'silver_rate'));
             $data['display_net_amount_in_outstanding'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'display_net_amount_in_outstanding'));
 
             $data['account_id'] = isset($_GET['account_id']) && !empty($_GET['account_id']) ? $_GET['account_id'] : '';
-            $data['account_group_id'] = isset($_GET['account_group_id']) && !empty($_GET['account_group_id']) ? $_GET['account_group_id'] : '';
+            if(isset($_GET['account_group_id'])){
+                $data['account_group_id'] = isset($_GET['account_group_id']) && !empty($_GET['account_group_id']) ? $_GET['account_group_id'] : '';
+            } else {
+                $data['account_group_id'] = $customer_and_supplier_ids;
+            }
+            
+            $data['selected_account_group_ids'] = $customer_and_supplier_ids;
 
             set_page('reports/outstanding', $data);
         } else {
@@ -1679,6 +1688,7 @@ class Reports extends CI_Controller
     function outstanding_datatable()
     {
         $post_data = $this->input->post();
+        $account_group_id = $post_data['account_group_id'];
         $upto_balance_date = date('Y-m-d', strtotime($post_data['upto_balance_date']));
         $gold_rate = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'gold_rate'));
         $silver_rate = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'silver_rate'));
@@ -1689,7 +1699,8 @@ class Reports extends CI_Controller
                 $all_account_arr[$account['account_id']] = $account['credit_limit'];
             }
         }
-        $account_group_id = $post_data['account_group_id'];
+        
+        
         if ($account_group_id == DEPARTMENT_GROUP) {
             $sell_items_data1 = $this->crud->get_sell_items_for_outstanding_report_department($upto_balance_date, $account_group_id);
             $sell_with_gst_amount_data = $this->crud->get_sell_with_gst_amount_for_outstanding_report_department($upto_balance_date, $account_group_id);
@@ -1709,140 +1720,219 @@ class Reports extends CI_Controller
             $other_payment_receipt_data = $this->crud->get_other_payment_receipt_for_outstanding_report_department($upto_balance_date, $account_group_id);
             $opening_data = $this->crud->get_opening_for_outstanding_report($upto_balance_date, $account_group_id);
             $list = array_merge($opening_data, $sell_items_data, $metal_payment_data, $payment_receipt_data, $cashbook_d_data, $cashbook_a_data, $manufacture_issue_receive_data, $manufacture_issue_receive_silver_data, $manufacture_manu_hand_made_data, $manufacture_casting_data, $manufacture_machin_chain_data, $from_stock_transfer_data, $to_stock_transfer_data, $other_sell_items_data, $other_payment_receipt_data);
-        } else if ($account_group_id == '0') {
-            $d_sell_items_data1 = $this->crud->get_sell_items_for_outstanding_report_department($upto_balance_date, $account_group_id);
-            $d_sell_with_gst_amount_data = $this->crud->get_sell_with_gst_amount_for_outstanding_report_department($upto_balance_date, $account_group_id);
-            $d_sell_items_data = array_merge($d_sell_items_data1, $d_sell_with_gst_amount_data);
-            $d_payment_receipt_data = $this->crud->get_payment_receipt_for_outstanding_report_department($upto_balance_date, $account_group_id);
-            $d_metal_payment_data = $this->crud->get_metal_payment_receipt_for_outstanding_report_department($upto_balance_date, $account_group_id);
-            $d_from_stock_transfer_data = $this->crud->get_stock_transfer_for_outstanding_report_department($upto_balance_date, $account_group_id, 'ST F');
-            $d_to_stock_transfer_data = $this->crud->get_stock_transfer_for_outstanding_report_department($upto_balance_date, $account_group_id, 'ST T');
-            $d_cashbook_data = $this->crud->get_cashbook_for_outstanding_report_department($upto_balance_date, $account_group_id);
-            $d_manufacture_issue_receive_data = $this->crud->get_manufacture_issue_receive_for_outstanding_report_department($upto_balance_date, $account_group_id);
-            $d_manufacture_issue_receive_silver_data = $this->crud->get_manufacture_issue_receive_silver_for_outstanding_report_department($upto_balance_date, $account_group_id);
-            $d_manufacture_manu_hand_made_data = $this->crud->get_manufacture_manu_hand_made_for_outstanding_report_department($upto_balance_date, $account_group_id);
-            $d_manufacture_casting_data = $this->crud->get_manufacture_casting_for_outstanding_report_department($upto_balance_date, $account_group_id);
-            $d_manufacture_machin_chain_data = $this->crud->get_manufacture_machin_chain_for_outstanding_report_department($upto_balance_date, $account_group_id);
-            $d_other_sell_items_data = $this->crud->get_other_sell_items_for_outstanding_report_department($upto_balance_date, $account_group_id);
-            $d_other_payment_receipt_data = $this->crud->get_other_payment_receipt_for_outstanding_report_department($upto_balance_date, $account_group_id);
-            $d_opening_data = $this->crud->get_opening_for_outstanding_report($upto_balance_date, $account_group_id);
-            $dipartment_list = array_merge($d_opening_data, $d_sell_items_data, $d_metal_payment_data, $d_payment_receipt_data, $d_cashbook_data, $d_manufacture_issue_receive_data, $d_manufacture_issue_receive_silver_data, $d_manufacture_manu_hand_made_data, $d_manufacture_casting_data, $d_manufacture_machin_chain_data, $d_from_stock_transfer_data, $d_to_stock_transfer_data, $d_other_sell_items_data, $d_other_payment_receipt_data);
+        } /*else if ($account_group_id == '0') {
+            
+        }*/ else {
+            if(is_array($account_group_id)){
+                if (in_array(0,$account_group_id)) {
+                    
+                    $account_group_ids = $this->crud->getFromSQL('SELECT g.account_group_id,g.account_group_name FROM `user_account_group` ug JOIN account_group g ON(g.account_group_id = ug.account_group_id) WHERE ug.user_id = "' . $this->logged_in_id . '"');
+                    foreach($account_group_ids as $agi){
+                        $account_group_id[] = $agi->account_group_id;
+                    }
+                    if (($key = array_search(0, $account_group_id)) !== false) {
+                        unset($account_group_id[$key]);
+                    }
+                    sort($account_group_id);
+                    $d_sell_items_data1 = $this->crud->get_sell_items_for_outstanding_ids_report_department($upto_balance_date, $account_group_id);
+                    $d_sell_with_gst_amount_data = $this->crud->get_sell_with_gst_amount_for_outstanding_ids_report_department($upto_balance_date, $account_group_id);
+                    $d_sell_items_data = array_merge($d_sell_items_data1, $d_sell_with_gst_amount_data);
+                    $d_payment_receipt_data = $this->crud->get_payment_receipt_for_outstanding_ids_report_department($upto_balance_date, $account_group_id);
+                    $d_metal_payment_data = $this->crud->get_metal_payment_receipt_for_outstanding_ids_report_department($upto_balance_date, $account_group_id);
+                    $d_from_stock_transfer_data = $this->crud->get_stock_transfer_for_outstanding_ids_report_department($upto_balance_date, $account_group_id, 'ST F');
+                    $d_to_stock_transfer_data = $this->crud->get_stock_transfer_for_outstanding_ids_report_department($upto_balance_date, $account_group_id, 'ST T');
+                    $d_cashbook_data = $this->crud->get_cashbook_for_outstanding_ids_report_department($upto_balance_date, $account_group_id);
+                    $d_manufacture_issue_receive_data = $this->crud->get_manufacture_issue_receive_for_outstanding_ids_report_department($upto_balance_date, $account_group_id);
+                    $d_manufacture_issue_receive_silver_data = $this->crud->get_manufacture_issue_receive_silver_for_outstanding_ids_report_department($upto_balance_date, $account_group_id);
+                    $d_manufacture_manu_hand_made_data = $this->crud->get_manufacture_manu_hand_made_for_outstanding_ids_report_department($upto_balance_date, $account_group_id);
+                    $d_manufacture_casting_data = $this->crud->get_manufacture_casting_for_outstanding_ids_report_department($upto_balance_date, $account_group_id);
+                    $d_manufacture_machin_chain_data = $this->crud->get_manufacture_machin_chain_for_outstanding_ids_report_department($upto_balance_date, $account_group_id);
+                    $d_other_sell_items_data = $this->crud->get_other_sell_items_for_outstanding_ids_report_department($upto_balance_date, $account_group_id);
+                    $d_other_payment_receipt_data = $this->crud->get_other_payment_receipt_for_outstanding_ids_report_department($upto_balance_date, $account_group_id);
+                    $d_opening_data = $this->crud->get_opening_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $dipartment_list = array_merge($d_opening_data, $d_sell_items_data, $d_metal_payment_data, $d_payment_receipt_data, $d_cashbook_data, $d_manufacture_issue_receive_data, $d_manufacture_issue_receive_silver_data, $d_manufacture_manu_hand_made_data, $d_manufacture_casting_data, $d_manufacture_machin_chain_data, $d_from_stock_transfer_data, $d_to_stock_transfer_data, $d_other_sell_items_data, $d_other_payment_receipt_data);
 
-            $sell_items_data1 = $this->crud->get_sell_items_for_outstanding_report($upto_balance_date, $account_group_id);
-            $sell_items_data2 = $this->crud->get_sell_items_for_mfloss_outstanding_report($upto_balance_date, $account_group_id);
-            $sp_discount_data = $this->crud->get_sell_discount_for_outstanding_report($upto_balance_date, $account_group_id);
-            $sell_with_gst_amount_data = $this->crud->get_sell_with_gst_amount_for_outstanding_report($upto_balance_date, $account_group_id);
-            $sell_items_data = array_merge($sell_items_data1, $sell_items_data2, $sp_discount_data, $sell_with_gst_amount_data);
-            $payment_receipt_data = $this->crud->get_payment_receipt_for_outstanding_report($upto_balance_date, $account_group_id);
-            $payment_receipt_data_bank = $this->crud->get_payment_receipt_for_outstanding_report_bank($upto_balance_date, $account_group_id);
-            $metal_payment_data = $this->crud->get_metal_payment_receipt_for_outstanding_report($upto_balance_date, $account_group_id);
-            $gold_bhav_data = $this->crud->get_gold_bhav_for_outstanding_report($upto_balance_date, $account_group_id);
-            $silver_bhav_data = $this->crud->get_silver_bhav_for_outstanding_report($upto_balance_date, $account_group_id);
-            $journal_data = $this->crud->get_journal_naam_jama_for_outstanding_report($upto_balance_date, $account_group_id);
-            $cashbook_data = $this->crud->get_cashbook_for_outstanding_report($upto_balance_date, $account_group_id);
-            $manufacture_issue_receive_data = $this->crud->get_manufacture_issue_receive_for_outstanding_report($upto_balance_date, $account_group_id);
-            $manufacture_issue_receive_silver_data = $this->crud->get_manufacture_issue_receive_silver_for_outstanding_report($upto_balance_date, $account_group_id);
-            $manufacture_manu_hand_made_data = $this->crud->get_manufacture_manu_hand_made_for_outstanding_report($upto_balance_date, $account_group_id);
-            $manufacture_casting_data = $this->crud->get_manufacture_casting_for_outstanding_report($upto_balance_date, $account_group_id);
-            $manufacture_machin_chain_data = $this->crud->get_manufacture_machin_chain_for_outstanding_report($upto_balance_date, $account_group_id);
-            $other_sell_items_data = $this->crud->get_other_sell_items_for_outstanding_report($upto_balance_date, $account_group_id);
-            $other_payment_receipt_data = $this->crud->get_other_payment_receipt_for_outstanding_report($upto_balance_date, $account_group_id);
-            $other_payment_receipt_data_bank = $this->crud->get_other_payment_receipt_for_outstanding_report_bank($upto_balance_date, $account_group_id);
-            if (empty($account_group_id)) {
-                $hisab_fine_data1 = $this->crud->get_hisab_fine_for_outstanding_report($upto_balance_date, $account_group_id, 'worker');
-                $hisab_fine_data2 = $this->crud->get_hisab_fine_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
-                $hisab_fine_data3 = $this->crud->get_hisab_fine_silver_for_outstanding_report($upto_balance_date, $account_group_id, 'worker');
-                $hisab_fine_data4 = $this->crud->get_hisab_fine_silver_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
-                $hisab_fine_data = array_merge($hisab_fine_data1, $hisab_fine_data2, $hisab_fine_data3, $hisab_fine_data4);
-                $hisab_done_ir_data1 = $this->crud->get_hisab_done_ir_for_outstanding_report($upto_balance_date, $account_group_id, 'worker');
-                $hisab_done_ir_data2 = $this->crud->get_hisab_done_ir_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
-                $hisab_done_ir_data3 = $this->crud->get_hisab_done_irs_for_outstanding_report($upto_balance_date, $account_group_id, 'worker');
-                $hisab_done_ir_data4 = $this->crud->get_hisab_done_irs_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
-                $hisab_done_ir_data = array_merge($hisab_done_ir_data1, $hisab_done_ir_data2, $hisab_done_ir_data3, $hisab_done_ir_data4);
+                    $sell_items_data1 = $this->crud->get_sell_items_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $sell_items_data2 = $this->crud->get_sell_items_for_mfloss_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $sp_discount_data = $this->crud->get_sell_discount_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $sell_with_gst_amount_data = $this->crud->get_sell_with_gst_amount_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $sell_items_data = array_merge($sell_items_data1, $sell_items_data2, $sp_discount_data, $sell_with_gst_amount_data);
+                    $payment_receipt_data = $this->crud->get_payment_receipt_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $payment_receipt_data_bank = $this->crud->get_payment_receipt_for_outstanding_ids_report_bank($upto_balance_date, $account_group_id);
+                    $metal_payment_data = $this->crud->get_metal_payment_receipt_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $gold_bhav_data = $this->crud->get_gold_bhav_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $silver_bhav_data = $this->crud->get_silver_bhav_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $journal_data = $this->crud->get_journal_naam_jama_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $cashbook_data = $this->crud->get_cashbook_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $manufacture_issue_receive_data = $this->crud->get_manufacture_issue_receive_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $manufacture_issue_receive_silver_data = $this->crud->get_manufacture_issue_receive_silver_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $manufacture_manu_hand_made_data = $this->crud->get_manufacture_manu_hand_made_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $manufacture_casting_data = $this->crud->get_manufacture_casting_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $manufacture_machin_chain_data = $this->crud->get_manufacture_machin_chain_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $other_sell_items_data = $this->crud->get_other_sell_items_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $other_payment_receipt_data = $this->crud->get_other_payment_receipt_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $other_payment_receipt_data_bank = $this->crud->get_other_payment_receipt_for_outstanding_ids_report_bank($upto_balance_date, $account_group_id);
+                    if (empty($account_group_id)) {
+                        $hisab_fine_data1 = $this->crud->get_hisab_fine_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'worker');
+                        $hisab_fine_data2 = $this->crud->get_hisab_fine_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'mfloss');
+                        $hisab_fine_data3 = $this->crud->get_hisab_fine_silver_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'worker');
+                        $hisab_fine_data4 = $this->crud->get_hisab_fine_silver_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'mfloss');
+                        $hisab_fine_data = array_merge($hisab_fine_data1, $hisab_fine_data2, $hisab_fine_data3, $hisab_fine_data4);
+                        $hisab_done_ir_data1 = $this->crud->get_hisab_done_ir_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'worker');
+                        $hisab_done_ir_data2 = $this->crud->get_hisab_done_ir_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'mfloss');
+                        $hisab_done_ir_data3 = $this->crud->get_hisab_done_irs_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'worker');
+                        $hisab_done_ir_data4 = $this->crud->get_hisab_done_irs_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'mfloss');
+                        $hisab_done_ir_data = array_merge($hisab_done_ir_data1, $hisab_done_ir_data2, $hisab_done_ir_data3, $hisab_done_ir_data4);
 
-                $sell_ad_charges_data1 = $this->crud->get_sell_ad_charges_for_outstanding_report($upto_balance_date, $account_group_id, 'account');
-                $sell_ad_charges_data2 = $this->crud->get_sell_ad_charges_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
-                $sell_ad_charges_data = array_merge($sell_ad_charges_data1, $sell_ad_charges_data2);
+                        $sell_ad_charges_data1 = $this->crud->get_sell_ad_charges_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'account');
+                        $sell_ad_charges_data2 = $this->crud->get_sell_ad_charges_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'mfloss');
+                        $sell_ad_charges_data = array_merge($sell_ad_charges_data1, $sell_ad_charges_data2);
 
-                $hallmark_xrf_data1 = $this->crud->get_hallmark_xrf_for_outstanding_report($upto_balance_date, $account_group_id, 'account');
-                $hallmark_xrf_data2 = $this->crud->get_hallmark_xrf_for_outstanding_report($upto_balance_date, $account_group_id, 'xrf_hm_laser_pl');
-                $hallmark_xrf_data = array_merge($hallmark_xrf_data1, $hallmark_xrf_data2);
+                        $hallmark_xrf_data1 = $this->crud->get_hallmark_xrf_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'account');
+                        $hallmark_xrf_data2 = $this->crud->get_hallmark_xrf_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'xrf_hm_laser_pl');
+                        $hallmark_xrf_data = array_merge($hallmark_xrf_data1, $hallmark_xrf_data2);
+                    } else {
+                        $hisab_fine_data1 = $this->crud->get_hisab_fine_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                        $hisab_fine_data2 = $this->crud->get_hisab_fine_silver_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                        $hisab_fine_data = array_merge($hisab_fine_data1, $hisab_fine_data2);
+                        $hisab_done_ir_data1 = $this->crud->get_hisab_done_ir_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                        $hisab_done_ir_data2 = $this->crud->get_hisab_done_irs_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                        $hisab_done_ir_data = array_merge($hisab_done_ir_data1, $hisab_done_ir_data2);
+
+                        $sell_ad_charges_data1 = $this->crud->get_sell_ad_charges_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                        $sell_ad_charges_data = array_merge($sell_ad_charges_data1);
+
+                        $hallmark_xrf_data1 = $this->crud->get_hallmark_xrf_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                        $hallmark_xrf_data = array_merge($hallmark_xrf_data1);
+                    }
+                    $acc_list = array_merge($sell_items_data, $metal_payment_data, $payment_receipt_data, $payment_receipt_data_bank, $gold_bhav_data, $silver_bhav_data, $journal_data, $cashbook_data, $manufacture_issue_receive_data, $manufacture_issue_receive_silver_data, $manufacture_manu_hand_made_data, $manufacture_casting_data, $manufacture_machin_chain_data, $other_sell_items_data, $other_payment_receipt_data, $other_payment_receipt_data_bank, $hisab_fine_data, $hisab_done_ir_data, $sell_ad_charges_data, $hallmark_xrf_data);
+                    $list = array_merge($dipartment_list, $acc_list);
+                } else {
+                    $account_ids = $this->crud->get_account_ids_from_account_group_ids($account_group_id);
+                    if (in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)) {
+                        $sell_items_data1 = $this->crud->get_sell_items_for_mfloss_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    } else {
+                        $sell_items_data1 = $this->crud->get_sell_items_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    }
+
+                    $sp_discount_data = $this->crud->get_sell_discount_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $sell_with_gst_amount_data = $this->crud->get_sell_with_gst_amount_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $sell_items_data = array_merge($sell_items_data1, $sp_discount_data, $sell_with_gst_amount_data);
+                    $payment_receipt_data = $this->crud->get_payment_receipt_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $payment_receipt_data_bank = $this->crud->get_payment_receipt_for_outstanding_ids_report_bank($upto_balance_date, $account_group_id);
+                    $metal_payment_data = $this->crud->get_metal_payment_receipt_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $gold_bhav_data = $this->crud->get_gold_bhav_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $silver_bhav_data = $this->crud->get_silver_bhav_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $journal_data = $this->crud->get_journal_naam_jama_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $cashbook_data = $this->crud->get_cashbook_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $manufacture_issue_receive_data = $this->crud->get_manufacture_issue_receive_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $manufacture_issue_receive_silver_data = $this->crud->get_manufacture_issue_receive_silver_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $manufacture_manu_hand_made_data = $this->crud->get_manufacture_manu_hand_made_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $manufacture_casting_data = $this->crud->get_manufacture_casting_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $manufacture_machin_chain_data = $this->crud->get_manufacture_machin_chain_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $other_sell_items_data = $this->crud->get_other_sell_items_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $other_payment_receipt_data = $this->crud->get_other_payment_receipt_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $other_payment_receipt_data_bank = $this->crud->get_other_payment_receipt_for_outstanding_ids_report_bank($upto_balance_date, $account_group_id);
+                    if (empty($account_group_id)) {
+                        $hisab_fine_data1 = $this->crud->get_hisab_fine_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'worker');
+                        $hisab_fine_data2 = $this->crud->get_hisab_fine_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'mfloss');
+                        $hisab_fine_data3 = $this->crud->get_hisab_fine_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'worker');
+                        $hisab_fine_data4 = $this->crud->get_hisab_fine_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'mfloss');
+                        $hisab_fine_data = array_merge($hisab_fine_data1, $hisab_fine_data2, $hisab_fine_data3, $hisab_fine_data4);
+                        $hisab_done_ir_data1 = $this->crud->get_hisab_done_ir_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'worker');
+                        $hisab_done_ir_data2 = $this->crud->get_hisab_done_ir_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'mfloss');
+                        $hisab_done_ir_data3 = $this->crud->get_hisab_done_ir_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'worker');
+                        $hisab_done_ir_data4 = $this->crud->get_hisab_done_ir_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'mfloss');
+                        $hisab_done_ir_data = array_merge($hisab_done_ir_data1, $hisab_done_ir_data2, $hisab_done_ir_data3, $hisab_done_ir_data4);
+
+                        $sell_ad_charges_data1 = $this->crud->get_sell_ad_charges_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'account');
+                        $sell_ad_charges_data2 = $this->crud->get_sell_ad_charges_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'mfloss');
+                        $sell_ad_charges_data = array_merge($sell_ad_charges_data1, $sell_ad_charges_data2);
+
+                        $hallmark_xrf_data1 = $this->crud->get_hallmark_xrf_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'account');
+                        $hallmark_xrf_data2 = $this->crud->get_hallmark_xrf_for_outstanding_ids_report($upto_balance_date, $account_group_id, 'xrf_hm_laser_pl');
+                        $hallmark_xrf_data = array_merge($hallmark_xrf_data1, $hallmark_xrf_data2);
+                    } else {
+                        $hisab_fine_data1 = $this->crud->get_hisab_fine_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                        $hisab_fine_data2 = $this->crud->get_hisab_fine_silver_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                        $hisab_fine_data = array_merge($hisab_fine_data1, $hisab_fine_data2);
+                        $hisab_done_ir_data1 = $this->crud->get_hisab_done_ir_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                        $hisab_done_ir_data2 = $this->crud->get_hisab_done_irs_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                        $hisab_done_ir_data = array_merge($hisab_done_ir_data1, $hisab_done_ir_data2);
+
+                        $sell_ad_charges_data1 = $this->crud->get_sell_ad_charges_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                        $sell_ad_charges_data = array_merge($sell_ad_charges_data1);
+
+                        $hallmark_xrf_data1 = $this->crud->get_hallmark_xrf_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                        $hallmark_xrf_data = array_merge($hallmark_xrf_data1);
+                    }
+                    $opening_data = $this->crud->get_opening_for_outstanding_ids_report($upto_balance_date, $account_group_id);
+                    $list = array_merge($opening_data, $sell_items_data, $metal_payment_data, $payment_receipt_data, $payment_receipt_data_bank, $gold_bhav_data, $silver_bhav_data, $journal_data, $cashbook_data, $manufacture_issue_receive_data, $manufacture_issue_receive_silver_data, $manufacture_manu_hand_made_data, $manufacture_casting_data, $manufacture_machin_chain_data, $other_sell_items_data, $other_payment_receipt_data, $other_payment_receipt_data_bank, $hisab_fine_data, $hisab_done_ir_data, $sell_ad_charges_data, $hallmark_xrf_data);
+                }
+
             } else {
-                $hisab_fine_data1 = $this->crud->get_hisab_fine_for_outstanding_report($upto_balance_date, $account_group_id);
-                $hisab_fine_data2 = $this->crud->get_hisab_fine_silver_for_outstanding_report($upto_balance_date, $account_group_id);
-                $hisab_fine_data = array_merge($hisab_fine_data1, $hisab_fine_data2);
-                $hisab_done_ir_data1 = $this->crud->get_hisab_done_ir_for_outstanding_report($upto_balance_date, $account_group_id);
-                $hisab_done_ir_data2 = $this->crud->get_hisab_done_irs_for_outstanding_report($upto_balance_date, $account_group_id);
-                $hisab_done_ir_data = array_merge($hisab_done_ir_data1, $hisab_done_ir_data2);
+                $account_ids = $this->crud->get_account_ids_from_account_group_id($account_group_id);
+                if (in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)) {
+                    $sell_items_data1 = $this->crud->get_sell_items_for_mfloss_outstanding_report($upto_balance_date, $account_group_id);
+                } else {
+                    $sell_items_data1 = $this->crud->get_sell_items_for_outstanding_report($upto_balance_date, $account_group_id);
+                }
 
-                $sell_ad_charges_data1 = $this->crud->get_sell_ad_charges_for_outstanding_report($upto_balance_date, $account_group_id);
-                $sell_ad_charges_data = array_merge($sell_ad_charges_data1);
+                $sp_discount_data = $this->crud->get_sell_discount_for_outstanding_report($upto_balance_date, $account_group_id);
+                $sell_with_gst_amount_data = $this->crud->get_sell_with_gst_amount_for_outstanding_report($upto_balance_date, $account_group_id);
+                $sell_items_data = array_merge($sell_items_data1, $sp_discount_data, $sell_with_gst_amount_data);
+                $payment_receipt_data = $this->crud->get_payment_receipt_for_outstanding_report($upto_balance_date, $account_group_id);
+                $payment_receipt_data_bank = $this->crud->get_payment_receipt_for_outstanding_report_bank($upto_balance_date, $account_group_id);
+                $metal_payment_data = $this->crud->get_metal_payment_receipt_for_outstanding_report($upto_balance_date, $account_group_id);
+                $gold_bhav_data = $this->crud->get_gold_bhav_for_outstanding_report($upto_balance_date, $account_group_id);
+                $silver_bhav_data = $this->crud->get_silver_bhav_for_outstanding_report($upto_balance_date, $account_group_id);
+                $journal_data = $this->crud->get_journal_naam_jama_for_outstanding_report($upto_balance_date, $account_group_id);
+                $cashbook_data = $this->crud->get_cashbook_for_outstanding_report($upto_balance_date, $account_group_id);
+                $manufacture_issue_receive_data = $this->crud->get_manufacture_issue_receive_for_outstanding_report($upto_balance_date, $account_group_id);
+                $manufacture_issue_receive_silver_data = $this->crud->get_manufacture_issue_receive_silver_for_outstanding_report($upto_balance_date, $account_group_id);
+                $manufacture_manu_hand_made_data = $this->crud->get_manufacture_manu_hand_made_for_outstanding_report($upto_balance_date, $account_group_id);
+                $manufacture_casting_data = $this->crud->get_manufacture_casting_for_outstanding_report($upto_balance_date, $account_group_id);
+                $manufacture_machin_chain_data = $this->crud->get_manufacture_machin_chain_for_outstanding_report($upto_balance_date, $account_group_id);
+                $other_sell_items_data = $this->crud->get_other_sell_items_for_outstanding_report($upto_balance_date, $account_group_id);
+                $other_payment_receipt_data = $this->crud->get_other_payment_receipt_for_outstanding_report($upto_balance_date, $account_group_id);
+                $other_payment_receipt_data_bank = $this->crud->get_other_payment_receipt_for_outstanding_report_bank($upto_balance_date, $account_group_id);
+                if (empty($account_group_id)) {
+                    $hisab_fine_data1 = $this->crud->get_hisab_fine_for_outstanding_report($upto_balance_date, $account_group_id, 'worker');
+                    $hisab_fine_data2 = $this->crud->get_hisab_fine_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
+                    $hisab_fine_data3 = $this->crud->get_hisab_fine_for_outstanding_report($upto_balance_date, $account_group_id, 'worker');
+                    $hisab_fine_data4 = $this->crud->get_hisab_fine_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
+                    $hisab_fine_data = array_merge($hisab_fine_data1, $hisab_fine_data2, $hisab_fine_data3, $hisab_fine_data4);
+                    $hisab_done_ir_data1 = $this->crud->get_hisab_done_ir_for_outstanding_report($upto_balance_date, $account_group_id, 'worker');
+                    $hisab_done_ir_data2 = $this->crud->get_hisab_done_ir_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
+                    $hisab_done_ir_data3 = $this->crud->get_hisab_done_ir_for_outstanding_report($upto_balance_date, $account_group_id, 'worker');
+                    $hisab_done_ir_data4 = $this->crud->get_hisab_done_ir_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
+                    $hisab_done_ir_data = array_merge($hisab_done_ir_data1, $hisab_done_ir_data2, $hisab_done_ir_data3, $hisab_done_ir_data4);
 
-                $hallmark_xrf_data1 = $this->crud->get_hallmark_xrf_for_outstanding_report($upto_balance_date, $account_group_id);
-                $hallmark_xrf_data = array_merge($hallmark_xrf_data1);
+                    $sell_ad_charges_data1 = $this->crud->get_sell_ad_charges_for_outstanding_report($upto_balance_date, $account_group_id, 'account');
+                    $sell_ad_charges_data2 = $this->crud->get_sell_ad_charges_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
+                    $sell_ad_charges_data = array_merge($sell_ad_charges_data1, $sell_ad_charges_data2);
+
+                    $hallmark_xrf_data1 = $this->crud->get_hallmark_xrf_for_outstanding_report($upto_balance_date, $account_group_id, 'account');
+                    $hallmark_xrf_data2 = $this->crud->get_hallmark_xrf_for_outstanding_report($upto_balance_date, $account_group_id, 'xrf_hm_laser_pl');
+                    $hallmark_xrf_data = array_merge($hallmark_xrf_data1, $hallmark_xrf_data2);
+                } else {
+                    $hisab_fine_data1 = $this->crud->get_hisab_fine_for_outstanding_report($upto_balance_date, $account_group_id);
+                    $hisab_fine_data2 = $this->crud->get_hisab_fine_silver_for_outstanding_report($upto_balance_date, $account_group_id);
+                    $hisab_fine_data = array_merge($hisab_fine_data1, $hisab_fine_data2);
+                    $hisab_done_ir_data1 = $this->crud->get_hisab_done_ir_for_outstanding_report($upto_balance_date, $account_group_id);
+                    $hisab_done_ir_data2 = $this->crud->get_hisab_done_irs_for_outstanding_report($upto_balance_date, $account_group_id);
+                    $hisab_done_ir_data = array_merge($hisab_done_ir_data1, $hisab_done_ir_data2);
+
+                    $sell_ad_charges_data1 = $this->crud->get_sell_ad_charges_for_outstanding_report($upto_balance_date, $account_group_id);
+                    $sell_ad_charges_data = array_merge($sell_ad_charges_data1);
+
+                    $hallmark_xrf_data1 = $this->crud->get_hallmark_xrf_for_outstanding_report($upto_balance_date, $account_group_id);
+                    $hallmark_xrf_data = array_merge($hallmark_xrf_data1);
+                }
+                $opening_data = $this->crud->get_opening_for_outstanding_report($upto_balance_date, $account_group_id);
+                $list = array_merge($opening_data, $sell_items_data, $metal_payment_data, $payment_receipt_data, $payment_receipt_data_bank, $gold_bhav_data, $silver_bhav_data, $journal_data, $cashbook_data, $manufacture_issue_receive_data, $manufacture_issue_receive_silver_data, $manufacture_manu_hand_made_data, $manufacture_casting_data, $manufacture_machin_chain_data, $other_sell_items_data, $other_payment_receipt_data, $other_payment_receipt_data_bank, $hisab_fine_data, $hisab_done_ir_data, $sell_ad_charges_data, $hallmark_xrf_data);  
             }
-            $acc_list = array_merge($sell_items_data, $metal_payment_data, $payment_receipt_data, $payment_receipt_data_bank, $gold_bhav_data, $silver_bhav_data, $journal_data, $cashbook_data, $manufacture_issue_receive_data, $manufacture_issue_receive_silver_data, $manufacture_manu_hand_made_data, $manufacture_casting_data, $manufacture_machin_chain_data, $other_sell_items_data, $other_payment_receipt_data, $other_payment_receipt_data_bank, $hisab_fine_data, $hisab_done_ir_data, $sell_ad_charges_data, $hallmark_xrf_data);
-            $list = array_merge($dipartment_list, $acc_list);
-        } else {
-            $account_ids = $this->crud->get_account_ids_from_account_group_id($account_group_id);
-            if (in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)) {
-                $sell_items_data1 = $this->crud->get_sell_items_for_mfloss_outstanding_report($upto_balance_date, $account_group_id);
-            } else {
-                $sell_items_data1 = $this->crud->get_sell_items_for_outstanding_report($upto_balance_date, $account_group_id);
-            }
-            $sp_discount_data = $this->crud->get_sell_discount_for_outstanding_report($upto_balance_date, $account_group_id);
-            $sell_with_gst_amount_data = $this->crud->get_sell_with_gst_amount_for_outstanding_report($upto_balance_date, $account_group_id);
-            $sell_items_data = array_merge($sell_items_data1, $sp_discount_data, $sell_with_gst_amount_data);
-            $payment_receipt_data = $this->crud->get_payment_receipt_for_outstanding_report($upto_balance_date, $account_group_id);
-            $payment_receipt_data_bank = $this->crud->get_payment_receipt_for_outstanding_report_bank($upto_balance_date, $account_group_id);
-            $metal_payment_data = $this->crud->get_metal_payment_receipt_for_outstanding_report($upto_balance_date, $account_group_id);
-            $gold_bhav_data = $this->crud->get_gold_bhav_for_outstanding_report($upto_balance_date, $account_group_id);
-            $silver_bhav_data = $this->crud->get_silver_bhav_for_outstanding_report($upto_balance_date, $account_group_id);
-            $journal_data = $this->crud->get_journal_naam_jama_for_outstanding_report($upto_balance_date, $account_group_id);
-            $cashbook_data = $this->crud->get_cashbook_for_outstanding_report($upto_balance_date, $account_group_id);
-            $manufacture_issue_receive_data = $this->crud->get_manufacture_issue_receive_for_outstanding_report($upto_balance_date, $account_group_id);
-            $manufacture_issue_receive_silver_data = $this->crud->get_manufacture_issue_receive_silver_for_outstanding_report($upto_balance_date, $account_group_id);
-            $manufacture_manu_hand_made_data = $this->crud->get_manufacture_manu_hand_made_for_outstanding_report($upto_balance_date, $account_group_id);
-            $manufacture_casting_data = $this->crud->get_manufacture_casting_for_outstanding_report($upto_balance_date, $account_group_id);
-            $manufacture_machin_chain_data = $this->crud->get_manufacture_machin_chain_for_outstanding_report($upto_balance_date, $account_group_id);
-            $other_sell_items_data = $this->crud->get_other_sell_items_for_outstanding_report($upto_balance_date, $account_group_id);
-            $other_payment_receipt_data = $this->crud->get_other_payment_receipt_for_outstanding_report($upto_balance_date, $account_group_id);
-            $other_payment_receipt_data_bank = $this->crud->get_other_payment_receipt_for_outstanding_report_bank($upto_balance_date, $account_group_id);
-            if (empty($account_group_id)) {
-                $hisab_fine_data1 = $this->crud->get_hisab_fine_for_outstanding_report($upto_balance_date, $account_group_id, 'worker');
-                $hisab_fine_data2 = $this->crud->get_hisab_fine_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
-                $hisab_fine_data3 = $this->crud->get_hisab_fine_silver_for_outstanding_report($upto_balance_date, $account_group_id, 'worker');
-                $hisab_fine_data4 = $this->crud->get_hisab_fine_silver_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
-                $hisab_fine_data = array_merge($hisab_fine_data1, $hisab_fine_data2, $hisab_fine_data3, $hisab_fine_data4);
-                $hisab_done_ir_data1 = $this->crud->get_hisab_done_ir_for_outstanding_report($upto_balance_date, $account_group_id, 'worker');
-                $hisab_done_ir_data2 = $this->crud->get_hisab_done_ir_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
-                $hisab_done_ir_data3 = $this->crud->get_hisab_done_irs_for_outstanding_report($upto_balance_date, $account_group_id, 'worker');
-                $hisab_done_ir_data4 = $this->crud->get_hisab_done_irs_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
-                $hisab_done_ir_data = array_merge($hisab_done_ir_data1, $hisab_done_ir_data2, $hisab_done_ir_data3, $hisab_done_ir_data4);
-
-                $sell_ad_charges_data1 = $this->crud->get_sell_ad_charges_for_outstanding_report($upto_balance_date, $account_group_id, 'account');
-                $sell_ad_charges_data2 = $this->crud->get_sell_ad_charges_for_outstanding_report($upto_balance_date, $account_group_id, 'mfloss');
-                $sell_ad_charges_data = array_merge($sell_ad_charges_data1, $sell_ad_charges_data2);
-
-                $hallmark_xrf_data1 = $this->crud->get_hallmark_xrf_for_outstanding_report($upto_balance_date, $account_group_id, 'account');
-                $hallmark_xrf_data2 = $this->crud->get_hallmark_xrf_for_outstanding_report($upto_balance_date, $account_group_id, 'xrf_hm_laser_pl');
-                $hallmark_xrf_data = array_merge($hallmark_xrf_data1, $hallmark_xrf_data2);
-            } else {
-                $hisab_fine_data1 = $this->crud->get_hisab_fine_for_outstanding_report($upto_balance_date, $account_group_id);
-                $hisab_fine_data2 = $this->crud->get_hisab_fine_silver_for_outstanding_report($upto_balance_date, $account_group_id);
-                $hisab_fine_data = array_merge($hisab_fine_data1, $hisab_fine_data2);
-                $hisab_done_ir_data1 = $this->crud->get_hisab_done_ir_for_outstanding_report($upto_balance_date, $account_group_id);
-                $hisab_done_ir_data2 = $this->crud->get_hisab_done_irs_for_outstanding_report($upto_balance_date, $account_group_id);
-                $hisab_done_ir_data = array_merge($hisab_done_ir_data1, $hisab_done_ir_data2);
-
-                $sell_ad_charges_data1 = $this->crud->get_sell_ad_charges_for_outstanding_report($upto_balance_date, $account_group_id);
-                $sell_ad_charges_data = array_merge($sell_ad_charges_data1);
-
-                $hallmark_xrf_data1 = $this->crud->get_hallmark_xrf_for_outstanding_report($upto_balance_date, $account_group_id);
-                $hallmark_xrf_data = array_merge($hallmark_xrf_data1);
-            }
-            $opening_data = $this->crud->get_opening_for_outstanding_report($upto_balance_date, $account_group_id);
-            $list = array_merge($opening_data, $sell_items_data, $metal_payment_data, $payment_receipt_data, $payment_receipt_data_bank, $gold_bhav_data, $silver_bhav_data, $journal_data, $cashbook_data, $manufacture_issue_receive_data, $manufacture_issue_receive_silver_data, $manufacture_manu_hand_made_data, $manufacture_casting_data, $manufacture_machin_chain_data, $other_sell_items_data, $other_payment_receipt_data, $other_payment_receipt_data_bank, $hisab_fine_data, $hisab_done_ir_data, $sell_ad_charges_data, $hallmark_xrf_data);
+            
         }
 
         uasort($list, function ($a, $b) {
@@ -1918,8 +2008,17 @@ class Reports extends CI_Controller
                 if ($credit_limit == null || $credit_limit == '') {
                     $credit_limit = 0;
                 }
-                $tr_naam_data = $this->crud->get_transfer_naam_jama_for_outstanding_report($upto_balance_date, $outstanding_row['account_id'], 'TR Naam', $account_group_id);
-                $tr_jama_data = $this->crud->get_transfer_naam_jama_for_outstanding_report($upto_balance_date, $outstanding_row['account_id'], 'TR Jama', $account_group_id);
+
+                $tr_naam_data = null;
+                $tr_jama_data = null;
+                if(is_array($account_group_id)){
+                    $tr_naam_data = $this->crud->get_transfer_naam_jama_for_outstanding_ids_report($upto_balance_date, $outstanding_row['account_id'], 'TR Naam', $account_group_id);
+                    $tr_jama_data = $this->crud->get_transfer_naam_jama_for_outstanding_ids_report($upto_balance_date, $outstanding_row['account_id'], 'TR Jama', $account_group_id);
+                } else {
+                    $tr_naam_data = $this->crud->get_transfer_naam_jama_for_outstanding_report($upto_balance_date, $outstanding_row['account_id'], 'TR Naam', $account_group_id);
+                    $tr_jama_data = $this->crud->get_transfer_naam_jama_for_outstanding_report($upto_balance_date, $outstanding_row['account_id'], 'TR Jama', $account_group_id);
+                }
+                
                 if (!empty($tr_naam_data)) {
                     foreach ($tr_naam_data as $naam) {
                         $outstanding_row['gold_fine'] = number_format((float) $outstanding_row['gold_fine'], 3, '.', '') + number_format((float) $naam->gold_fine, 3, '.', '');
