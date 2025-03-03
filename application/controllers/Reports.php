@@ -1709,7 +1709,9 @@ class Reports extends CI_Controller
             $other_payment_receipt_data = $this->crud->get_other_payment_receipt_for_outstanding_report_department($upto_balance_date, $account_group_id);
             $opening_data = $this->crud->get_opening_for_outstanding_report($upto_balance_date, $account_group_id);
             $list = array_merge($opening_data, $sell_items_data, $metal_payment_data, $payment_receipt_data, $cashbook_d_data, $cashbook_a_data, $manufacture_issue_receive_data, $manufacture_issue_receive_silver_data, $manufacture_manu_hand_made_data, $manufacture_casting_data, $manufacture_machin_chain_data, $from_stock_transfer_data, $to_stock_transfer_data, $other_sell_items_data, $other_payment_receipt_data);
-        } else if ($account_group_id == '0') {
+            // } else if ($account_group_id == '0') {
+        } else if (is_array($account_group_id) && in_array(0, $account_group_id) || empty($account_group_id)) {
+
             $d_sell_items_data1 = $this->crud->get_sell_items_for_outstanding_report_department($upto_balance_date, $account_group_id);
             $d_sell_with_gst_amount_data = $this->crud->get_sell_with_gst_amount_for_outstanding_report_department($upto_balance_date, $account_group_id);
             $d_sell_items_data = array_merge($d_sell_items_data1, $d_sell_with_gst_amount_data);
@@ -1785,11 +1787,15 @@ class Reports extends CI_Controller
             $list = array_merge($dipartment_list, $acc_list);
         } else {
             $account_ids = $this->crud->get_account_ids_from_account_group_id($account_group_id);
+
+
             if (in_array(MF_LOSS_EXPENSE_ACCOUNT_ID, $account_ids)) {
                 $sell_items_data1 = $this->crud->get_sell_items_for_mfloss_outstanding_report($upto_balance_date, $account_group_id);
             } else {
                 $sell_items_data1 = $this->crud->get_sell_items_for_outstanding_report($upto_balance_date, $account_group_id);
+
             }
+
             $sp_discount_data = $this->crud->get_sell_discount_for_outstanding_report($upto_balance_date, $account_group_id);
             $sell_with_gst_amount_data = $this->crud->get_sell_with_gst_amount_for_outstanding_report($upto_balance_date, $account_group_id);
             $sell_items_data = array_merge($sell_items_data1, $sp_discount_data, $sell_with_gst_amount_data);
@@ -5349,7 +5355,7 @@ class Reports extends CI_Controller
             $row[] = $created_rfid->fine;
             $row[] = date('d/m/Y h:i A', strtotime($created_rfid->created_at));
             $data[] = $row;
-            
+
 
             $total_rfid_grwt = $total_rfid_grwt + $created_rfid->grwt;
             $total_rfid_less = $total_rfid_less + $created_rfid->less;
@@ -5555,79 +5561,79 @@ class Reports extends CI_Controller
 
     function print_all_rfid_tags()
     {
-            $custom_data = $this->crud->get_all_records_with_three('item_stock','item_stock_id','');
-            // echo '<pre>';
-            // print_r($custom_data);
-            // echo '<pre>';
+        $custom_data = $this->crud->get_all_records_with_three('item_stock', 'item_stock_id', '');
+        // echo '<pre>';
+        // print_r($custom_data);
+        // echo '<pre>';
 
-            $data = array();
-            $data['use_barcode'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'use_barcode'));
-            $rfid_data = [];
-            foreach($custom_data as $cs_row){
-                $item_master = $this->crud->get_data_row_by_id('item_master', 'item_id', $cs_row->item_id);
-                $rfid = $this->crud->get_data_row_by_id('item_stock', 'item_stock_id', $cs_row->item_stock_id);
-                $rfid_data[] = array(
-                    'item_stock_rfid' => $cs_row->item_stock_id,
-                    'item_name' => $item_master->item_name??'',
-                    'rfid_grwt' => $rfid->grwt??'',
-                    'rfid_less' => $rfid->less??'',
-                    'rfid_ntwt' => $rfid->ntwt??''
-                );
-            }
-            $data['rfid_data'] = $rfid_data;
-            // echo '<pre>';
-            // print_r($data);
-            // echo '</pre>';
-            // exit;
-            // return $this->load->view('reports/print_selected_rfid_tags', $data);
-
-            $this->load->library('m_pdf');
-
-            // Define label size (width x height in mm)
-            $labelWidth = 50;  // Example width
-            $labelHeight = 10; // Example height
-
-
-            // $pdf = new mPDF('utf-8', array(60, 12));
-            $pdf = new mPDF('utf-8', array(50, 10));
-            // $pdf = new mPDF('utf-8');
-            // $pdf = new mPDF('utf-8', [$labelWidth, $labelHeight]);
-            /*$pdf->AddPage(
-                'P', // orientation
-                '', // type
-                '', // resetpagenum
-                '', // pagenumstyle
-                '', // suppress
-                '1px', // margin-left
-                '1px', // margin-right
-                '6px', // margin-top
-                '2px', // margin-bottom
-                0, // margin-header
-                0 // margin-footer
-            );*/
-            
-
-            $pdf->AddPage(
-                'P', //orientation
-                '', //type
-                '', //resetpagenum
-                '', //pagenumstyle
-                '', //suppress
-                '1px', //margin-left
-                '1px', //margin-right
-                '1px', //margin-top
-                '1px', //margin-bottom
-                0, //margin-header
-                0 //margin-footer
+        $data = array();
+        $data['use_barcode'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'use_barcode'));
+        $rfid_data = [];
+        foreach ($custom_data as $cs_row) {
+            $item_master = $this->crud->get_data_row_by_id('item_master', 'item_id', $cs_row->item_id);
+            $rfid = $this->crud->get_data_row_by_id('item_stock', 'item_stock_id', $cs_row->item_stock_id);
+            $rfid_data[] = array(
+                'item_stock_rfid' => $cs_row->item_stock_id,
+                'item_name' => $item_master->item_name ?? '',
+                'rfid_grwt' => $rfid->grwt ?? '',
+                'rfid_less' => $rfid->less ?? '',
+                'rfid_ntwt' => $rfid->ntwt ?? ''
             );
+        }
+        $data['rfid_data'] = $rfid_data;
+        // echo '<pre>';
+        // print_r($data);
+        // echo '</pre>';
+        // exit;
+        // return $this->load->view('reports/print_selected_rfid_tags', $data);
 
-            $html = $this->load->view('reports/print_all_tags', $data, true);
-            // echo $html;
-            // exit;
-            $pdf->WriteHTML($html);
-            $pdfFilePath = "RFID_Tags.pdf";
-            $pdf->Output($pdfFilePath, "I");
-        
+        $this->load->library('m_pdf');
+
+        // Define label size (width x height in mm)
+        $labelWidth = 50;  // Example width
+        $labelHeight = 10; // Example height
+
+
+        // $pdf = new mPDF('utf-8', array(60, 12));
+        $pdf = new mPDF('utf-8', array(50, 10));
+        // $pdf = new mPDF('utf-8');
+        // $pdf = new mPDF('utf-8', [$labelWidth, $labelHeight]);
+        /*$pdf->AddPage(
+            'P', // orientation
+            '', // type
+            '', // resetpagenum
+            '', // pagenumstyle
+            '', // suppress
+            '1px', // margin-left
+            '1px', // margin-right
+            '6px', // margin-top
+            '2px', // margin-bottom
+            0, // margin-header
+            0 // margin-footer
+        );*/
+
+
+        $pdf->AddPage(
+            'P', //orientation
+            '', //type
+            '', //resetpagenum
+            '', //pagenumstyle
+            '', //suppress
+            '1px', //margin-left
+            '1px', //margin-right
+            '1px', //margin-top
+            '1px', //margin-bottom
+            0, //margin-header
+            0 //margin-footer
+        );
+
+        $html = $this->load->view('reports/print_all_tags', $data, true);
+        // echo $html;
+        // exit;
+        $pdf->WriteHTML($html);
+        $pdfFilePath = "RFID_Tags.pdf";
+        $pdf->Output($pdfFilePath, "I");
+
     }
 
     function delete_rfid($item_stock_rfid_id = '')
