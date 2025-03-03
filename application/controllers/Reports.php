@@ -5359,9 +5359,74 @@ class Reports extends CI_Controller
 
     function get_created_stock_items_list()
     {
-        $this->load->helper('stock_status');
         $post_data = $this->input->post();
-        return get_created_stock_items_list($post_data);
+        $config['table'] = 'item_stock isr';
+        $config['select'] = 'isr.*';
+        // $config['column_search'] = array('isr.ntwt','isr.grwt','isr.less','isr.tunch','isr.fine','isr.stock_type');
+        $config['order'] = array('isr.item_stock_id' => 'desc');
+        $this->load->library('datatables', $config, 'datatable');
+        $created_rfid_list = $this->datatable->get_datatables();
+        $data = array();
+        $total_rfid_grwt = 0;
+        $total_rfid_less = 0;
+        $total_rfid_add = 0;
+        $total_rfid_ntwt = 0;
+        $total_rfid_fine = 0;
+        $total_rfid_charges = 0;
+        $rfid_pcs = 1;
+        foreach ($created_rfid_list as $created_rfid) {
+            $rfid_action_btn = '';
+            $checkbox = '<input type="checkbox" class="stock-checkbox" value="' . $created_rfid->item_stock_id . '">';
+            $rfid_action_btn .= $checkbox . ' &nbsp; ';
+            if ($this->applib->have_access_role(STOCK_STATUS_MODULE_ID, "rfid_edit")) {
+                $rfid_action_btn .= '<a href="javascript:void(0);" class="edit_rfid" data-item_stock_id="' . $created_rfid->item_stock_id . '" ><i class="glyphicon glyphicon-edit"></i></a>';
+            }
+            $rfid_action_btn .= ' &nbsp; <a href="' . base_url('reports/print_item_rfid/' . $created_rfid->item_stock_id) . '" class="btn btn-primary btn-xs" target="_blank"><i class="fa fa-print"></i></a>';
+            $rfid_action_btn .= ' &nbsp; <a href="' . base_url('reports/print_item_rfid_tag/' . $created_rfid->item_stock_id) . '" title="Print RFID tag" class="btn btn-primary btn-xs" target="_blank"><i class="fa fa-print"></i></a>';
+            if ($this->applib->have_access_role(STOCK_STATUS_MODULE_ID, "rfid_delete")) {
+                $rfid_action_btn .= ' &nbsp; <a href="javascript:void(0);" class="delete_rfid" data-href="' . base_url('reports/delete_rfid/' . $created_rfid->item_stock_id) . '"><span class="glyphicon glyphicon-trash" style="color : red">&nbsp;</span></a>';
+            }
+            $row = array();
+            $row[] = $rfid_action_btn;
+            $row[] = $rfid_pcs;
+            // $row[] = $created_rfid->item_stock_id;
+            $row[] = $created_rfid->grwt;
+            $row[] = $created_rfid->less;
+            $row[] = $created_rfid->ntwt;
+            $row[] = $created_rfid->fine;
+            $row[] = date('d/m/Y h:i A', strtotime($created_rfid->created_at));
+            $data[] = $row;
+
+
+            $total_rfid_grwt = $total_rfid_grwt + $created_rfid->grwt;
+            $total_rfid_less = $total_rfid_less + $created_rfid->less;
+            $total_rfid_ntwt = $total_rfid_ntwt + $created_rfid->ntwt;
+            $total_rfid_fine = $total_rfid_fine + $created_rfid->fine;
+            $rfid_pcs++;
+        }
+        $row = array();
+        $row[] = '<b>Total<b>';
+        $row[] = '';
+        $row[] = '';
+        $row[] = '';
+        $row[] = '<b>' . number_format((float) $total_rfid_grwt, 3, '.', '') . '</b>';
+        $row[] = '<b>' . number_format((float) $total_rfid_less, 3, '.', '') . '</b>';
+        $row[] = '<b>' . number_format((float) $total_rfid_add, 3, '.', '') . '</b>';
+        $row[] = '<b>' . number_format((float) $total_rfid_ntwt, 3, '.', '') . '</b>';
+        $row[] = '<b>' . number_format((float) $total_rfid_fine, 3, '.', '') . '</b>';
+        $row[] = '<b>' . number_format((float) $total_rfid_charges, 2, '.', '') . '</b>';
+        $row[] = '';
+        $row[] = '';
+        $data[] = $row;
+        $output = array(
+            // "draw" => 2,
+            "recordsTotal" => count($created_rfid_list),
+            "recordsFiltered" => $this->datatable->count_filtered(),
+            "data" => $data,
+            "rfid_stock" => number_format((float) $total_rfid_grwt, 3, '.', ''),
+            "rfid_pcs" => $rfid_pcs - 1,
+        );
+        echo json_encode($output);
     }
 
     function print_item_rfid($item_stock_rfid_id = '')
