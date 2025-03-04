@@ -635,7 +635,7 @@ class Reports extends CI_Controller
             if (isset($post_data['department_id']) && !empty($post_data['department_id'])) {
                 $row[] = $stock_adjust_btn;
             } else {
-                $row[] = '';
+                $row[] = $stock_adjust_btn;
             }
 
             $row[] = '<b class="' . $className . '">' . $less . '</b>';
