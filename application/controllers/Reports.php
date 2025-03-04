@@ -584,7 +584,7 @@ class Reports extends CI_Controller
                 }
             }
 
-            $stock_adjust_btn .= ' &nbsp; <a href="javascript:void(0);" class="btn btn-primary btn-xs item_stock_details pull-left" data-category_name="Stock" data-item_name="Stock" style="margin: 0px 3px;" > Stock </a>';
+            $stock_adjust_btn .= ' &nbsp; <a href="javascript:void(0);" id="'.$stock->item_stock_id.'" class="btn btn-primary btn-xs item_stock_details pull-left" data-category_name="Stock" data-item_name="Stock" style="margin: 0px 3px;" > Stock </a>';
 
 
             $row = array();
@@ -5313,11 +5313,16 @@ class Reports extends CI_Controller
     function get_created_stock_items_list()
     {
         $post_data = $this->input->post();
+        // $item_stock_id = isset($post_data['item_stock_id']) ? $post_data['item_stock_id'] : null;
+        $item_stock_id = isset($_GET['item_stock_id']) ? $_GET['item_stock_id'] : null;
         $config['table'] = 'item_stock isr';
         $config['select'] = 'isr.*';
         // $config['column_search'] = array('isr.ntwt','isr.grwt','isr.less','isr.tunch','isr.fine','isr.stock_type');
         $config['order'] = array('isr.item_stock_id' => 'desc');
-        $this->load->library('datatables', $config, 'datatable');
+        $this->load->library('datatables', $config, 'datatable');        
+        if (!empty($item_stock_id)) {
+            $this->db->where('isr.item_stock_id', $item_stock_id);
+        }
         $created_rfid_list = $this->datatable->get_datatables();
         $data = array();
         $total_rfid_grwt = 0;
