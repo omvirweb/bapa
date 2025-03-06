@@ -77,6 +77,7 @@
                                             <label>To Date</label>
                                             <input type="text" name="to_date" id="datepicker2" class="form-control" value="<?php echo date('d-m-Y'); ?>">
                                         </div>
+                                        <a href="javascript:void(0);" id="" class="btn btn-primary btn-md item_stock_details_all pull-left" data-category_name="Stock" data-item_name="Stock" style="margin: 25px 0px 0px 0px;" > Stock </a>
                                         <table class="table row-border table-bordered table-striped" style="width:100%" id="stock_status_table">
                                             <thead>
                                                 <tr>
@@ -272,7 +273,7 @@
         <div class="modal-content" style="background-color:#f1e8e1;">
             <div class="modal-header">
                 <div class="col-md-6">
-                    <h4 class="modal-title" id="stock_item_modelLabel">Stock Items</h4>
+                    <h4 class="modal-title" id="stock_item_modelLabel">Stock Items <span id="titleToAppend"></span></h4>
                 </div>
                 <div class="col-md-6">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -281,7 +282,7 @@
             <div class="modal-body edit-content">
                 <form class="form-horizontal" method="post" id="stock_item_form" novalidate enctype="multipart/form-data">
                 <input type="hidden" name="item_stock_rfid_id" id="item_stock_rfid_id">
-                    <input type="hidden" name="rfid_item_stock_id" id="rfid_item_stock_id">
+                <input type="hidden" name="item_stock_id" id="item_stock_id">
                     <div class="row">                        
                         <div class="col-md-12">
                             <div class="">
@@ -416,19 +417,20 @@
 
             created_rfid_table.draw();
         });
-        $(document).on('click', '.item_stock_details', function(e) {
+
+        $(document).on('click', '.item_stock_details_all', function(e) {
             e.preventDefault();            
             var category_name = $(this).attr('data-category_name');
             var item_id = $(this).attr('data-item_id');
             var item_name = $(this).attr('data-item_name');
             var grwt = $(this).attr('data-grwt');
             var tunch = $(this).attr('data-tunch');
-            var item_stock_id = $(this).attr('data-item_stock_id');
+            var item_stock_id = $(this).attr('id');
             $("#stock_item_model #rfid_category").val(category_name);
             $("#stock_item_model #rfid_item_name").val(item_name);
             $("#stock_item_model #rfid_item_cur_stock").val(grwt);
             $("#stock_item_model #rfid_tunch").val(tunch);
-            $("#stock_item_model #rfid_item_stock_id").val(item_stock_id);
+            $("#item_stock_id").val(item_stock_id);
             $('#stock_item_model').modal('show');
 
             $.ajax({
@@ -437,11 +439,47 @@
                 async: false,
                 success: function(response) {
                     var json = $.parseJSON(response);
+                    if ($.fn.DataTable.isDataTable('#created_stock_item_table')) {
+                        created_stock_item_table.ajax.reload(null, false); // Reload with updated data 
+                        $("#titleToAppend").html(" ");                       
+                    }
                 }
             });
-
-            created_stock_item_table.draw();
         });
+
+
+        $(document).on('click', '.item_stock_details', function(e) {
+            e.preventDefault();            
+            var category_name = $(this).attr('data-category_name');
+            var item_id = $(this).attr('data-item_id');
+            var item_name = $(this).attr('data-item_name');
+            var grwt = $(this).attr('data-grwt');
+            var tunch = $(this).attr('data-tunch');
+            var item_stock_id = $(this).attr('id');
+            $("#stock_item_model #rfid_category").val(category_name);
+            $("#stock_item_model #rfid_item_name").val(item_name);
+            $("#stock_item_model #rfid_item_cur_stock").val(grwt);
+            $("#stock_item_model #rfid_tunch").val(tunch);
+            $("#item_stock_id").val(item_stock_id);
+            $('#stock_item_model').modal('show');
+
+            $.ajax({
+                url: "<?php echo base_url('sell/get_single_stock_item_data'); ?>/",
+                type: "POST",
+                async: false,
+                data:{item_stock_id:item_stock_id},
+                success: function(response) {
+                    var json = $.parseJSON(response);
+                    if ($.fn.DataTable.isDataTable('#created_stock_item_table')) {
+                        created_stock_item_table.ajax.reload(null, false); // Reload with updated data
+                        $("#titleToAppend").html(" - "+item_name+": "+tunch+" Tunch");
+                    }
+                }
+            });
+            
+        });
+
+
         $('#rfid_model').on('shown.bs.modal', function() {
             $("#rfid_grwt").focus();
             $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
@@ -897,7 +935,7 @@
             "ajax": {
                 "url": "<?php echo site_url('reports/get_created_stock_items_list') ?>",
                 "data": function(d) {
-                    d.item_stock_id = $('#created_stock_item_table #rfid_item_stock_id').val();
+                    d.item_stock_id = $('#item_stock_id').val();
                 },
                 "complete": function() {
                     $('#ajax-loader').hide();
