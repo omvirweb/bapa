@@ -430,7 +430,7 @@ class Reports extends CI_Controller
             $data['silver_rate'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'silver_rate'));
             set_page('reports/stock_status', $data);
         } else {
-            $this->session->set_flashdata('error_message', 'You have not permission to access this page.');
+            $this->session->set_flashdata('error_message', 'You do not have permission to access this page.');
             redirect("/");
         }
     }
