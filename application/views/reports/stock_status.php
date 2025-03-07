@@ -887,6 +887,10 @@
             return false;
         });
 
+        $('#stock_item_model').on('shown.bs.modal', function () {
+            $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+        });
+
         created_rfid_table = $('#created_rfid_table').DataTable({
             "serverSide": true,
             "scrollY": "300px",
@@ -925,7 +929,8 @@
         });
 
         created_stock_item_table = $('#created_stock_item_table').DataTable({
-            "autoWidth": true,
+            "autoWidth": false,
+            "responsive": true,
             "serverSide": true,
             "scrollY": "300px",
             "scrollX": true,
@@ -949,7 +954,7 @@
             "columnDefs": [{
                 "className": "dt-right",
                 "targets": [0,1,2,3,4,5,6]
-            }]
+            }],
         });
 
         $(document).on("click", ".edit_rfid", function() {
