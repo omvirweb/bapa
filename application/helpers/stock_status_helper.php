@@ -51,6 +51,7 @@ if (!function_exists('call_reports_controller_opening_balance_function')) {
 if (!function_exists('get_stock_status_datatable')) {
     function get_stock_status_datatable() {  
         $post_data = $_POST;  
+        $className = null;
         $CI =& get_instance(); // Get the CI instance
         $crud_model = $CI->load->model('Crud');    
         $crud_model = $CI->load->model('AppModel');    
