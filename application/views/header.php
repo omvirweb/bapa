@@ -976,6 +976,13 @@ $segment3 = $this->uri->segment(3);
                                                             href="<?= base_url(); ?>reports/stock_status/"><i
                                                                 class="fa fa-line-chart"></i>Stock Status</a></li>
                                                 <?php } ?>
+												
+												<?php if ($this->applib->have_access_role(STOCK_STATUS_MODULE_ID, "view")) { ?>
+                                                    <li class="<?= ($segment2 == 'stock_status') ? 'active' : '' ?>"><a
+                                                            href="<?= base_url(); ?>reports/profit_loss/"><i
+                                                                class="fa fa-line-chart"></i>Profit & Loss</a></li>
+                                                <?php } ?>
+												
                                                 <?php if ($this->applib->have_access_role(STOCK_STATUS_MODULE_ID, "stock_check")) { ?>
                                                     <li class="<?= ($segment2 == 'stock_check') ? 'active' : '' ?>"><a
                                                             href="<?= base_url(); ?>reports/stock_check/"><i
