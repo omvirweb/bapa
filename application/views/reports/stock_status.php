@@ -68,15 +68,7 @@
                                                 <option value="1"> Only RFID Stock </option>
                                                 <option value="2"> Without RFID Stock </option>
                                             </select>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label>From Date</label>
-                                            <input type="text" name="from_date" id="datepicker1" class="form-control" value="<?php echo date("d-m-Y"); ?>">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label>To Date</label>
-                                            <input type="text" name="to_date" id="datepicker2" class="form-control" value="<?php echo date('d-m-Y'); ?>">
-                                        </div>
+                                        </div>                                        
                                         <a href="javascript:void(0);" id="" class="btn btn-primary btn-md item_stock_details_all pull-left" data-category_name="Stock" data-item_name="Stock" style="margin: 25px 0px 0px 0px;" > Stock </a>
                                         <table class="table row-border table-bordered table-striped" style="width:100%" id="stock_status_table">
                                             <thead>
@@ -93,8 +85,6 @@
                                                     <th>Tunch</th>
                                                     <th>Gold</th>
                                                     <th>Silver</th>
-                                                    <!-- <th>Amount</th> -->
-                                                    <th>Profit/loss Fine</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -718,8 +708,6 @@
                 "url": "<?php echo site_url('reports/stock_status_datatable') ?>",
                 "type": "POST",
                 "data": function(d) {
-                    d.from_date = $('#datepicker1').val();
-                    d.to_date = $('#datepicker2').val();
                     d.department_id = $('#department_id').val();
                     d.category_id = $('#category_id').val();
                     d.item_id = $('#item_id').val();
@@ -735,7 +723,7 @@
             },
             "columnDefs": [{
                 "className": "dt-right",
-                "targets": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+                "targets": [2, 3, 4, 5, 6, 7, 8, 9, 10],
             }, ],
             "fnRowCallback": function(nRow, aData) {
 

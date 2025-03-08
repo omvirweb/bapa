@@ -59,32 +59,33 @@ if (!function_exists('get_stock_status_datatable')) {
 
         $use_rfid = $CI->Crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'use_rfid'));
         $use_barcode = $CI->Crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'use_barcode'));
-
         $config['table'] = 'item_stock s';
         if ($post_data['include_wstg'] == 'true') {
             $config['select'] = '`s`.`department_id`, `s`.`category_id`, `s`.`item_id`, `s`.`item_stock_id`, `s`.`tunch`, `s`.`rfid_created_grwt`,`cat`.`category_name`, `im`.`item_name`, `im`.`stock_method`, `cat`.`category_group_id`,SUM(s.grwt) AS grwt,SUM(s.ntwt) AS ntwt,sum(s.less) AS less, SUM((s.ntwt * (s.tunch + im.default_wastage))/100) AS fine';
         } else {
             $config['select'] = '`s`.`department_id`, `s`.`category_id`, `s`.`item_id`, `s`.`item_stock_id`, `s`.`tunch`, `s`.`rfid_created_grwt`,`cat`.`category_name`, `im`.`item_name`, `im`.`stock_method`, `cat`.`category_group_id`,SUM(s.grwt) AS grwt,SUM(s.ntwt) AS ntwt,sum(s.less) AS less, SUM((s.ntwt * s.tunch)/100) AS fine';
         }
+
         $config['joins'][] = array('join_table' => 'item_master im', 'join_by' => 'im.item_id = s.item_id', 'join_type' => 'left');
         $config['joins'][] = array('join_table' => 'account pm', 'join_by' => 'pm.account_id = s.department_id', 'join_type' => 'left');
         $config['joins'][] = array('join_table' => 'category cat', 'join_by' => 'cat.category_id = s.category_id', 'join_type' => 'left');
         $config['column_search'] = array('cat.category_name', 'im.item_name', 's.grwt', 's.less', 's.ntwt', 's.tunch', 's.fine');
         $config['column_order'] = array('cat.category_name', 'im.item_name', 'grwt', null, 's.less', 's.ntwt', 's.tunch', 's.fine', 's.fine');
-        $config['custom_where'] = ' (im.stock_method = 1 AND (s.grwt = 0 OR s.grwt != 0) OR (im.stock_method = 2 AND s.grwt != 0) OR (im.stock_method = 3 AND s.grwt != 0))';
+        // $config['custom_where'] = ' (im.stock_method = 1 AND (s.grwt = 0 OR s.grwt != 0) OR (im.stock_method = 2 AND s.grwt != 0) OR (im.stock_method = 3 AND s.grwt != 0))';
+        $config['custom_where'] = ' ((im.stock_method = 1) OR (im.stock_method = 2) OR (im.stock_method = 3))';
         //        $config['custom_where'] = ' 1 ';
         $department_ids = $CI->applib->current_user_department_ids();
         if (!empty($department_ids)) {
             $department_ids = implode(',', $department_ids);
             $config['custom_where'] .= 'AND s.department_id IN(' . $department_ids . ')';
         }
-        if (isset($post_data['category_id']) && !empty($post_data['category_id'])) {
+        if (isset($post_data['category_id']) && !empty($post_data['category_id']) && $post_data['category_id']!==0) {
             $config['wheres'][] = array('column_name' => 's.category_id', 'column_value' => $post_data['category_id']);
         }
-        if (isset($post_data['item_id']) && !empty($post_data['item_id'])) {
+        if (isset($post_data['item_id']) && !empty($post_data['item_id']) && $post_data['item_id']!==0) {
             $config['wheres'][] = array('column_name' => 's.item_id', 'column_value' => $post_data['item_id']);
         }
-        if (isset($post_data['tunch']) && !empty($post_data['tunch'])) {
+        if (isset($post_data['tunch']) && !empty($post_data['tunch']) && $post_data['tunch']!==0) {
             $config['wheres'][] = array('column_name' => 's.tunch', 'column_value' => $post_data['tunch']);
         }
         if (isset($post_data['department_id']) && !empty($post_data['department_id'])) {
@@ -92,7 +93,8 @@ if (!function_exists('get_stock_status_datatable')) {
         }
         if ($post_data['in_stock'] == 'true') {
             $config['custom_where'] .= ' AND s.grwt != 0';
-        }
+        } 
+
         if (isset($post_data['department_id']) && !empty($post_data['department_id'])) {
             if (isset($post_data['item_wise']) && $post_data['item_wise'] == 'true') {
                 $config['group_by'] = 's.category_id,s.item_id, if(`im`.`stock_method` = 1, `s`.`tunch`, ""), if(`im`.`stock_method` = 2, `s`.`item_stock_id`, "")';
@@ -106,9 +108,9 @@ if (!function_exists('get_stock_status_datatable')) {
                 $config['group_by'] = 's.category_id, s.item_id, if(`im`.`stock_method` = 1, `s`.`tunch`, "")';
             }
         }
-        if (isset($post_data['rfid_filter']) && $post_data['rfid_filter'] == '1') {
+        if (isset($post_data['rfid_filter']) && $post_data['rfid_filter'] == '1' && $post_data['rfid_filter']!==0) {
             $config['custom_where'] .= ' AND s.item_stock_id IN ( SELECT `item_stock_id` FROM `item_stock_rfid` WHERE `rfid_used` = 0)';
-        } else if (isset($post_data['rfid_filter']) && $post_data['rfid_filter'] == '2') {
+        } else if (isset($post_data['rfid_filter']) && $post_data['rfid_filter'] == '2' && $post_data['rfid_filter']!==0) {
             $config['custom_where'] .= ' AND s.item_stock_id NOT IN ( SELECT `item_stock_id` FROM `item_stock_rfid` WHERE `rfid_used` = 0)';
         }
         $config['order'] = array('s.item_stock_id' => 'desc');
@@ -134,12 +136,6 @@ if (!function_exists('get_stock_status_datatable')) {
         $to_date = '';
         $display_opening = 1;
         $final_profit_loss_amount = 0;
-        if (!empty($post_data['from_date'])) {
-            $from_date = date('Y-m-d', strtotime($post_data['from_date']));
-        }
-        if (!empty($post_data['to_date'])) {
-            $to_date = date('Y-m-d', strtotime($post_data['to_date']));
-        }
         foreach ($list as $stock) {
             $gold = 0;
             $silver = 0;
@@ -161,7 +157,7 @@ if (!function_exists('get_stock_status_datatable')) {
             }
             $tunch = number_format((float) $stock->tunch, 2, '.', '');
 
-            if ($stock->stock_method == '3') {
+            if ($stock->stock_method == '3' || $stock->stock_method == 3) {
                 if ($grwt != '0.000') {
                     if ($CI->AppModel->have_access_role(STOCK_ADJUST_ID, "view")) {
                         if ($ntwt != '0.000') {
@@ -172,7 +168,7 @@ if (!function_exists('get_stock_status_datatable')) {
                         $stock_adjust_btn = '<a href="javascript:void(0);" class="btn btn-primary btn-xs item_stock_row pull-left" data-department_id="' . $stock->department_id . '" data-category_id="' . $stock->category_id . '" data-item_id="' . $stock->item_id . '" data-category_group_id="' . $stock->category_group_id . '" data-grwt="' . $grwt . '" data-less_allow="' . $less_allow . '" data-less="' . $less . '" data-ntwt="' . $ntwt . '" data-tunch="' . $stock->tunch . '" data-wstg="' . $wstg . '" data-fine="' . number_format($stock->fine, 3, '.', '') . '" data-item_stock_id="' . $stock->item_stock_id . '" > Adjust </a>';
                     }
                 }
-            } else if ($stock->stock_method == '2') {
+            } else if ($stock->stock_method == '2' || $stock->stock_method == 2) {
                 if (isset($post_data['item_wise']) && $post_data['item_wise'] != 'true') {
                     if ($ntwt != '0.000') {
                         $tunch = number_format(((float) $stock->fine / (float) $ntwt) * 100, 2, '.', '');
@@ -295,149 +291,6 @@ if (!function_exists('get_stock_status_datatable')) {
             } else {
                 // $row[] = '<b>0</b>';
             }
-
-
-
-
-
-            /* --------------------------------------- added by mayur-------------------------------------------------------- */
-            $total_plus_fine = 0;
-            $total_minus_fine = 0;
-            $profit_loss_tunch = $stock->tunch ?? '';
-            $department_id = $stock->department_id;
-            $category_id = $stock->category_id;
-            $item_id = $stock->item_id;
-            $post_data['account_id'] = isset($stock->account_id) ? $stock->account_id : '';
-            $post_data['include_wastage'] = $post_data['include_wstg'];
-
-            $opening_data = get_opening_stock_ledger($from_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], '', $post_data['include_wastage']);
-            $p_data = $CI->Crud->get_sell_items_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'P');
-            $s_data = $CI->Crud->get_sell_items_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'S');
-            $e_data = $CI->Crud->get_sell_items_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'E');
-            $m_r_data = $CI->Crud->get_metal_payment_receipt_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'M R');
-            $m_p_data = $CI->Crud->get_metal_payment_receipt_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'M P');
-            $f_t_data = $CI->Crud->get_stock_transfer_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'F T');
-            $t_t_data = $CI->Crud->get_stock_transfer_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'T T');
-            $mfi_data = $CI->Crud->get_manufacture_issue_receive_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'MFI');
-            $mfr_data = $CI->Crud->get_manufacture_issue_receive_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'MFR');
-            $mfis_data = $CI->Crud->get_manufacture_issue_receive_silver_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'MFIS');
-            $mfrs_data = $CI->Crud->get_manufacture_issue_receive_silver_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'MFRS');
-            $mhmifw_data = $CI->Crud->get_manufacture_manu_hand_made_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'MHMIFW');
-            $mhmis_data = $CI->Crud->get_manufacture_manu_hand_made_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'MHMIS');
-            $mhmrfw_data = $CI->Crud->get_manufacture_manu_hand_made_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'MHMRFW');
-            $mhmrs_data = $CI->Crud->get_manufacture_manu_hand_made_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'MHMRS');
-            $castingifw_data = $CI->Crud->get_manufacture_casting_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'CASTINGIFW');
-            $castingis_data = $CI->Crud->get_manufacture_casting_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'CASTINGIS');
-            $castingrfw_data = $CI->Crud->get_manufacture_casting_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'CASTINGRFW');
-            $castingrs_data = $CI->Crud->get_manufacture_casting_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'CASTINGRS');
-            $mchainifw_data = $CI->Crud->get_manufacture_machin_chain_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'MCHAINIFW');
-            $mchainis_data = $CI->Crud->get_manufacture_machin_chain_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'MCHAINIS');
-            $mchainrfw_data = $CI->Crud->get_manufacture_machin_chain_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'MCHAINRFW');
-            $mchainrs_data = $CI->Crud->get_manufacture_machin_chain_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'MCHAINRS');
-            $o_p_data = $CI->Crud->get_other_sell_item_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'O P');
-            $o_s_data = $CI->Crud->get_other_sell_item_for_stock_ledger($from_date, $to_date, $department_id, $category_id, $item_id, $profit_loss_tunch, $post_data['account_id'], 'O S');
-            $stock_ledger_data = array_merge($p_data, $s_data, $e_data, $m_r_data, $m_p_data, $f_t_data, $t_t_data, $mfi_data, $mfr_data, $mfis_data, $mfrs_data, $mhmifw_data, $mhmis_data, $mhmrfw_data, $mhmrs_data, $castingifw_data, $castingis_data, $castingrfw_data, $castingrs_data, $mchainifw_data, $mchainis_data, $mchainrfw_data, $mchainrs_data, $o_p_data, $o_s_data);
-
-            uasort($stock_ledger_data, function ($a, $b) {
-                $value1 = strtotime($a->st_date);
-                $value2 = strtotime($b->st_date);
-                return $value1 - $value2;
-            });
-
-            usort($stock_ledger_data, function ($a, $b) {
-                if ($a->st_date < $b->st_date) {
-                    $retval = -1;
-                } elseif ($a->st_date > $b->st_date) {
-                    $retval = 1;
-                } else {
-                    $retval = 0;
-                }
-                if ($retval == 0) {
-                    $value1 = strtotime($a->updated_at);
-                    $value2 = strtotime($b->updated_at);
-                    $retval = $value1 - $value2;
-                    return $retval;
-                }
-                return $retval;
-            });
-
-            $stock_ledger_data = array_merge($opening_data, $stock_ledger_data);
-            $stock_ledger_data = array_values($stock_ledger_data);
-            //$data = array();
-            $total_plus_grwt = 0;
-            $total_plus_less = 0;
-            $total_plus_net_wt = 0;
-            $total_plus_fine = 0;
-            $total_minus_grwt = 0;
-            $total_minus_less = 0;
-            $total_minus_net_wt = 0;
-            $total_minus_fine = 0;
-            $pre_key = 0;
-            $zero_value = 0;
-
-            foreach ($stock_ledger_data as $key => $stock_ledger) {
-
-                $grwt = number_format((float) $stock_ledger->grwt, 3, '.', '');
-                $less = (is_numeric((float) $stock_ledger->less)) ? number_format((float) $stock_ledger->less, 3, '.', '') : 0;
-                $net_wt = (!is_numeric((float) $stock_ledger->net_wt)) ? (float) $grwt - (float) $less : (float) $stock_ledger->net_wt;
-                $net_wt = number_format((float) $net_wt, 3, '.', '');
-                $touch_id = $stock_ledger->touch_id;
-                $wstg = (is_numeric($stock_ledger->wstg)) ? $stock_ledger->wstg : '';
-                $account_name = ($stock_ledger->account_name != 'account_name') ? $stock_ledger->account_name : '';
-                $fine = number_format((float) $stock_ledger->fine, 3, '.', '');
-
-                if ($stock_ledger->type_sort == 'S' || $stock_ledger->type_sort == 'M P' || $stock_ledger->type_sort == 'F T' || $stock_ledger->type_sort == 'MFI' || $stock_ledger->type_sort == 'MFIS' || $stock_ledger->type_sort == 'MHMIFW' || $stock_ledger->type_sort == 'MHMIS' || $stock_ledger->type_sort == 'CASTINGIFW' || $stock_ledger->type_sort == 'CASTINGIS' || $stock_ledger->type_sort == 'MCHAINIFW' || $stock_ledger->type_sort == 'MCHAINIS' || $stock_ledger->type_sort == 'O S') {
-                    $grwt = $zero_value - (float) $grwt;
-                    $grwt = number_format((float) $grwt, 3, '.', '');
-                    $less = (!empty($less)) ? $zero_value - (float) $less : 0;
-                    $less = number_format((float) $less, 3, '.', '');
-                    $net_wt = $zero_value - (float) $net_wt;
-                    $net_wt = number_format((float) $net_wt, 3, '.', '');
-                    $fine = $zero_value - (float) $fine;
-                    $fine = number_format((float) $fine, 3, '.', '');
-
-                    $total_minus_grwt = number_format((float) $total_minus_grwt, '3', '.', '') + number_format((float) $grwt, '3', '.', '');
-                    $total_minus_less = number_format((float) $total_minus_less, '3', '.', '') + number_format((float) $less, '3', '.', '');
-                    $total_minus_net_wt = number_format((float) $total_minus_net_wt, '3', '.', '') + number_format((float) $net_wt, '3', '.', '');
-                    $total_minus_fine = number_format((float) $total_minus_fine, '3', '.', '') + number_format((float) $fine, '3', '.', '');
-                } else {
-                    $total_plus_grwt = number_format((float) $total_plus_grwt, '3', '.', '') + number_format((float) $grwt, '3', '.', '');
-                    $total_plus_less = number_format((float) $total_plus_less, '3', '.', '') + number_format((float) $less, '3', '.', '');
-                    $total_plus_net_wt = number_format((float) $total_plus_net_wt, '3', '.', '') + number_format((float) $net_wt, '3', '.', '');
-                    $total_plus_fine = number_format((float) $total_plus_fine, '3', '.', '') + number_format((float) $fine, '3', '.', '');
-                }
-
-                if ($display_opening == 1) {
-                    if ($key == 0) {
-                        $balance_grwt = $stock_ledger_data[$key]->balance_grwt;
-                        $balance_net_wt = $stock_ledger_data[$key]->balance_net_wt;
-                        $balance_fine = $stock_ledger_data[$key]->balance_fine;
-                    } else {
-                        $balance_grwt = $stock_ledger_data[$key]->balance_grwt = number_format((float) $stock_ledger_data[$pre_key]->balance_grwt, '3', '.', '') + number_format((float) $grwt, '3', '.', '');
-                        $balance_net_wt = $stock_ledger_data[$key]->balance_net_wt = number_format((float) $stock_ledger_data[$pre_key]->balance_net_wt, '3', '.', '') + number_format((float) $net_wt, '3', '.', '');
-
-                        if ($post_data['include_wastage'] == 'true') {
-                            $default_wstg = $CI->Crud->get_column_value_by_id('item_master', 'default_wastage', array('item_id' => $stock_ledger->item_id));
-                            $with_wastage_fine = number_format((float) $net_wt, '3', '.', '') * ((float) $touch_id + (float) $default_wstg) / 100;
-                            $balance_fine = $stock_ledger_data[$key]->balance_fine = number_format((float) $stock_ledger_data[$pre_key]->balance_fine, '3', '.', '') + number_format((float) $with_wastage_fine, '3', '.', '');
-                        } else {
-                            $without_wastage_fine = (float) $net_wt * (float) $touch_id / 100;
-                            $balance_fine = $stock_ledger_data[$key]->balance_fine = number_format((float) $stock_ledger_data[$pre_key]->balance_fine, '3', '.', '') + number_format((float) $without_wastage_fine, '3', '.', '');
-                        }
-                        $pre_key = $key;
-                    }
-                } else {
-                    $balance_grwt = 0;
-                    $balance_net_wt = 0;
-                    $balance_fine = 0;
-                }
-            }
-            $profit_loss = number_format((float) $balance_fine, '3', '.', '') - (number_format((float) $total_plus_fine, '3', '.', '') + number_format((float) $total_minus_fine, '3', '.', ''));
-            $final_profit_loss_amount += $profit_loss;
-            $row[] = '<b class = "' . $className . '">' . number_format((float) $profit_loss, '3', '.', '') . '</b>';
-            /*--------------------------------------- added by mayur-------------------------------------------------------- */
-
-
 
             $data[] = $row;
         }
