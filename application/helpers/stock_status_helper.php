@@ -52,6 +52,7 @@ if (!function_exists('get_stock_status_datatable')) {
     function get_stock_status_datatable() {  
         $post_data = $_POST;  
         $className = null;
+        $totalRecodsCountForDatatable = null;
         $CI =& get_instance(); // Get the CI instance
         $crud_model = $CI->load->model('Crud');    
         $crud_model = $CI->load->model('AppModel');    
@@ -295,6 +296,8 @@ if (!function_exists('get_stock_status_datatable')) {
 
             $data[] = $row;
         }
+        $totalRecodsCountForDatatable = count($data);
+        
         $row = array();
         $row[] = '<b>Gold Total</b>';
         $row[] = '';
@@ -436,6 +439,7 @@ if (!function_exists('get_stock_status_datatable')) {
             "recordsFiltered" => $datatable->count_filtered(),
             "data" => $data,
         );
+        
         echo json_encode($output);
     }
 }
