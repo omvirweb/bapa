@@ -85,7 +85,7 @@
                                                     <th>Tunch</th>
 													<th>Gold</th>
 													<th>Silver</th>
-                                                    <th>Profit/loss Fine</th>
+                                                    <th class="dt-right">Profit/loss Fine</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -1064,3 +1064,14 @@
         return array;
     }
 </script>
+<style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: right; /* Right align the text */
+        }
+    </style>

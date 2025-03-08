@@ -1058,10 +1058,10 @@ $segment3 = $this->uri->segment(3);
                                                     <?php } ?>
                                                 <?php } ?>
                                                 <?php if ($this->applib->have_access_role(TRADING_PL_MODULE_ID, "view")) { ?>
-                                                    <li
+                                                   <!-- <li
                                                         class="<?= ($segment1 == 'reports' && $segment2 == 'trading_pl') ? 'active' : '' ?>">
                                                         <a href="<?= base_url(); ?>reports/trading_pl/"><i
-                                                                class="fa fa-money"></i>Trading PL</a></li>
+                                                                class="fa fa-money"></i>Trading PL</a></li>-->
                                                 <?php } ?>
                                                 <?php if ($this->applib->have_access_role(TRADING_PL_MODULE_ID, "view")) { ?>
                                                     <li
@@ -1084,7 +1084,7 @@ $segment3 = $this->uri->segment(3);
                                 </li>
                             <?php } ?>
                             <?php if ($this->applib->have_access_role(HR_MODULE_ID, "view")) { ?>
-                                <li
+                                <!--<li
                                     class="dropdown <?= ($segment2 == 'yearly_leaves' || $segment2 == 'present_hours' || $segment2 == 'apply_leave' || $segment2 == 'department_attendance' || $segment1 == 'employee_salary' || $segment1 == 'hr_attendance') ? 'active' : '' ?>">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">HR <span
                                             class="caret"></span></a>
@@ -1095,10 +1095,7 @@ $segment3 = $this->uri->segment(3);
                                                 <a href="<?php echo base_url() ?>yearly_leaves/yearly_leaves/"><i
                                                         class="fa fa-file-code-o"></i>Yearly Leaves</a></li>
                                         <?php } ?>
-                                        <?php /* <li class="<?= ($segment1 == 'weekly_leaves' && $segment2 == 'weekly_leaves') ? 'active' : '' ?>"><a href="<?php echo base_url() ?>weekly_leaves/weekly_leaves/"><i class="fa fa-file-image-o"></i>Weekly Leaves</a></li> */ ?>
-                                        <?php /* if($this->applib->have_access_role(PRESENT_HOURS_MODULE_ID,"add") || $this->applib->have_access_role(PRESENT_HOURS_MODULE_ID,"view")) { ?>
-                                               <li class="<?= ($segment1 == 'present_hours' && $segment2 == 'present_hours') ? 'active' : '' ?>"><a href="<?php echo base_url() ?>present_hours/present_hours/"><i class="fa fa-clock-o"></i>Present Hours</a></li>
-                                           <?php } */ ?>
+                                       
                                         <?php if ($this->applib->have_access_role(APPLY_LEAVE_ID, "add") || $this->applib->have_access_role(APPLY_LEAVE_ID, "edit") || $this->applib->have_access_role(APPLY_LEAVE_ID, "delete") || $this->applib->have_access_role(APPLY_LEAVE_ID, "view")) { ?>
                                             <li
                                                 class="<?= ($segment1 == 'apply_leave' && $segment2 == 'apply_leave') ? 'active' : '' ?>">
@@ -1129,7 +1126,9 @@ $segment3 = $this->uri->segment(3);
                                                         class="fa fa-pencil-square-o"></i>Employee Salary</a></li>
                                         <?php } ?>
                                     </ul>
-                                </li>
+                                </li>-->
+								
+								
                             <?php } ?>
 
                             <?php if ($this->applib->have_access_role(HALLMARK_MODULE_ID, "view")) { ?>
