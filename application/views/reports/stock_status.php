@@ -701,7 +701,9 @@
             "scrollY": "480px",
             "scrollX": true,
             "search": true,
-            "paging": false,
+            "pageLength": 50,
+            "lengthChange": false,
+            "paging": true,
             "ordering": [1, "desc"],
             "order": [],
             "ajax": {
@@ -724,7 +726,7 @@
             "columnDefs": [{
                 "className": "dt-right",
                 "targets": [2, 3, 4, 5, 6, 7, 8, 9, 10],
-            }, ],
+            }],
             "fnRowCallback": function(nRow, aData) {
 
                 //alert(aData);
