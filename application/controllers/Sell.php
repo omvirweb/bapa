@@ -4162,4 +4162,12 @@ class Sell extends CI_Controller
 
     }
 
+    function get_single_stock_item_data()
+    {
+        $item_stock_id = $_POST['item_stock_id'];
+        $item_data = $this->crud->get_data_row_by_id('item_stock', 'item_stock_id', $item_stock_id);
+        print json_encode($item_data);
+        exit;       
+    }
+
 }
