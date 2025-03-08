@@ -3,8 +3,11 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 // Load the model manually
-require_once APPPATH . 'models/AppModel.php';
-require_once APPPATH . 'models/Crud.php';
+// require_once APPPATH . 'models/AppModel.php';
+// require_once APPPATH . 'models/Crud.php';
+
+require_once '../models/AppModel.php';
+require_once '../models/Crud.php';
 
 
 //loading datatable library
@@ -439,7 +442,7 @@ if (!function_exists('get_stock_status_datatable')) {
             "recordsFiltered" => $datatable->count_filtered(),
             "data" => $data,
         );
-        
+
         echo json_encode($output);
     }
 }
