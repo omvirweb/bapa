@@ -478,7 +478,7 @@ class Reports extends CI_Controller
 
         $config['table'] = 'item_stock s';
         if ($post_data['include_wstg'] == 'true') {
-            $config['select'] = '`s`.`department_id`, `s`.`category_id`, `s`.`item_id`, `s`.`item_stock_id`, `s`.`tunch`, `s`.`rfid_created_grwt`,`cat`.`category_name`, `im`.`item_name`, `im`.`stock_method`, `cat`.`category_group_id`,SUM(s.grwt) AS grwt,SUM(s.ntwt) AS ntwt,sum(s.less) AS less, SUM((s.ntwt * (s.tunch + im.default_wastage))/100) AS fine';
+            $config['select'] = '`s`.`department_id`, `s`.`category_id`, `s`.`item_id`, `s`.`item_stock_id`, `s`.`tunch`, `s`.`rfid_created_grwt`,`cat`.`category_name`, `im`.`item_name`, `im`.`stock_method`, `cat`.`category_group_id`,SUM(s.grwt) AS grwt,SUM(s.ntwt) AS ntwt,sum(s.less) AS less, SUM((s.ntwt * (s.tunch + im.default_wastage))/100) AS fine, im.default_wastage';
         } else {
             $config['select'] = '`s`.`department_id`, `s`.`category_id`, `s`.`item_id`, `s`.`item_stock_id`, `s`.`tunch`, `s`.`rfid_created_grwt`,`cat`.`category_name`, `im`.`item_name`, `im`.`stock_method`, `cat`.`category_group_id`,SUM(s.grwt) AS grwt,SUM(s.ntwt) AS ntwt,sum(s.less) AS less, SUM((s.ntwt * s.tunch)/100) AS fine';
         }
@@ -618,6 +618,13 @@ class Reports extends CI_Controller
 
             $stock_adjust_btn .= ' &nbsp; <a href="javascript:void(0);" class="btn btn-primary btn-xs item_stock_details pull-left" data-category_name="Stock" data-item_name="Stock" style="margin: 0px 3px;" > Stock </a>';
 
+            if ($post_data['include_wstg'] == 'true') {
+                $opening_wstg = $this->Crud->get_row_by_where("opening_stock",array('item_id'=>$stock->item_id));
+                if($stock->default_wastage==0){
+                    @$tunch = $tunch + $opening_wstg->wstg;
+                    $tunch = number_format($tunch,2);
+                }                
+            }
 
             $row = array();
             $row[] = $stock->category_name;
@@ -626,7 +633,7 @@ class Reports extends CI_Controller
                 'to_date' => $post_data['to_date'] ?? '',
                 'department_id' => $post_data['department_id'] ?? '',
                 'category_id' => $post_data['category_id'] ?? '',
-                'item_id' => $post_data['item_id'] ?? '',
+                'item_id' => $stock->item_id ?? $post_data['item_id'],
                 'tunch' => $tunch ?? '',
                 'include_wstg' => isset($post_data['include_wstg']) && $post_data['include_wstg'] === 'true' ? 1 : 0,
                 'rfid_filter' => $post_data['rfid_filter'] ?? '',
