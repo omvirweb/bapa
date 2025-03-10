@@ -978,7 +978,7 @@ $segment3 = $this->uri->segment(3);
                                                 <?php } ?>
 												
 												<?php if ($this->applib->have_access_role(STOCK_STATUS_MODULE_ID, "view")) { ?>
-                                                    <li class="<?= ($segment2 == 'stock_status') ? 'active' : '' ?>"><a
+                                                    <li class="<?= ($segment2 == 'profit_loss') ? 'active' : '' ?>"><a
                                                             href="<?= base_url(); ?>reports/profit_loss/"><i
                                                                 class="fa fa-line-chart"></i>Profit & Loss</a></li>
                                                 <?php } ?>
