@@ -59,7 +59,7 @@
                                             <div class="clrearfix"></div>
                                             <div class="col-md-6">
                                                 <label for="default_wastage">Default Wastage <span class="required-sign">&nbsp;*</span></label>
-                                                <input type="text" name="default_wastage" id="default_wastage" class="form-control num_only"  value="<?= (isset($item_master_data->default_wastage)) ? $item_master_data->default_wastage : '0'; ?>"><br />
+                                                <input type="number" name="default_wastage" id="default_wastage" class="form-control num_only"  value="<?= (isset($item_master_data->default_wastage)) ? $item_master_data->default_wastage : '0'; ?>"><br />
                                             </div>
                                             <div class="col-md-3">
                                                 <label for="less">Less</label><br />

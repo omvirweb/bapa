@@ -1038,6 +1038,7 @@ class Reports extends CI_Controller
             $data['items'] = $this->crud->get_all_records('item_master', 'item_id', '');
             $data['carat'] = $this->crud->get_all_records('carat', 'purity', 'ASC');
             $data['item_wise'] = $item_wise;
+            $data['default_wastage'] = $this->crud->get_column_value_by_id('item_master', 'default_wastage', array('item_id' => $item_stock_data->item_id));
             set_page('reports/stock_ledger', $data);
         } else {
             $this->session->set_flashdata('error_message', 'You have not permission to access this page.');
@@ -1205,6 +1206,13 @@ class Reports extends CI_Controller
             $net_wt = number_format((float) $net_wt, 3, '.', '');
             $touch_id = $stock_ledger->touch_id;
             $wstg = (is_numeric($stock_ledger->wstg)) ? $stock_ledger->wstg : '';
+            if ($post_data['include_wastage'] == 'true') {
+                $opening_wstg = $this->Crud->get_row_by_where("opening_stock",array('item_id'=>$post_data['item_id']));
+                if($post_data['default_wastage']==0){
+                    @$wstg = $wstg + $opening_wstg->wstg;
+                    $wstg = number_format($wstg,2);
+                }                
+            }
             $account_name = ($stock_ledger->account_name != 'account_name') ? $stock_ledger->account_name : '';
             $fine = number_format((float) $stock_ledger->fine, 3, '.', '');
 
