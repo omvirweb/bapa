@@ -444,7 +444,7 @@ define('PRO_MODULE_JOURNAL', 'yes');
 define('PRO_MODULE_CASHBOOK', 'yes');
 define('PRO_MODULE_IMPORT_DATA', 'yes');
 
-define('PRO_MODULE_HR', 'yes');
+define('PRO_MODULE_HR', 'no');
 
 define('PRO_MODULE_MANUFACTURE_MENU', 'yes');
 define('PRO_MODULE_MANUFACTURE_ISSUE_RECEIVE', 'yes');
