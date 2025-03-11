@@ -1,34 +1,38 @@
 <?php
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /**
  * Class Account
  * &@property Crud $crud
  * &@property AppLib $applib
  */
-class Account extends CI_Controller {
+class Account extends CI_Controller
+{
+
 
     public $logged_in_id = null;
     public $now_time = null;
 
-    function __construct() {
+    function __construct()
+    {
         parent::__construct();
         $this->load->helper(array('form', 'url'));
         $this->load->model('Appmodel', 'app_model');
         $this->load->model('Crud', 'crud');
-        if (!$this->session->userdata(PACKAGE_FOLDER_NAME.'is_logged_in')) {
+        if (!$this->session->userdata(PACKAGE_FOLDER_NAME . 'is_logged_in')) {
             redirect('/auth/login/');
         }
-        $this->logged_in_id = $this->session->userdata(PACKAGE_FOLDER_NAME.'is_logged_in')['user_id'];
+        $this->logged_in_id = $this->session->userdata(PACKAGE_FOLDER_NAME . 'is_logged_in')['user_id'];
         $this->now_time = date('Y-m-d H:i:s');
     }
 
-    function account() {
+    function account()
+    {
         $name_data = $this->crud->execuetSQL("SET SESSION group_concat_max_len = 1000000;");
         $name_data = $this->crud->getFromSQL('SELECT GROUP_CONCAT(\'\"\', account_name, \'\"\') as names FROM account');
         $name_data = $name_data[0]->names;
-//        echo '<pre>'.$this->db->last_query(); exit;
+        //        echo '<pre>'.$this->db->last_query(); exit;
 //        echo '<pre>'; print_r($name_data); exit;
         if (!empty($_POST['account_id']) && isset($_POST['account_id'])) {
             if ($this->applib->have_access_role(ACCOUNT_MODULE_ID, "edit")) {
@@ -103,7 +107,7 @@ class Account extends CI_Controller {
                 $data = array();
                 $data['names'] = $name_data;
                 $data['account_mobile_no_is_required'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'account_mobile_no_is_required'));
-//                echo '<pre>'; print_r($data); exit;
+                //                echo '<pre>'; print_r($data); exit;
                 set_page('account/account', $data);
             } else {
                 $this->session->set_flashdata('error_message', 'You have not permission to access this page.');
@@ -111,35 +115,38 @@ class Account extends CI_Controller {
             }
         }
     }
-    function get_name() {
+    function get_name()
+    {
         //print_r($_POST['keyword']); exit;
         $data = '';
-        if(!empty($_POST['keyword'])){}
+        if (!empty($_POST['keyword'])) {
+        }
         $this->db->select('*');
         $this->db->from('account');
         $this->db->like('account_name', $_POST['keyword']);
         $res = $this->db->get();
         $rows = $res->num_rows();
-        
+
         if ($rows > 0) {
             $result = $res->result();
-            
-//            $result = $result[0];
+
+            //            $result = $result[0];
             //echo "<pre>";
             //print_r($result); exit;
             $data = '<ul id="name-list">';
-            foreach($result as $name){
+            foreach ($result as $name) {
                 //print_r($name);
-                
-                $data .= '<li class="li_tag" onClick="selectCountry(\''.$name->account_name.'\')">'.$name->account_name.'</li>';
-                
+
+                $data .= '<li class="li_tag" onClick="selectCountry(\'' . $name->account_name . '\')">' . $name->account_name . '</li>';
+
             }
             $data .= '</ul>';
         }
         echo $data;
     }
 
-    function save_account() {
+    function save_account()
+    {
         $return = array();
         $post_data = $this->input->post();
         $is_approve = $this->app_model->have_access_role(ACCOUNT_MODULE_ID, "approve");
@@ -148,39 +155,40 @@ class Account extends CI_Controller {
 
             // Use default state ID if not provided
             $state_id = !empty($post_data['account_state']) ? (int) $post_data['account_state'] : DEFAULT_STATE_ID;
-        
+
             // Check if city exists
             $existing_city = $this->db->get_where('city', [
                 'city_name' => trim($post_data['account_city']),
-                'state_id'  => $state_id
+                'state_id' => $state_id
             ])->row_array();
-        
+
             if (!empty($existing_city)) {
                 $post_data['account_city'] = $existing_city['city_id']; // Fix array access
             } else {
                 // Create new city
                 $city_data = [
-                    'city_name'  => trim($post_data['account_city']),
-                    'state_id'   => $state_id,
+                    'city_name' => trim($post_data['account_city']),
+                    'state_id' => $state_id,
                     'created_at' => date('Y-m-d H:i:s'),
                     'created_by' => $this->session->userdata('user_id'),
                     'is_deleted' => 0
                 ];
-        
+
                 // Insert new city
                 $this->crud->insert('city', $city_data);
-        
+
                 // Get inserted city ID
                 $post_data['account_city'] = $this->db->insert_id();
             }
         }
-        
-        
-//        echo '<pre>'; print_r($post_data); exit;
-        if (isset($post_data['account_group_id']) && 
-            ($post_data['account_group_id'] == CUSTOMER_GROUP 
-            || $post_data['account_group_id'] == SUNDRY_CREDITORS_ACCOUNT_GROUP 
-            || $post_data['account_group_id'] == SUNDRY_DEBTORS_ACCOUNT_GROUP)
+
+
+        //        echo '<pre>'; print_r($post_data); exit;
+        if (
+            isset($post_data['account_group_id']) &&
+            ($post_data['account_group_id'] == CUSTOMER_GROUP
+                || $post_data['account_group_id'] == SUNDRY_CREDITORS_ACCOUNT_GROUP
+                || $post_data['account_group_id'] == SUNDRY_DEBTORS_ACCOUNT_GROUP)
         ) {
             $line_items_data = json_decode($post_data['line_items_data']);
         }
@@ -210,7 +218,7 @@ class Account extends CI_Controller {
         $post_data['opening_balance_in_silver'] = isset($post_data['opening_balance_in_silver']) && !empty($post_data['opening_balance_in_silver']) ? $post_data['opening_balance_in_silver'] : 0;
         $post_data['price_per_pcs'] = isset($post_data['price_per_pcs']) && !empty($post_data['price_per_pcs']) ? $post_data['price_per_pcs'] : null;
         $post_data['account_status'] = isset($post_data['account_status']) ? $post_data['account_status'] : null;
-        
+
         unset($post_data['line_items_index']);
         unset($post_data['line_items_data']);
         if ($is_approve) {
@@ -219,7 +227,7 @@ class Account extends CI_Controller {
             $post_data['status'] = '2';
             $post_data['account_group_id'] = NOT_APPROVED_ACCOUNT_GROUP_ID;
         }
-        
+
         if (isset($post_data['account_name']) && !empty($post_data['account_name'])) {
             if (isset($post_data['account_id']) && !empty($post_data['account_id'])) {
                 $acc_duplication = $this->crud->get_row_by_id('account', array('account_name' => $post_data['account_name'], 'account_id !=' => $post_data['account_id']));
@@ -232,7 +240,7 @@ class Account extends CI_Controller {
                 exit;
             }
         }
-        
+
         if (isset($post_data['account_email_ids']) && !empty($post_data['account_email_ids'])) {
             if (isset($post_data['account_id']) && !empty($post_data['account_id'])) {
                 $acc_duplication = $this->crud->get_row_by_id('account', array('account_email_ids' => $post_data['account_email_ids'], 'account_id !=' => $post_data['account_id']));
@@ -265,7 +273,7 @@ class Account extends CI_Controller {
                     $this->db->select('*');
                     $this->db->from('account');
                     $this->db->where('account_id !=', $account_id);
-//                    $this->db->where('created_by', $this->logged_in_id);
+                    //                    $this->db->where('created_by', $this->logged_in_id);
                     $this->db->like('account_mobile', $mobile);
                     $res = $this->db->get();
                     $rows = $res->num_rows();
@@ -337,7 +345,7 @@ class Account extends CI_Controller {
             $old_ob_gold = $this->crud->get_val_by_id('account', $post_data['account_id'], 'account_id', 'opening_balance_in_gold');
             $gold_ob_cr_db = $this->crud->get_val_by_id('account', $post_data['account_id'], 'account_id', 'gold_ob_credit_debit');
             $old_gold_fine = $this->crud->get_val_by_id('account', $post_data['account_id'], 'account_id', 'gold_fine');
-            
+
             $old_ob_silver = $this->crud->get_val_by_id('account', $post_data['account_id'], 'account_id', 'opening_balance_in_silver');
             $silver_ob_cr_db = $this->crud->get_val_by_id('account', $post_data['account_id'], 'account_id', 'silver_ob_credit_debit');
             $old_silver_fine = $this->crud->get_val_by_id('account', $post_data['account_id'], 'account_id', 'silver_fine');
@@ -346,17 +354,17 @@ class Account extends CI_Controller {
             $rc_ob_cr_db = $this->crud->get_val_by_id('account', $post_data['account_id'], 'account_id', 'rupees_ob_credit_debit');
             $old_amount = $this->crud->get_val_by_id('account', $post_data['account_id'], 'account_id', 'amount');
 
-            if ($gold_ob_cr_db == '1') { 
+            if ($gold_ob_cr_db == '1') {
                 $old_gold_fine = $old_gold_fine + $old_ob_gold;
             } else {
                 $old_gold_fine = $old_gold_fine - $old_ob_gold;
             }
-            if ($silver_ob_cr_db == '1') { 
+            if ($silver_ob_cr_db == '1') {
                 $old_silver_fine = $old_silver_fine + $old_ob_silver;
             } else {
                 $old_silver_fine = $old_silver_fine - $old_ob_silver;
             }
-            if ($rc_ob_cr_db == '1') { 
+            if ($rc_ob_cr_db == '1') {
                 $old_amount = $old_amount + $old_ob_rs;
             } else {
                 $old_amount = $old_amount - $old_ob_rs;
@@ -378,7 +386,7 @@ class Account extends CI_Controller {
                 $post_data['amount'] = $old_amount + $post_data['opening_balance_in_rupees'];
             }
 
-            if(isset($post_data['is_supplier'])){
+            if (isset($post_data['is_supplier'])) {
                 unset($post_data['is_supplier']);
                 $post_data['is_supplier'] = '1';
             } else {
@@ -432,7 +440,7 @@ class Account extends CI_Controller {
                 $post_data['amount'] = $post_data['opening_balance_in_rupees'];
             }
 
-            if(isset($post_data['is_supplier'])){
+            if (isset($post_data['is_supplier'])) {
                 unset($post_data['is_supplier']);
                 $post_data['is_supplier'] = '1';
             } else {
@@ -443,7 +451,7 @@ class Account extends CI_Controller {
             $post_data['updated_by'] = $this->logged_in_id;
             $post_data['updated_at'] = $this->now_time;
             $result = $this->crud->insert('account', $post_data);
-//            echo $this->db->last_query();
+            //            echo $this->db->last_query();
             if ($result) {
                 $return['success'] = "Added";
                 $this->session->set_flashdata('success', true);
@@ -474,8 +482,9 @@ class Account extends CI_Controller {
         print json_encode($return);
         exit;
     }
-    
-    function get_account_wastages($acc_id){
+
+    function get_account_wastages($acc_id)
+    {
         $return = array();
         $item_data = $this->crud->getFromSQL("SELECT i.item_id,i.item_name,c.category_id,c.category_name,pi.wstg FROM party_item_details as pi LEFT JOIN item_master as i ON i.item_id = pi.item_id  LEFT JOIN category as c ON c.category_id = pi.category_id WHERE pi.account_id = " . $acc_id . " ");
         $return['item_data'] = $item_data;
@@ -483,7 +492,8 @@ class Account extends CI_Controller {
         exit;
     }
 
-    function account_list() {
+    function account_list()
+    {
         if ($this->applib->have_access_role(ACCOUNT_MODULE_ID, "view")) {
             set_page('account/account_list');
         } else {
@@ -491,7 +501,8 @@ class Account extends CI_Controller {
             redirect("/");
         }
     }
-    function account_list_customer() {
+    function account_list_customer()
+    {
         if ($this->applib->have_access_role(ACCOUNT_MODULE_ID, "view")) {
             set_page('account/account_list_customer');
         } else {
@@ -499,7 +510,8 @@ class Account extends CI_Controller {
             redirect("/");
         }
     }
-    function account_list_supplier() {
+    function account_list_supplier()
+    {
         if ($this->applib->have_access_role(ACCOUNT_MODULE_ID, "view")) {
             set_page('account/account_list_supplier');
         } else {
@@ -508,36 +520,37 @@ class Account extends CI_Controller {
         }
     }
 
-    function account_datatable() {
+    function account_datatable()
+    {
         $is_approve = $this->app_model->have_access_role(ACCOUNT_MODULE_ID, "approve");
-        $this->user_type = $this->session->userdata(PACKAGE_FOLDER_NAME.'is_logged_in')['user_type'];
+        $this->user_type = $this->session->userdata(PACKAGE_FOLDER_NAME . 'is_logged_in')['user_type'];
         $config['table'] = 'account a';
         $config['select'] = 'a.is_active,IF(a.is_supplier = 1,"Yes", "No") AS supplier,a.gold_fine, a.silver_fine, a.amount, a.opening_balance_in_gold, a.gold_ob_credit_debit, a.opening_balance_in_silver, a.silver_ob_credit_debit, a.opening_balance_in_rupees, a.rupees_ob_credit_debit,a.account_id, a.account_name, a.account_email_ids, a.account_phone, a.account_mobile, ag.account_group_name as ag_name,a.interest,a.opening_balance,a.credit_debit,a.account_group_id,a.bank_name,a.bank_account_no,a.ifsc_code,a.bank_interest,a.credit_limit,IF(a.status = 1,"Approve","Not Approve") AS status, IF(a.gold_ob_credit_debit = 1,"Credit", "Debit") AS gold_ob_cd, IF(a.silver_ob_credit_debit = 1,"Credit", "Debit") AS silver_ob_cd, IF(a.rupees_ob_credit_debit = 1,"Credit", "Debit") AS rupees_ob_cd';
-        $config['column_order'] = array(null, null, 'a.account_name','a.account_email_ids', 'a.account_phone', 'a.account_mobile', 'ag.account_group_name','a.is_supplier', 'a.interest', 'a.credit_limit', 'a.opening_balance_in_gold', 'a.gold_ob_credit_debit', 'a.opening_balance_in_silver', 'a.silver_ob_credit_debit', 'a.opening_balance_in_rupees', 'a.rupees_ob_credit_debit');
-        $config['column_search'] = array('a.account_name', 'a.account_email_ids', 'a.account_phone', 'a.account_mobile', 'ag.account_group_name', 'a.interest', 'a.credit_limit', 'a.opening_balance', 'a.credit_debit', 'a.opening_balance_in_gold', 'IF(a.gold_ob_credit_debit = 1,"Credit", "Debit")', 'a.opening_balance_in_silver', 'IF(a.silver_ob_credit_debit = 1,"Credit", "Debit")', 'a.opening_balance_in_rupees', 'IF(a.rupees_ob_credit_debit = 1,"Credit", "Debit")', 'a.bank_name', 'a.bank_account_no', 'a.ifsc_code', 'a.bank_interest', 'IF(a.status = 1,"Approve","Not Approve")','IF(a.is_supplier = 1,"Yes", "No")');
-//        if ($this->user_type != USER_TYPE_ADMIN) {
+        $config['column_order'] = array(null, null, 'a.account_name', 'a.account_email_ids', 'a.account_phone', 'a.account_mobile', 'ag.account_group_name', 'a.is_supplier', 'a.interest', 'a.credit_limit', 'a.opening_balance_in_gold', 'a.gold_ob_credit_debit', 'a.opening_balance_in_silver', 'a.silver_ob_credit_debit', 'a.opening_balance_in_rupees', 'a.rupees_ob_credit_debit');
+        $config['column_search'] = array('a.account_name', 'a.account_email_ids', 'a.account_phone', 'a.account_mobile', 'ag.account_group_name', 'a.interest', 'a.credit_limit', 'a.opening_balance', 'a.credit_debit', 'a.opening_balance_in_gold', 'IF(a.gold_ob_credit_debit = 1,"Credit", "Debit")', 'a.opening_balance_in_silver', 'IF(a.silver_ob_credit_debit = 1,"Credit", "Debit")', 'a.opening_balance_in_rupees', 'IF(a.rupees_ob_credit_debit = 1,"Credit", "Debit")', 'a.bank_name', 'a.bank_account_no', 'a.ifsc_code', 'a.bank_interest', 'IF(a.status = 1,"Approve","Not Approve")', 'IF(a.is_supplier = 1,"Yes", "No")');
+        //        if ($this->user_type != USER_TYPE_ADMIN) {
 //            $config['wheres'][] = array('column_name' => 'a.created_by', 'column_value' => $this->logged_in_id);
 //        }
 
 
         $config['custom_where'] = '1=1';
         $account_groups = $this->applib->current_user_account_group_ids();
-        if(!empty($account_groups)) {
-            $config['custom_where'] .= ' AND a.account_group_id IN ('.implode(',',$account_groups).')';
+        if (!empty($account_groups)) {
+            $config['custom_where'] .= ' AND a.account_group_id IN (' . implode(',', $account_groups) . ')';
         } else {
             $config['custom_where'] .= ' AND a.account_group_id IN(-1)';
         }
 
         $account_ids = $this->applib->current_user_account_ids();
-        if($account_ids == "allow_all_accounts"){
-            
-        } elseif(!empty($account_ids)){
+        if ($account_ids == "allow_all_accounts") {
+
+        } elseif (!empty($account_ids)) {
             $account_ids = implode(',', $account_ids);
-            $config['custom_where'] .= ' AND a.account_id IN('.$account_ids.')';
+            $config['custom_where'] .= ' AND a.account_id IN(' . $account_ids . ')';
         } else {
             $config['custom_where'] .= ' AND a.account_id IN(-1)';
         }
-        
+
         if (isset($_POST['status']) && !empty($_POST['status'])) {
             $config['wheres'][] = array('column_name' => 'a.status', 'column_value' => $_POST['status']);
         }
@@ -547,50 +560,50 @@ class Account extends CI_Controller {
         $this->load->library('datatables', $config, 'datatable');
         $list = $this->datatable->get_datatables();
         $data = array();
-//        echo "<pre>"; print_r($list); exit;
+        //        echo "<pre>"; print_r($list); exit;
         $role_delete = $this->app_model->have_access_role(ACCOUNT_MODULE_ID, "delete");
         $role_edit = $this->app_model->have_access_role(ACCOUNT_MODULE_ID, "edit");
         foreach ($list as $accounts) {
             $row = array();
             $action = '';
-            if($accounts->account_group_id != ADMIN_GROUP && $accounts->account_group_id != USER_GROUP && $accounts->account_group_id != WORKER_GROUP && $accounts->account_group_id != SALESMAN_GROUP){
-                if($role_edit){
+            if ($accounts->account_group_id != ADMIN_GROUP && $accounts->account_group_id != USER_GROUP && $accounts->account_group_id != WORKER_GROUP && $accounts->account_group_id != SALESMAN_GROUP) {
+                if ($role_edit) {
                     $action .= '<div style="width:80px;"><form id="edit_' . $accounts->account_id . '" method="post" action="' . base_url() . 'account/account" style="width: 30px; display: initial;" >
                                 <input type="hidden" name="account_id" id="account_id" value="' . $accounts->account_id . '">
                                 <a class="edit_button btn-primary btn-xs" href="javascript:{}" onclick="document.getElementById(\'edit_' . $accounts->account_id . '\').submit();" title="Edit Account"><i class="fa fa-edit"></i></a>
                             </form> ';
                 }
             }
-            
-            if($accounts->account_id == CUSTOMER_MONTHLY_INTEREST_ACCOUNT_ID || $accounts->account_id == ADJUST_EXPENSE_ACCOUNT_ID || $accounts->account_id == SALARY_EXPENSE_ACCOUNT_ID || $accounts->account_id == MF_LOSS_EXPENSE_ACCOUNT_ID || $accounts->account_id == XRF_HM_LASER_PL_EXPENSE_ACCOUNT_ID){
+
+            if ($accounts->account_id == CUSTOMER_MONTHLY_INTEREST_ACCOUNT_ID || $accounts->account_id == ADJUST_EXPENSE_ACCOUNT_ID || $accounts->account_id == SALARY_EXPENSE_ACCOUNT_ID || $accounts->account_id == MF_LOSS_EXPENSE_ACCOUNT_ID || $accounts->account_id == XRF_HM_LASER_PL_EXPENSE_ACCOUNT_ID) {
             } else {
-            
-                if($accounts->account_group_id != DEPARTMENT_GROUP && $accounts->account_group_id != ADMIN_GROUP && $accounts->account_group_id != USER_GROUP && $accounts->account_group_id != WORKER_GROUP && $accounts->account_group_id != SALESMAN_GROUP){
+
+                if ($accounts->account_group_id != DEPARTMENT_GROUP && $accounts->account_group_id != ADMIN_GROUP && $accounts->account_group_id != USER_GROUP && $accounts->account_group_id != WORKER_GROUP && $accounts->account_group_id != SALESMAN_GROUP) {
                     if ($role_delete) {
                         $action .= '| <a href="javascript:void(0);" class="delete_button btn-danger btn-xs" data-href="' . base_url('account/delete/' . $accounts->account_id) . '"><i class="fa fa-trash"></i></a> ';
                     }
-    //            $action .= '| <a href="javascript:void(0);" class="print_modal" title="ledger Print" data-account_id="' . $accounts->account_id . '" ><span class="glyphicon glyphicon-print" style="color : #419bf4"></span></a></div>';
-    //                $action .= '| <a href="javascript:void(0);" class="ledger" title="ledger" data-account_id="' . $accounts->account_id . '" ><span class="fa fa-file" style="color : #419bf4"></span></a></div>';
+                    //            $action .= '| <a href="javascript:void(0);" class="print_modal" title="ledger Print" data-account_id="' . $accounts->account_id . '" ><span class="glyphicon glyphicon-print" style="color : #419bf4"></span></a></div>';
+                    //                $action .= '| <a href="javascript:void(0);" class="ledger" title="ledger" data-account_id="' . $accounts->account_id . '" ><span class="fa fa-file" style="color : #419bf4"></span></a></div>';
                 }
             }
-            if($role_edit){
-                if($accounts->is_active == '1'){
+            if ($role_edit) {
+                if ($accounts->is_active == '1') {
                     $action .= '| <a href="javascript:void(0);" title="Click To Deactivate" data-status="0" class="ac_dc_button" data-href="' . base_url('account/active_deactive/' . $accounts->account_id) . '"><span class="glyphicon glyphicon-ok" style="color : green">&nbsp;</span></a>';
-                } else if($accounts->is_active == '0'){
+                } else if ($accounts->is_active == '0') {
                     $action .= '| <a href="javascript:void(0);" title="Click To Active" data-status="1" class="ac_dc_button" data-href="' . base_url('account/active_deactive/' . $accounts->account_id) . '"><span class="glyphicon glyphicon-remove" style="color : red">&nbsp;</span></a>';
                 }
             }
-            if($accounts->account_id == CASE_CUSTOMER_ACCOUNT_ID){
+            if ($accounts->account_id == CASE_CUSTOMER_ACCOUNT_ID) {
                 $row[] = '';
             } else {
                 $row[] = $action;
             }
             if ($is_approve && $accounts->status == "Not Approve") {
                 $is_confirm_only = 'data-confirm_only="0"';
-                if (in_array($accounts->account_group_id,array(ADMIN_GROUP,USER_GROUP,WORKER_GROUP,SALESMAN_GROUP))) {
+                if (in_array($accounts->account_group_id, array(ADMIN_GROUP, USER_GROUP, WORKER_GROUP, SALESMAN_GROUP))) {
                     $is_confirm_only = 'data-confirm_only="1"';
                 }
-                $icon = '&nbsp;&nbsp;<a href="javascript:void(0);" class="change_approve_status btn-primary btn-xs" data-href="' . base_url('account/change_approve_status/' . $accounts->account_id) . '" data-account_id="'.$accounts->account_id.'" '.$is_confirm_only.'><i class="fa fa-check"></i></a>';
+                $icon = '&nbsp;&nbsp;<a href="javascript:void(0);" class="change_approve_status btn-primary btn-xs" data-href="' . base_url('account/change_approve_status/' . $accounts->account_id) . '" data-account_id="' . $accounts->account_id . '" ' . $is_confirm_only . '><i class="fa fa-check"></i></a>';
             } else {
                 $icon = '';
             }
@@ -640,38 +653,39 @@ class Account extends CI_Controller {
         //output to json format
         echo json_encode($output);
     }
-    function account_datatable_customer() {
+    function account_datatable_customer()
+    {
         $is_approve = $this->app_model->have_access_role(ACCOUNT_MODULE_ID, "approve");
-        $this->user_type = $this->session->userdata(PACKAGE_FOLDER_NAME.'is_logged_in')['user_type'];
+        $this->user_type = $this->session->userdata(PACKAGE_FOLDER_NAME . 'is_logged_in')['user_type'];
         $config['table'] = 'account a';
         $config['select'] = 'a.is_active,IF(a.is_supplier = 1,"Yes", "No") AS supplier,a.gold_fine, a.silver_fine, a.amount, a.opening_balance_in_gold, a.gold_ob_credit_debit, a.opening_balance_in_silver, a.silver_ob_credit_debit, a.opening_balance_in_rupees, a.rupees_ob_credit_debit,a.account_id, a.account_name, a.account_email_ids, a.account_phone, a.account_mobile, ag.account_group_name as ag_name,a.interest,a.opening_balance,a.credit_debit,a.account_group_id,a.bank_name,a.bank_account_no,a.ifsc_code,a.bank_interest,a.credit_limit,IF(a.status = 1,"Approve","Not Approve") AS status, IF(a.gold_ob_credit_debit = 1,"Credit", "Debit") AS gold_ob_cd, IF(a.silver_ob_credit_debit = 1,"Credit", "Debit") AS silver_ob_cd, IF(a.rupees_ob_credit_debit = 1,"Credit", "Debit") AS rupees_ob_cd';
-        $config['column_order'] = array(null, null, 'a.account_name','a.account_email_ids', 'a.account_phone', 'a.account_mobile', 'ag.account_group_name','a.is_supplier', 'a.interest', 'a.credit_limit', 'a.opening_balance_in_gold', 'a.gold_ob_credit_debit', 'a.opening_balance_in_silver', 'a.silver_ob_credit_debit', 'a.opening_balance_in_rupees', 'a.rupees_ob_credit_debit');
-        $config['column_search'] = array('a.account_name', 'a.account_email_ids', 'a.account_phone', 'a.account_mobile', 'ag.account_group_name', 'a.interest', 'a.credit_limit', 'a.opening_balance', 'a.credit_debit', 'a.opening_balance_in_gold', 'IF(a.gold_ob_credit_debit = 1,"Credit", "Debit")', 'a.opening_balance_in_silver', 'IF(a.silver_ob_credit_debit = 1,"Credit", "Debit")', 'a.opening_balance_in_rupees', 'IF(a.rupees_ob_credit_debit = 1,"Credit", "Debit")', 'a.bank_name', 'a.bank_account_no', 'a.ifsc_code', 'a.bank_interest', 'IF(a.status = 1,"Approve","Not Approve")','IF(a.is_supplier = 1,"Yes", "No")');
-//        if ($this->user_type != USER_TYPE_ADMIN) {
+        $config['column_order'] = array(null, null, 'a.account_name', 'a.account_email_ids', 'a.account_phone', 'a.account_mobile', 'ag.account_group_name', 'a.is_supplier', 'a.interest', 'a.credit_limit', 'a.opening_balance_in_gold', 'a.gold_ob_credit_debit', 'a.opening_balance_in_silver', 'a.silver_ob_credit_debit', 'a.opening_balance_in_rupees', 'a.rupees_ob_credit_debit');
+        $config['column_search'] = array('a.account_name', 'a.account_email_ids', 'a.account_phone', 'a.account_mobile', 'ag.account_group_name', 'a.interest', 'a.credit_limit', 'a.opening_balance', 'a.credit_debit', 'a.opening_balance_in_gold', 'IF(a.gold_ob_credit_debit = 1,"Credit", "Debit")', 'a.opening_balance_in_silver', 'IF(a.silver_ob_credit_debit = 1,"Credit", "Debit")', 'a.opening_balance_in_rupees', 'IF(a.rupees_ob_credit_debit = 1,"Credit", "Debit")', 'a.bank_name', 'a.bank_account_no', 'a.ifsc_code', 'a.bank_interest', 'IF(a.status = 1,"Approve","Not Approve")', 'IF(a.is_supplier = 1,"Yes", "No")');
+        //        if ($this->user_type != USER_TYPE_ADMIN) {
 //            $config['wheres'][] = array('column_name' => 'a.created_by', 'column_value' => $this->logged_in_id);
 //        }
 
 
         $config['custom_where'] = '1=1';
         $account_groups = $this->applib->current_user_account_group_ids();
-        if(!empty($account_groups)) {
-            $config['custom_where'] .= ' AND a.account_group_id IN ('.implode(',',$account_groups).')';
+        if (!empty($account_groups)) {
+            $config['custom_where'] .= ' AND a.account_group_id IN (' . implode(',', $account_groups) . ')';
         } else {
             $config['custom_where'] .= ' AND a.account_group_id IN(-1)';
         }
 
         $account_ids = $this->applib->current_user_account_ids();
-        if($account_ids == "allow_all_accounts"){
-            
-        } elseif(!empty($account_ids)){
+        if ($account_ids == "allow_all_accounts") {
+
+        } elseif (!empty($account_ids)) {
             $account_ids = implode(',', $account_ids);
-            $config['custom_where'] .= ' AND a.account_id IN('.$account_ids.')';
+            $config['custom_where'] .= ' AND a.account_id IN(' . $account_ids . ')';
         } else {
             $config['custom_where'] .= ' AND a.account_id IN(-1)';
         }
         $config['custom_where'] = 'a.account_group_id = ' . CUSTOMER_GROUP;
 
-        
+
         if (isset($_POST['status']) && !empty($_POST['status'])) {
             $config['wheres'][] = array('column_name' => 'a.status', 'column_value' => $_POST['status']);
         }
@@ -681,50 +695,50 @@ class Account extends CI_Controller {
         $this->load->library('datatables', $config, 'datatable');
         $list = $this->datatable->get_datatables();
         $data = array();
-//        echo "<pre>"; print_r($list); exit;
+        //        echo "<pre>"; print_r($list); exit;
         $role_delete = $this->app_model->have_access_role(ACCOUNT_MODULE_ID, "delete");
         $role_edit = $this->app_model->have_access_role(ACCOUNT_MODULE_ID, "edit");
         foreach ($list as $accounts) {
             $row = array();
             $action = '';
-            if($accounts->account_group_id != ADMIN_GROUP && $accounts->account_group_id != USER_GROUP && $accounts->account_group_id != WORKER_GROUP && $accounts->account_group_id != SALESMAN_GROUP){
-                if($role_edit){
+            if ($accounts->account_group_id != ADMIN_GROUP && $accounts->account_group_id != USER_GROUP && $accounts->account_group_id != WORKER_GROUP && $accounts->account_group_id != SALESMAN_GROUP) {
+                if ($role_edit) {
                     $action .= '<div style="width:80px;"><form id="edit_' . $accounts->account_id . '" method="post" action="' . base_url() . 'account/account" style="width: 30px; display: initial;" >
                                 <input type="hidden" name="account_id" id="account_id" value="' . $accounts->account_id . '">
                                 <a class="edit_button btn-primary btn-xs" href="javascript:{}" onclick="document.getElementById(\'edit_' . $accounts->account_id . '\').submit();" title="Edit Account"><i class="fa fa-edit"></i></a>
                             </form> ';
                 }
             }
-            
-            if($accounts->account_id == CUSTOMER_MONTHLY_INTEREST_ACCOUNT_ID || $accounts->account_id == ADJUST_EXPENSE_ACCOUNT_ID || $accounts->account_id == SALARY_EXPENSE_ACCOUNT_ID || $accounts->account_id == MF_LOSS_EXPENSE_ACCOUNT_ID || $accounts->account_id == XRF_HM_LASER_PL_EXPENSE_ACCOUNT_ID){
+
+            if ($accounts->account_id == CUSTOMER_MONTHLY_INTEREST_ACCOUNT_ID || $accounts->account_id == ADJUST_EXPENSE_ACCOUNT_ID || $accounts->account_id == SALARY_EXPENSE_ACCOUNT_ID || $accounts->account_id == MF_LOSS_EXPENSE_ACCOUNT_ID || $accounts->account_id == XRF_HM_LASER_PL_EXPENSE_ACCOUNT_ID) {
             } else {
-            
-                if($accounts->account_group_id != DEPARTMENT_GROUP && $accounts->account_group_id != ADMIN_GROUP && $accounts->account_group_id != USER_GROUP && $accounts->account_group_id != WORKER_GROUP && $accounts->account_group_id != SALESMAN_GROUP){
+
+                if ($accounts->account_group_id != DEPARTMENT_GROUP && $accounts->account_group_id != ADMIN_GROUP && $accounts->account_group_id != USER_GROUP && $accounts->account_group_id != WORKER_GROUP && $accounts->account_group_id != SALESMAN_GROUP) {
                     if ($role_delete) {
                         $action .= '| <a href="javascript:void(0);" class="delete_button btn-danger btn-xs" data-href="' . base_url('account/delete/' . $accounts->account_id) . '"><i class="fa fa-trash"></i></a> ';
                     }
-    //            $action .= '| <a href="javascript:void(0);" class="print_modal" title="ledger Print" data-account_id="' . $accounts->account_id . '" ><span class="glyphicon glyphicon-print" style="color : #419bf4"></span></a></div>';
-    //                $action .= '| <a href="javascript:void(0);" class="ledger" title="ledger" data-account_id="' . $accounts->account_id . '" ><span class="fa fa-file" style="color : #419bf4"></span></a></div>';
+                    //            $action .= '| <a href="javascript:void(0);" class="print_modal" title="ledger Print" data-account_id="' . $accounts->account_id . '" ><span class="glyphicon glyphicon-print" style="color : #419bf4"></span></a></div>';
+                    //                $action .= '| <a href="javascript:void(0);" class="ledger" title="ledger" data-account_id="' . $accounts->account_id . '" ><span class="fa fa-file" style="color : #419bf4"></span></a></div>';
                 }
             }
-            if($role_edit){
-                if($accounts->is_active == '1'){
+            if ($role_edit) {
+                if ($accounts->is_active == '1') {
                     $action .= '| <a href="javascript:void(0);" title="Click To Deactivate" data-status="0" class="ac_dc_button" data-href="' . base_url('account/active_deactive/' . $accounts->account_id) . '"><span class="glyphicon glyphicon-ok" style="color : green">&nbsp;</span></a>';
-                } else if($accounts->is_active == '0'){
+                } else if ($accounts->is_active == '0') {
                     $action .= '| <a href="javascript:void(0);" title="Click To Active" data-status="1" class="ac_dc_button" data-href="' . base_url('account/active_deactive/' . $accounts->account_id) . '"><span class="glyphicon glyphicon-remove" style="color : red">&nbsp;</span></a>';
                 }
             }
-            if($accounts->account_id == CASE_CUSTOMER_ACCOUNT_ID){
+            if ($accounts->account_id == CASE_CUSTOMER_ACCOUNT_ID) {
                 $row[] = '';
             } else {
                 $row[] = $action;
             }
             if ($is_approve && $accounts->status == "Not Approve") {
                 $is_confirm_only = 'data-confirm_only="0"';
-                if (in_array($accounts->account_group_id,array(ADMIN_GROUP,USER_GROUP,WORKER_GROUP,SALESMAN_GROUP))) {
+                if (in_array($accounts->account_group_id, array(ADMIN_GROUP, USER_GROUP, WORKER_GROUP, SALESMAN_GROUP))) {
                     $is_confirm_only = 'data-confirm_only="1"';
                 }
-                $icon = '&nbsp;&nbsp;<a href="javascript:void(0);" class="change_approve_status btn-primary btn-xs" data-href="' . base_url('account/change_approve_status/' . $accounts->account_id) . '" data-account_id="'.$accounts->account_id.'" '.$is_confirm_only.'><i class="fa fa-check"></i></a>';
+                $icon = '&nbsp;&nbsp;<a href="javascript:void(0);" class="change_approve_status btn-primary btn-xs" data-href="' . base_url('account/change_approve_status/' . $accounts->account_id) . '" data-account_id="' . $accounts->account_id . '" ' . $is_confirm_only . '><i class="fa fa-check"></i></a>';
             } else {
                 $icon = '';
             }
@@ -774,38 +788,39 @@ class Account extends CI_Controller {
         //output to json format
         echo json_encode($output);
     }
-    function account_datatable_supplier() {
+    function account_datatable_supplier()
+    {
         $is_approve = $this->app_model->have_access_role(ACCOUNT_MODULE_ID, "approve");
-        $this->user_type = $this->session->userdata(PACKAGE_FOLDER_NAME.'is_logged_in')['user_type'];
+        $this->user_type = $this->session->userdata(PACKAGE_FOLDER_NAME . 'is_logged_in')['user_type'];
         $config['table'] = 'account a';
         $config['select'] = 'a.is_active,IF(a.is_supplier = 1,"Yes", "No") AS supplier,a.gold_fine, a.silver_fine, a.amount, a.opening_balance_in_gold, a.gold_ob_credit_debit, a.opening_balance_in_silver, a.silver_ob_credit_debit, a.opening_balance_in_rupees, a.rupees_ob_credit_debit,a.account_id, a.account_name, a.account_email_ids, a.account_phone, a.account_mobile, ag.account_group_name as ag_name,a.interest,a.opening_balance,a.credit_debit,a.account_group_id,a.bank_name,a.bank_account_no,a.ifsc_code,a.bank_interest,a.credit_limit,IF(a.status = 1,"Approve","Not Approve") AS status, IF(a.gold_ob_credit_debit = 1,"Credit", "Debit") AS gold_ob_cd, IF(a.silver_ob_credit_debit = 1,"Credit", "Debit") AS silver_ob_cd, IF(a.rupees_ob_credit_debit = 1,"Credit", "Debit") AS rupees_ob_cd';
-        $config['column_order'] = array(null, null, 'a.account_name','a.account_email_ids', 'a.account_phone', 'a.account_mobile', 'ag.account_group_name','a.is_supplier', 'a.interest', 'a.credit_limit', 'a.opening_balance_in_gold', 'a.gold_ob_credit_debit', 'a.opening_balance_in_silver', 'a.silver_ob_credit_debit', 'a.opening_balance_in_rupees', 'a.rupees_ob_credit_debit');
-        $config['column_search'] = array('a.account_name', 'a.account_email_ids', 'a.account_phone', 'a.account_mobile', 'ag.account_group_name', 'a.interest', 'a.credit_limit', 'a.opening_balance', 'a.credit_debit', 'a.opening_balance_in_gold', 'IF(a.gold_ob_credit_debit = 1,"Credit", "Debit")', 'a.opening_balance_in_silver', 'IF(a.silver_ob_credit_debit = 1,"Credit", "Debit")', 'a.opening_balance_in_rupees', 'IF(a.rupees_ob_credit_debit = 1,"Credit", "Debit")', 'a.bank_name', 'a.bank_account_no', 'a.ifsc_code', 'a.bank_interest', 'IF(a.status = 1,"Approve","Not Approve")','IF(a.is_supplier = 1,"Yes", "No")');
-//        if ($this->user_type != USER_TYPE_ADMIN) {
+        $config['column_order'] = array(null, null, 'a.account_name', 'a.account_email_ids', 'a.account_phone', 'a.account_mobile', 'ag.account_group_name', 'a.is_supplier', 'a.interest', 'a.credit_limit', 'a.opening_balance_in_gold', 'a.gold_ob_credit_debit', 'a.opening_balance_in_silver', 'a.silver_ob_credit_debit', 'a.opening_balance_in_rupees', 'a.rupees_ob_credit_debit');
+        $config['column_search'] = array('a.account_name', 'a.account_email_ids', 'a.account_phone', 'a.account_mobile', 'ag.account_group_name', 'a.interest', 'a.credit_limit', 'a.opening_balance', 'a.credit_debit', 'a.opening_balance_in_gold', 'IF(a.gold_ob_credit_debit = 1,"Credit", "Debit")', 'a.opening_balance_in_silver', 'IF(a.silver_ob_credit_debit = 1,"Credit", "Debit")', 'a.opening_balance_in_rupees', 'IF(a.rupees_ob_credit_debit = 1,"Credit", "Debit")', 'a.bank_name', 'a.bank_account_no', 'a.ifsc_code', 'a.bank_interest', 'IF(a.status = 1,"Approve","Not Approve")', 'IF(a.is_supplier = 1,"Yes", "No")');
+        //        if ($this->user_type != USER_TYPE_ADMIN) {
 //            $config['wheres'][] = array('column_name' => 'a.created_by', 'column_value' => $this->logged_in_id);
 //        }
 
 
         $config['custom_where'] = '1=1';
         $account_groups = $this->applib->current_user_account_group_ids();
-        if(!empty($account_groups)) {
-            $config['custom_where'] .= ' AND a.account_group_id IN ('.implode(',',$account_groups).')';
+        if (!empty($account_groups)) {
+            $config['custom_where'] .= ' AND a.account_group_id IN (' . implode(',', $account_groups) . ')';
         } else {
             $config['custom_where'] .= ' AND a.account_group_id IN(-1)';
         }
 
         $account_ids = $this->applib->current_user_account_ids();
-        if($account_ids == "allow_all_accounts"){
-            
-        } elseif(!empty($account_ids)){
+        if ($account_ids == "allow_all_accounts") {
+
+        } elseif (!empty($account_ids)) {
             $account_ids = implode(',', $account_ids);
-            $config['custom_where'] .= ' AND a.account_id IN('.$account_ids.')';
+            $config['custom_where'] .= ' AND a.account_id IN(' . $account_ids . ')';
         } else {
             $config['custom_where'] .= ' AND a.account_id IN(-1)';
         }
         $config['custom_where'] = 'a.account_group_id = ' . SUPPLIER;
 
-        
+
         if (isset($_POST['status']) && !empty($_POST['status'])) {
             $config['wheres'][] = array('column_name' => 'a.status', 'column_value' => $_POST['status']);
         }
@@ -815,50 +830,50 @@ class Account extends CI_Controller {
         $this->load->library('datatables', $config, 'datatable');
         $list = $this->datatable->get_datatables();
         $data = array();
-//        echo "<pre>"; print_r($list); exit;
+        //        echo "<pre>"; print_r($list); exit;
         $role_delete = $this->app_model->have_access_role(ACCOUNT_MODULE_ID, "delete");
         $role_edit = $this->app_model->have_access_role(ACCOUNT_MODULE_ID, "edit");
         foreach ($list as $accounts) {
             $row = array();
             $action = '';
-            if($accounts->account_group_id != ADMIN_GROUP && $accounts->account_group_id != USER_GROUP && $accounts->account_group_id != WORKER_GROUP && $accounts->account_group_id != SALESMAN_GROUP){
-                if($role_edit){
+            if ($accounts->account_group_id != ADMIN_GROUP && $accounts->account_group_id != USER_GROUP && $accounts->account_group_id != WORKER_GROUP && $accounts->account_group_id != SALESMAN_GROUP) {
+                if ($role_edit) {
                     $action .= '<div style="width:80px;"><form id="edit_' . $accounts->account_id . '" method="post" action="' . base_url() . 'account/account" style="width: 30px; display: initial;" >
                                 <input type="hidden" name="account_id" id="account_id" value="' . $accounts->account_id . '">
                                 <a class="edit_button btn-primary btn-xs" href="javascript:{}" onclick="document.getElementById(\'edit_' . $accounts->account_id . '\').submit();" title="Edit Account"><i class="fa fa-edit"></i></a>
                             </form> ';
                 }
             }
-            
-            if($accounts->account_id == CUSTOMER_MONTHLY_INTEREST_ACCOUNT_ID || $accounts->account_id == ADJUST_EXPENSE_ACCOUNT_ID || $accounts->account_id == SALARY_EXPENSE_ACCOUNT_ID || $accounts->account_id == MF_LOSS_EXPENSE_ACCOUNT_ID || $accounts->account_id == XRF_HM_LASER_PL_EXPENSE_ACCOUNT_ID){
+
+            if ($accounts->account_id == CUSTOMER_MONTHLY_INTEREST_ACCOUNT_ID || $accounts->account_id == ADJUST_EXPENSE_ACCOUNT_ID || $accounts->account_id == SALARY_EXPENSE_ACCOUNT_ID || $accounts->account_id == MF_LOSS_EXPENSE_ACCOUNT_ID || $accounts->account_id == XRF_HM_LASER_PL_EXPENSE_ACCOUNT_ID) {
             } else {
-            
-                if($accounts->account_group_id != DEPARTMENT_GROUP && $accounts->account_group_id != ADMIN_GROUP && $accounts->account_group_id != USER_GROUP && $accounts->account_group_id != WORKER_GROUP && $accounts->account_group_id != SALESMAN_GROUP){
+
+                if ($accounts->account_group_id != DEPARTMENT_GROUP && $accounts->account_group_id != ADMIN_GROUP && $accounts->account_group_id != USER_GROUP && $accounts->account_group_id != WORKER_GROUP && $accounts->account_group_id != SALESMAN_GROUP) {
                     if ($role_delete) {
                         $action .= '| <a href="javascript:void(0);" class="delete_button btn-danger btn-xs" data-href="' . base_url('account/delete/' . $accounts->account_id) . '"><i class="fa fa-trash"></i></a> ';
                     }
-    //            $action .= '| <a href="javascript:void(0);" class="print_modal" title="ledger Print" data-account_id="' . $accounts->account_id . '" ><span class="glyphicon glyphicon-print" style="color : #419bf4"></span></a></div>';
-    //                $action .= '| <a href="javascript:void(0);" class="ledger" title="ledger" data-account_id="' . $accounts->account_id . '" ><span class="fa fa-file" style="color : #419bf4"></span></a></div>';
+                    //            $action .= '| <a href="javascript:void(0);" class="print_modal" title="ledger Print" data-account_id="' . $accounts->account_id . '" ><span class="glyphicon glyphicon-print" style="color : #419bf4"></span></a></div>';
+                    //                $action .= '| <a href="javascript:void(0);" class="ledger" title="ledger" data-account_id="' . $accounts->account_id . '" ><span class="fa fa-file" style="color : #419bf4"></span></a></div>';
                 }
             }
-            if($role_edit){
-                if($accounts->is_active == '1'){
+            if ($role_edit) {
+                if ($accounts->is_active == '1') {
                     $action .= '| <a href="javascript:void(0);" title="Click To Deactivate" data-status="0" class="ac_dc_button" data-href="' . base_url('account/active_deactive/' . $accounts->account_id) . '"><span class="glyphicon glyphicon-ok" style="color : green">&nbsp;</span></a>';
-                } else if($accounts->is_active == '0'){
+                } else if ($accounts->is_active == '0') {
                     $action .= '| <a href="javascript:void(0);" title="Click To Active" data-status="1" class="ac_dc_button" data-href="' . base_url('account/active_deactive/' . $accounts->account_id) . '"><span class="glyphicon glyphicon-remove" style="color : red">&nbsp;</span></a>';
                 }
             }
-            if($accounts->account_id == CASE_CUSTOMER_ACCOUNT_ID){
+            if ($accounts->account_id == CASE_CUSTOMER_ACCOUNT_ID) {
                 $row[] = '';
             } else {
                 $row[] = $action;
             }
             if ($is_approve && $accounts->status == "Not Approve") {
                 $is_confirm_only = 'data-confirm_only="0"';
-                if (in_array($accounts->account_group_id,array(ADMIN_GROUP,USER_GROUP,WORKER_GROUP,SALESMAN_GROUP))) {
+                if (in_array($accounts->account_group_id, array(ADMIN_GROUP, USER_GROUP, WORKER_GROUP, SALESMAN_GROUP))) {
                     $is_confirm_only = 'data-confirm_only="1"';
                 }
-                $icon = '&nbsp;&nbsp;<a href="javascript:void(0);" class="change_approve_status btn-primary btn-xs" data-href="' . base_url('account/change_approve_status/' . $accounts->account_id) . '" data-account_id="'.$accounts->account_id.'" '.$is_confirm_only.'><i class="fa fa-check"></i></a>';
+                $icon = '&nbsp;&nbsp;<a href="javascript:void(0);" class="change_approve_status btn-primary btn-xs" data-href="' . base_url('account/change_approve_status/' . $accounts->account_id) . '" data-account_id="' . $accounts->account_id . '" ' . $is_confirm_only . '><i class="fa fa-check"></i></a>';
             } else {
                 $icon = '';
             }
@@ -908,12 +923,14 @@ class Account extends CI_Controller {
         //output to json format
         echo json_encode($output);
     }
-    
-    function active_deactive($account_id){
+
+    function active_deactive($account_id)
+    {
         $this->crud->update('account', array('is_active' => $_POST['status']), array('account_id' => $account_id));
     }
-    
-    function account_item_datatable() {
+
+    function account_item_datatable()
+    {
         $post_data = $this->input->post();
         $config['table'] = 'party_item_details si';
         $config['select'] = 'si.*,im.item_name,c.category_name';
@@ -927,7 +944,7 @@ class Account extends CI_Controller {
         }
         $this->load->library('datatables', $config, 'datatable');
         $list = $this->datatable->get_datatables();
-//            echo $this->db->last_query();
+        //            echo $this->db->last_query();
         $data = array();
         foreach ($list as $sell_detail) {
             $row = array();
@@ -945,7 +962,8 @@ class Account extends CI_Controller {
         echo json_encode($output);
     }
 
-    function is_account_balace_zero($account_id) {
+    function is_account_balace_zero($account_id)
+    {
         if (!empty($account_id)) {
             $account_data = $this->crud->get_row_by_id('account', array('account_id' => $account_id));
             if (!empty($account_data)) {
@@ -954,7 +972,7 @@ class Account extends CI_Controller {
                 $journal_details_data = $this->crud->get_row_by_id('journal_details', array('account_id' => $account_id));
                 $payment_receipt_data = $this->crud->get_row_by_id('payment_receipt', array('account_id' => $account_id));
                 $transfer_data = $this->crud->get_row_by_id('transfer', array('transfer_account_id' => $account_id));
-//                if ($account_data[0]->gold_fine == 0 && $account_data[0]->silver_fine == 0 && $account_data[0]->amount == 0) {
+                //                if ($account_data[0]->gold_fine == 0 && $account_data[0]->silver_fine == 0 && $account_data[0]->amount == 0) {
                 if (empty($sell_data) && empty($order_data) && empty($journal_details_data) && empty($payment_receipt_data) && empty($transfer_data)) {
                     return true;
                 } else {
@@ -968,7 +986,8 @@ class Account extends CI_Controller {
         }
     }
 
-    function is_opening_balace_zero($account_id) {
+    function is_opening_balace_zero($account_id)
+    {
         if (!empty($account_id)) {
             $account_data = $this->crud->get_row_by_id('account', array('account_id' => $account_id));
             if (!empty($account_data)) {
@@ -976,7 +995,7 @@ class Account extends CI_Controller {
                 $gold_opening = $account_data->opening_balance_in_gold;
                 $silver_opening = $account_data->opening_balance_in_silver;
                 $amount_opening = $account_data->opening_balance_in_rupees;
-                if($gold_opening == 0 && $silver_opening == 0 && $amount_opening == 0) {
+                if ($gold_opening == 0 && $silver_opening == 0 && $amount_opening == 0) {
                     return true;
                 } else {
                     return false;
@@ -989,7 +1008,8 @@ class Account extends CI_Controller {
         }
     }
 
-    function delete($id) {
+    function delete($id)
+    {
 
         if (!$this->is_account_balace_zero($id)) {
             echo json_encode(array("success" => false, "message" => "You cannot delete this Account. This Account has been used."));
@@ -1015,8 +1035,9 @@ class Account extends CI_Controller {
         //$this->session->set_flashdata('success',true);
         //$this->session->set_flashdata('message','Deleted Successfully');
     }
-    
-    function delete_account_group($id) {
+
+    function delete_account_group($id)
+    {
         $table = $_POST['table_name'];
         $id_name = $_POST['id_name'];
         $return = $this->crud->delete($table, array($id_name => $id));
@@ -1024,9 +1045,10 @@ class Account extends CI_Controller {
         exit;
     }
 
-    function ledger_datatable() {
+    function ledger_datatable()
+    {
         $post_data = $this->input->post();
-//        echo '<pre>'; print_r($post_data); exit;
+        //        echo '<pre>'; print_r($post_data); exit;
         if (!empty($post_data['from_date'])) {
             $from_date = date('Y-m-d', strtotime($post_data['from_date']));
         }
@@ -1105,22 +1127,25 @@ class Account extends CI_Controller {
         echo json_encode($output);
     }
 
-    function change_approve_status($id = '') {
-//        echo '<pre>';        print_r($id); exit;
+    function change_approve_status($id = '')
+    {
+        //        echo '<pre>';        print_r($id); exit;
         $this->crud->update('account', array('status' => '1'), array('account_id' => $id));
     }
 
-    function approve_account($account_id = '',$account_group_id = '') {
-        
-        if($account_id != '' && $account_group_id != '') {
-            $this->crud->update('account', array('status' => '1','account_group_id' => $account_group_id), array('account_id' => $account_id));
+    function approve_account($account_id = '', $account_group_id = '')
+    {
+
+        if ($account_id != '' && $account_group_id != '') {
+            $this->crud->update('account', array('status' => '1', 'account_group_id' => $account_group_id), array('account_id' => $account_id));
         } elseif ($account_id != '') {
             $this->crud->update('account', array('status' => '1'), array('account_id' => $account_id));
         }
         echo json_encode(array('status' => "success"));
     }
 
-    function ledger_print($account_id = '', $from_date = '', $to_date = '') {
+    function ledger_print($account_id = '', $from_date = '', $to_date = '')
+    {
         $data = array();
         $data['from_date'] = $from_date;
         $data['to_date'] = $to_date;
@@ -1129,7 +1154,7 @@ class Account extends CI_Controller {
         $data['account_name'] = $this->crud->get_column_value_by_id('account', 'account_name', array('account_id' => $account_id));
         $sell_array = $this->crud->get_row_for_customer_ledger($account_id, $from_date, $to_date);
         $data['opening'] = $this->crud->get_account_opening_balance($account_id, $from_date);
-//        echo '<pre>'; print_r($sell_array); exit;
+        //        echo '<pre>'; print_r($sell_array); exit;
         if (!empty($sell_array)) {
             $data['sell_array'] = $sell_array;
         }
@@ -1143,7 +1168,8 @@ class Account extends CI_Controller {
         $mpdf->Output();
     }
 
-    function account_group() {
+    function account_group()
+    {
 
         if (!empty($_POST['id']) && isset($_POST['id'])) {
             if ($this->applib->have_access_role(ACCOUNT_GROUP_MODULE_ID, "edit")) {
@@ -1173,7 +1199,8 @@ class Account extends CI_Controller {
         }
     }
 
-    function save_account_group() {
+    function save_account_group()
+    {
         $return = array();
         $post_data = $this->input->post();
         if (isset($post_data['parent_group_id']) && !empty($post_data['parent_group_id'])) {
@@ -1181,7 +1208,7 @@ class Account extends CI_Controller {
         } else {
             $parent_group_id = 0;
         }
-        if(isset($post_data['move_data_opening_zero'])){
+        if (isset($post_data['move_data_opening_zero'])) {
             unset($post_data['move_data_opening_zero']);
             $data['move_data_opening_zero'] = '1';
         } else {
@@ -1197,12 +1224,12 @@ class Account extends CI_Controller {
             $data['parent_group_id'] = $parent_group_id;
             $data['account_group_name'] = $post_data['account_group_name'];
             $data['sequence'] = $post_data['sequence'];
-            if(isset($post_data['is_display_in_balance_sheet'])) {
+            if (isset($post_data['is_display_in_balance_sheet'])) {
                 $data['is_display_in_balance_sheet'] = "1";
             } else {
                 $data['is_display_in_balance_sheet'] = "0";
             }
-            if(isset($post_data['use_in_profit_loss'])){
+            if (isset($post_data['use_in_profit_loss'])) {
                 unset($post_data['use_in_profit_loss']);
                 $data['use_in_profit_loss'] = '1';
             } else {
@@ -1225,12 +1252,12 @@ class Account extends CI_Controller {
             $data['parent_group_id'] = $parent_group_id;
             $data['account_group_name'] = $post_data['account_group_name'];
             $data['sequence'] = $post_data['sequence'];
-            if(isset($post_data['is_display_in_balance_sheet'])) {
+            if (isset($post_data['is_display_in_balance_sheet'])) {
                 $data['is_display_in_balance_sheet'] = "1";
             } else {
                 $data['is_display_in_balance_sheet'] = "0";
             }
-            if(isset($post_data['use_in_profit_loss'])){
+            if (isset($post_data['use_in_profit_loss'])) {
                 unset($post_data['use_in_profit_loss']);
                 $data['use_in_profit_loss'] = '1';
             } else {
@@ -1249,17 +1276,18 @@ class Account extends CI_Controller {
         exit;
     }
 
-    function account_group_datatable() {
+    function account_group_datatable()
+    {
         $config['table'] = 'account_group a';
         $config['select'] = 'a.*, pa.account_group_name as pa_account_group_name, IF(a.is_display_in_balance_sheet = 1, "Yes" ,"No") AS in_balance_sheet, IF(a.use_in_profit_loss = 1, "Yes" ,"No") AS use_profit_loss, IF(a.move_data_opening_zero = 1, "Yes" ,"No") AS move_data_opening';
-        $config['column_order'] = array(null, 'pa.account_group_name', 'a.account_group_name', 'a.sequence', 'a.is_display_in_balance_sheet','a.use_in_profit_loss','a.move_data_opening_zero');
-        $config['column_search'] = array('pa.account_group_name', 'a.account_group_name', 'IF(a.is_display_in_balance_sheet = 1, "Yes" ,"No")','IF(a.use_in_profit_loss = 1, "Yes" ,"No")','IF(a.move_data_opening_zero = 1, "Yes" ,"No")');
+        $config['column_order'] = array(null, 'pa.account_group_name', 'a.account_group_name', 'a.sequence', 'a.is_display_in_balance_sheet', 'a.use_in_profit_loss', 'a.move_data_opening_zero');
+        $config['column_search'] = array('pa.account_group_name', 'a.account_group_name', 'IF(a.is_display_in_balance_sheet = 1, "Yes" ,"No")', 'IF(a.use_in_profit_loss = 1, "Yes" ,"No")', 'IF(a.move_data_opening_zero = 1, "Yes" ,"No")');
         $config['joins'][] = array('join_table' => 'account_group pa', 'join_by' => 'pa.account_group_id = a.parent_group_id', 'join_type' => 'left');
-        
+
         $config['custom_where'] = '1=1';
         $account_groups = $this->applib->current_user_account_group_ids();
-        if(!empty($account_groups)) {
-            $config['custom_where'] .= ' AND a.account_group_id IN ('.implode(',',$account_groups).')';
+        if (!empty($account_groups)) {
+            $config['custom_where'] .= ' AND a.account_group_id IN (' . implode(',', $account_groups) . ')';
         } else {
             $config['custom_where'] .= ' AND a.account_group_id IN(-1)';
         }
@@ -1275,19 +1303,19 @@ class Account extends CI_Controller {
         foreach ($list as $account_group) {
             $row = array();
             $action = '';
-            if($isEdit) {
+            if ($isEdit) {
                 $action .= '<form id="edit_' . $account_group->account_group_id . '" method="post" action="' . base_url() . 'account/account_group" class="pull-left">
                     <input type="hidden" name="id" id="id" value="' . $account_group->account_group_id . '">
                     <a class="edit_button btn-primary btn-xs" href="javascript:{}" onclick="document.getElementById(\'edit_' . $account_group->account_group_id . '\').submit();" title="Edit Account Group"><i class="fa fa-edit"></i></a>
-                </form>';    
+                </form>';
             }
-            
-            if($isDelete) {
+
+            if ($isDelete) {
                 if ($account_group->is_deletable == 1) {
                     $action .= ' | <a href="javascript:void(0);" class="delete_button btn-danger btn-xs" data-href="' . base_url('account/delete_account_group/' . $account_group->account_group_id) . '"><i class="fa fa-trash"></i></a>';
-                }    
+                }
             }
-            
+
             $row[] = $action;
             $row[] = $account_group->pa_account_group_name;
             $row[] = $account_group->account_group_name;
@@ -1307,7 +1335,8 @@ class Account extends CI_Controller {
         echo json_encode($output);
     }
 
-    function account_import() {
+    function account_import()
+    {
         if ($this->applib->have_access_role(ACCOUNT_MODULE_ID, "view")) {
             set_page('account/account_import');
         } else {
@@ -1315,17 +1344,18 @@ class Account extends CI_Controller {
             redirect("/");
         }
     }
-    
-    function account_import_csv(){
-		$count = 0;
-		$fp = fopen($_FILES['import_file']['tmp_name'],'r') or die("can't open file");
-        while($csv_line = fgetcsv($fp,1024)){
-			$count++;
-            if($count == 1){
-				continue;
+
+    function account_import_csv()
+    {
+        $count = 0;
+        $fp = fopen($_FILES['import_file']['tmp_name'], 'r') or die("can't open file");
+        while ($csv_line = fgetcsv($fp, 1024)) {
+            $count++;
+            if ($count == 1) {
+                continue;
             }//keep this if condition if you want to remove the first row
             $insert_csv = array();
-            if(!empty($csv_line[0])){
+            if (!empty($csv_line[0])) {
                 $account_name = trim($csv_line[0]);
                 $insert_csv['account_name'] = (!empty($account_name)) ? $account_name : NULL;
                 $insert_csv['account_group_id'] = '49';
@@ -1334,26 +1364,26 @@ class Account extends CI_Controller {
                 $account_mobile = trim($csv_line[3]);
                 $insert_csv['account_mobile'] = (!empty($account_mobile)) ? $account_mobile : NULL;
                 $insert_csv['status'] = '2';
-                
-                if(!empty($account_phone)){
+
+                if (!empty($account_phone)) {
                     $account_data = $this->crud->get_row_by_id('account', array('account_phone' => $account_phone));
                     if (!empty($account_data)) {
                         continue;
                     }
                 }
-                if(!empty($account_mobile)){
+                if (!empty($account_mobile)) {
                     $account_data = $this->crud->get_row_by_id('account', array('account_mobile' => $account_mobile));
                     if (!empty($account_data)) {
                         continue;
                     }
                 }
-                if(!empty($account_name)){
+                if (!empty($account_name)) {
                     $account_data = $this->crud->get_row_by_id('account', array('account_name' => $account_name));
                     if (!empty($account_data)) {
                         continue;
                     }
                 }
-                
+
                 $insert_csv['created_at'] = $this->now_time;
                 $insert_csv['updated_at'] = $this->now_time;
                 $insert_csv['updated_by'] = $this->logged_in_id;
@@ -1362,8 +1392,8 @@ class Account extends CI_Controller {
             }
         }
         fclose($fp) or die("can't close file");
-        $this->session->set_flashdata('success',true);
-		$this->session->set_flashdata('message','Account Import Successfully');
-		set_page('account/account_import');
-	}
+        $this->session->set_flashdata('success', true);
+        $this->session->set_flashdata('message', 'Account Import Successfully');
+        set_page('account/account_import');
+    }
 }

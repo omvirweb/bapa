@@ -74,7 +74,6 @@ $include_wastage = isset($_GET['include_wstg']) && $_GET['include_wstg'] == '1' 
                                                     </option>
                                                 <?php } ?>
                                             </select>
-                                            <input type="hidden" name="default_wastage" value="<?php echo $default_wastage;?>">
                                         </div>
                                         <div class="col-md-2">
                                             <label>Tunch</label>
@@ -250,7 +249,6 @@ $include_wastage = isset($_GET['include_wstg']) && $_GET['include_wstg'] == '1' 
                     d.type_sort = $('#type_sort').val();
                     d.rfid_filter = $('#rfid_filter').val();
                     d.include_wastage = $('input[name="include_wastage"]').prop('checked');
-                    d.default_wastage = $('input[name="default_wastage"]').val();
                 },
                 "complete": function () {
                     $('#ajax-loader').hide();

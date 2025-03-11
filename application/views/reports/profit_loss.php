@@ -53,7 +53,7 @@
                                         <div class="col-md-2">
                                             <label><input type="checkbox" name="in_stock" id="in_stock" checked> In stock</label><br />
                                             <label><input type="checkbox" name="item_wise" id="item_wise"> Item Wise</label><br />
-                                            <label><input type="checkbox" name="include_wstg" id="include_wstg" checked> Include Wastage</label>
+                                            <label><input type="checkbox" name="include_wstg" id="include_wstg"> Include Wastage</label>
                                         </div>
                                         <div class="col-md-2">
                                             <label><a href="<?= base_url('master/setting') ?>" target="_blanck">Rate From Setting : </a></label><br />
