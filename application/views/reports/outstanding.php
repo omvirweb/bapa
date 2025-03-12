@@ -44,11 +44,11 @@
                                             <option value="0">All</option>
                                             <?php if (!empty($account_groups)) {
                                                 foreach ($account_groups as $grp) { ?>
-                                                                                                            <option value="<?php echo $grp->account_group_id ?>"
-                                                                                                                <?= !empty($account_group_id) && $account_group_id == $grp->account_group_id ? 'selected' : '' ?>>
-                                                                                                                <?php echo $grp->account_group_name; ?>
-                                                                                                            </option>
-                                                                            <?php }
+                                                                                                                    <option value="<?php echo $grp->account_group_id ?>"
+                                                                                                                        <?= !empty($account_group_id) && $account_group_id == $grp->account_group_id ? 'selected' : '' ?>>
+                                                                                                                        <?php echo $grp->account_group_name; ?>
+                                                                                                                    </option>
+                                                                                <?php }
                                             } ?>
                                         </select>
                                      
@@ -98,9 +98,9 @@
                                                 <th class="text-right">Amount</th>
                                                 <th class="text-right">Net Amount</th>
                                                 <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
-                                                        <th class="text-right">Net Amount</th>
+                                                            <th class="text-right">Net Amount</th>
                                                 <?php } else { ?>
-                                                        <th style="display: none;"></th>
+                                                            <!-- <th style="display: none;"></th> -->
                                                 <?php } ?>
                                             </tr>
                                         </thead>
@@ -121,10 +121,10 @@
                                                 <th id="foot_total_credit_amount"
                                                     style="font-weight: bold; font-size: 16px; text-align: right;"></th>
                                                 <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
-                                                        <th id="total_credit_net_amount"
-                                                            style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                                            <th id="total_credit_net_amount"
+                                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
                                                 <?php } else { ?>
-                                                        <th id="total_credit_net_amount" style="display: none;"></th>
+                                                            <th id="total_credit_net_amount" style="display: none;"></th>
                                                 <?php } ?>
                                             </tr>
                                             <tr>
@@ -142,10 +142,10 @@
                                                 <th id="foot_total_debit_amount"
                                                     style="font-weight: bold; font-size: 16px; text-align: right;"></th>
                                                 <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
-                                                        <th id="total_debit_net_amount"
-                                                            style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                                            <th id="total_debit_net_amount"
+                                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
                                                 <?php } else { ?>
-                                                        <th id="total_debit_net_amount" style="display: none;"></th>
+                                                            <th id="total_debit_net_amount" style="display: none;"></th>
                                                 <?php } ?>
                                             </tr>
                                             <tr>
@@ -190,10 +190,10 @@
                                                 <th id="foot_total_amount"
                                                     style="font-weight: bold; font-size: 16px; text-align: right;"></th>
                                                 <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
-                                                        <th id="total_net_amount"
-                                                            style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                                            <th id="total_net_amount"
+                                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
                                                 <?php } else { ?>
-                                                        <th id="total_net_amount" style="display: none;"></th>
+                                                            <th id="total_net_amount" style="display: none;"></th>
                                                 <?php } ?>
                                             </tr>
                                             
@@ -292,7 +292,7 @@
         $('#debit_credit').select2({ width: '100%' });
         initAjaxSelect2($("#account_id"), "<?= base_url('app/account_name_with_number_select2_source') ?>");
         <?php if (!empty($account_id)) { ?>
-                setSelect2Value($("#account_id"), "<?= base_url('app/set_account_name_with_number_val_by_id/' . $account_id) ?>");
+                    setSelect2Value($("#account_id"), "<?= base_url('app/set_account_name_with_number_val_by_id/' . $account_id) ?>");
         <?php } ?>
 
         $(document).on('change', '#account_group_id', function () {
@@ -320,9 +320,9 @@
                     //                        }
                     //                    },
                     <?php if (isset($display_net_amount_in_outstanding) && $display_net_amount_in_outstanding == '1') { ?>
-                                                                columns: [2, 4, 5, 6, 7, 8, 9, 10],
+                                                                    columns: [2, 4, 5, 6, 7, 8, 9, 10],
                     <?php } else { ?>
-                                                                columns: [2, 4, 5, 6, 7, 8, 9],
+                                                                    columns: [2, 4, 5, 6, 7, 8, 9],
                     <?php } ?>
                 },
             }],
@@ -407,11 +407,11 @@
                         $('#customer_total_net_amount1').val('');
                     }
                     <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
-                            if (jsondata.total_net_amount) {
-                                $('#total_net_amount1').val(jsondata.total_net_amount);
-                            } else {
-                                $('#total_net_amount1').val('');
-                            }
+                                if (jsondata.total_net_amount) {
+                                    $('#total_net_amount1').val(jsondata.total_net_amount);
+                                } else {
+                                    $('#total_net_amount1').val('');
+                                }
                     <?php } ?>
 
                     if (jsondata.foot_total_credit_gold_fine) {
@@ -430,11 +430,11 @@
                         $('#foot_total_credit_amount1').val('');
                     }
                     <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
-                            if (jsondata.total_credit_net_amount) {
-                                $('#total_credit_net_amount1').val(jsondata.total_credit_net_amount);
-                            } else {
-                                $('#total_credit_net_amount1').val('');
-                            }
+                                if (jsondata.total_credit_net_amount) {
+                                    $('#total_credit_net_amount1').val(jsondata.total_credit_net_amount);
+                                } else {
+                                    $('#total_credit_net_amount1').val('');
+                                }
                     <?php } ?>
 
                     if (jsondata.foot_total_debit_gold_fine) {
@@ -453,11 +453,11 @@
                         $('#foot_total_debit_amount1').val('');
                     }
                     <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
-                            if (jsondata.total_debit_net_amount) {
-                                $('#total_debit_net_amount1').val(jsondata.total_debit_net_amount);
-                            } else {
-                                $('#total_debit_net_amount1').val('');
-                            }
+                                if (jsondata.total_debit_net_amount) {
+                                    $('#total_debit_net_amount1').val(jsondata.total_debit_net_amount);
+                                } else {
+                                    $('#total_debit_net_amount1').val('');
+                                }
                     <?php } ?>
                     return jsondata.data;
                 },
@@ -523,7 +523,7 @@
         table.columns([5]).visible(false);
         <?php if (isset($display_net_amount_in_outstanding) && $display_net_amount_in_outstanding == '1') {
         } else { ?>
-                table.columns([10]).visible(false);
+                    table.columns([10]).visible(false);
         <?php } ?>
         $('.dt-button.buttons-excel').css('border', 'none');
         $('.dt-button.buttons-excel').html('<img src="<?php echo base_url(); ?>assets/dist/img/excel_icon.png" style="width:25px;" alt="Excel" title="Excel" >');
