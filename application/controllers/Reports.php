@@ -434,9 +434,41 @@ class Reports extends CI_Controller
             redirect("/");
         }
     }
+    // Code Added by Rashid  //
+    function profit_loss()
+    {
+        if ($this->applib->have_access_role(STOCK_STATUS_MODULE_ID, "view") && $this->applib->have_access_role(REPORT_MODULE_ID, 'view')) {
+            $data = array();
+            $data['process'] = $this->crud->get_row_by_id('account', array('account_group_id' => DEPARTMENT_GROUP));
+            $data['category'] = $this->crud->get_all_records('category', 'category_id', '');
+            $data['items'] = $this->crud->get_all_records('item_master', 'item_id', '');
+            $data['carat'] = $this->crud->get_all_records('carat', 'purity', 'ASC');
+            $data['gold_rate'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'gold_rate'));
+            $data['silver_rate'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'silver_rate'));
+            set_page('reports/profit_loss', $data);
+        } else {
+            $this->session->set_flashdata('error_message', 'You have not permission to access this page.');
+            redirect("/");
+        }
+    }
+
+
+
+    // Code end by rashid //	
+
 
     function stock_status_datatable()
     {
+        $this->load->helper('stock_status');
+        $post_data = $this->input->post();
+        return get_stock_status_datatable($post_data);
+    }
+    // code for profit loss  //
+
+    function profit_loss_datatable()
+    {
+        $className = null;
+        $include_wstg = false;
         $post_data = $this->input->post();
         $gold_rate = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'gold_rate'));
         $silver_rate = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'silver_rate'));
@@ -620,64 +652,26 @@ class Reports extends CI_Controller
             } else {
                 $className = 'text-primary';
             }
-            $row[] = '<b class="' . $className . '">' . $grwt . '</b>';
+            //$row[] = '<b class="' . $className . '">' . $grwt . 'TEST</b>';
 
             // Format rfid_created_grwt and add it with appropriate Bootstrap class
             $stock->rfid_created_grwt = number_format((float) $stock->rfid_created_grwt, 3, '.', '');
-            $row[] = '<b class="' . $className . '">' . $stock->rfid_created_grwt . '</b>';
+            //$row[] = '<b class="' . $className . '">' . $stock->rfid_created_grwt . 'TT</b>';
 
             // Calculate and format rfid_not_created_grwt with Bootstrap classes
             $rfid_not_created_grwt = (float) $grwt - (float) $stock->rfid_created_grwt;
             $rfid_not_created_grwt = number_format((float) $rfid_not_created_grwt, 3, '.', '');
-            $row[] = '<b class="' . $className . '">' . $rfid_not_created_grwt . '</b>';
+            // $row[] = '<b class="' . $className . '">' . $rfid_not_created_grwt . 'T</b>';
 
             // Conditionally add stock adjust button or leave empty
-            if (isset($post_data['department_id']) && !empty($post_data['department_id'])) {
-                $row[] = $stock_adjust_btn;
-            } else {
-                $row[] = '';
-            }
 
-            $row[] = '<b class="' . $className . '">' . $less . '</b>';
-            $row[] = '<b class="' . $className . '">' . $ntwt . '</b>';
+
+            //$row[] = '<b class="' . $className . '">' . $less . '</b>';
+            // $row[] = '<b class="' . $className . '">' . $ntwt . '</b>';
             $row[] = '<b class="' . $className . '">' . $tunch . '</b>';
             $row[] = '<b class="' . $className . '">' . $gold . '</b>';
             $row[] = '<b class="' . $className . '">' . $silver . '</b>';
 
-
-            if ($stock->category_group_id == 1) {
-                // Update gold variables and calculate amount
-                $gold_grwt = (float) $gold_grwt + (float) $grwt;
-                $gold_rfid_created_grwt = (float) $gold_rfid_created_grwt + (float) $stock->rfid_created_grwt;
-                $gold_rfid_not_created_grwt = (float) $gold_rfid_not_created_grwt + (float) $rfid_not_created_grwt;
-                $gold_ntwt = (float) $gold_ntwt + (float) $ntwt;
-                $gold_fine = (float) $gold_fine + (float) $gold;
-
-                if ($gold_ntwt != 0 || $gold_ntwt != '') {
-                    $gold_tunch = ((float) $gold_fine) / (float) $gold_ntwt * 100;
-                }
-
-                $amount = (float) $gold * (float) $gold_rate / 10;
-                // $row[] = '<b class="' . ((float) $amount < 0 ? 'text-danger' : 'text-primary') . '">' . number_format((float) $amount, 2, '.', '') . '</b>';
-                $gold_amount = (float) $gold_amount + $amount;
-            } else if ($stock->category_group_id == 2) {
-                // Update silver variables and calculate amount
-                $silver_grwt = (float) $silver_grwt + (float) $grwt;
-                $silver_rfid_created_grwt = (float) $silver_rfid_created_grwt + (float) $stock->rfid_created_grwt;
-                $silver_rfid_not_created_grwt = (float) $silver_rfid_not_created_grwt + (float) $rfid_not_created_grwt;
-                $silver_ntwt = (float) $silver_ntwt + (float) $ntwt;
-                $silver_fine = (float) $silver_fine + (float) $silver;
-
-                if ($silver_ntwt != 0 || $silver_ntwt != '') {
-                    $silver_tunch = ((float) $silver_fine) / (float) $silver_ntwt * 100;
-                }
-
-                $amount = (float) $silver * (float) $silver_rate / 10;
-                // $row[] = '<b class="' . ((float) $amount < 0 ? 'text-danger' : 'text-primary') . '">' . number_format((float) $amount, 2, '.', '') . '</b>';
-                $silver_amount = (float) $silver_amount + $amount;
-            } else {
-                // $row[] = '<b>0</b>';
-            }
 
 
 
@@ -815,6 +809,7 @@ class Reports extends CI_Controller
                     $balance_fine = 0;
                 }
             }
+
             $profit_loss = number_format((float) $balance_fine, '3', '.', '') - (number_format((float) $total_plus_fine, '3', '.', '') + number_format((float) $total_minus_fine, '3', '.', ''));
             $final_profit_loss_amount += $profit_loss;
             $row[] = '<b class = "' . $className . '">' . number_format((float) $profit_loss, '3', '.', '') . '</b>';
@@ -967,6 +962,8 @@ class Reports extends CI_Controller
         );
         echo json_encode($output);
     }
+    // End code for profit loss  //
+
 
     function get_worker_stock_status_from_manufacture_data()
     {
@@ -1659,15 +1656,24 @@ class Reports extends CI_Controller
     // Outstanding related Functions
     function outstanding()
     {
+        $customer_and_supplier_ids = [48, 49];
+        $imploded_ids = implode(",", $customer_and_supplier_ids);
         $this->crud->execuetSQL(" DELETE FROM reminder WHERE account_id IN (SELECT account_id FROM `account` WHERE gold_fine = 0 AND silver_fine = 0 AND amount = 0) ");
         if ($this->applib->have_access_role(OUTSTANDING_MODULE_ID, "view") && $this->applib->have_access_role(OUTSTANDING_MODULE_ID, 'view')) {
+            // $data['account_groups'] = $this->crud->getFromSQL('SELECT g.account_group_id,g.account_group_name FROM `user_account_group` ug JOIN account_group g ON(g.account_group_id = ug.account_group_id) WHERE ug.user_id = "' . $this->logged_in_id . '" AND g.account_group_id IN (' . $imploded_ids . ')');
             $data['account_groups'] = $this->crud->getFromSQL('SELECT g.account_group_id,g.account_group_name FROM `user_account_group` ug JOIN account_group g ON(g.account_group_id = ug.account_group_id) WHERE ug.user_id = "' . $this->logged_in_id . '"');
             $data['gold_rate'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'gold_rate'));
             $data['silver_rate'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'silver_rate'));
             $data['display_net_amount_in_outstanding'] = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'display_net_amount_in_outstanding'));
 
             $data['account_id'] = isset($_GET['account_id']) && !empty($_GET['account_id']) ? $_GET['account_id'] : '';
-            $data['account_group_id'] = isset($_GET['account_group_id']) && !empty($_GET['account_group_id']) ? $_GET['account_group_id'] : '';
+            if (isset($_GET['account_group_id'])) {
+                $data['account_group_id'] = isset($_GET['account_group_id']) && !empty($_GET['account_group_id']) ? $_GET['account_group_id'] : '';
+            } else {
+                $data['account_group_id'] = $customer_and_supplier_ids;
+            }
+
+            $data['selected_account_group_ids'] = $customer_and_supplier_ids;
 
             set_page('reports/outstanding', $data);
         } else {
@@ -1917,12 +1923,39 @@ class Reports extends CI_Controller
         $foot_total_debit_amount = 0;
         $total_debit_net_amount = 0;
 
+        $supplier_total_gold_fine = 0;
+        $supplier_total_silver_fine = 0;
+        $supplier_total_amount = 0;
+        $supplier_total_net_amount = 0;
+        $customer_total_gold_fine = 0;
+        $customer_total_silver_fine = 0;
+        $customer_total_amount = 0;
+        $customer_total_net_amount = 0;
+
         foreach ($outstanding_data_arr as $outstanding_row) {
             $row = array();
             if (isset($outstanding_row['account_id']) && !empty($outstanding_row['account_id'])) {
                 $credit_limit = $all_account_arr[$outstanding_row['account_id']];
                 if ($credit_limit == null || $credit_limit == '') {
                     $credit_limit = 0;
+                }
+                $credit_limit = $all_account_arr[$outstanding_row['account_id']];
+                if (
+                    $post_data['credit_limit'] == '1' ||
+                    ($post_data['credit_limit'] == '2' && $credit_limit > $outstanding_row['net_amount']) ||
+                    ($post_data['credit_limit'] == '3' && $credit_limit < $outstanding_row['net_amount'])
+                ) {
+                    if ($outstanding_row['account_group_id'] == 48) {
+                        $supplier_total_gold_fine += $outstanding_row['gold_fine'];
+                        $supplier_total_silver_fine += $outstanding_row['silver_fine'];
+                        $supplier_total_amount += $outstanding_row['amount'];
+                        $supplier_total_net_amount += $outstanding_row['net_amount'];
+                    } elseif ($outstanding_row['account_group_id'] == 49) {
+                        $customer_total_gold_fine += $outstanding_row['gold_fine'];
+                        $customer_total_silver_fine += $outstanding_row['silver_fine'];
+                        $customer_total_amount += $outstanding_row['amount'];
+                        $customer_total_net_amount += $outstanding_row['net_amount'];
+                    }
                 }
                 $tr_naam_data = $this->crud->get_transfer_naam_jama_for_outstanding_report($upto_balance_date, $outstanding_row['account_id'], 'TR Naam', $account_group_id);
                 $tr_jama_data = $this->crud->get_transfer_naam_jama_for_outstanding_report($upto_balance_date, $outstanding_row['account_id'], 'TR Jama', $account_group_id);
@@ -2173,6 +2206,14 @@ class Reports extends CI_Controller
             "foot_total_debit_silver_fine" => number_format((float) $foot_total_debit_silver_fine, 3, '.', ''),
             "foot_total_debit_amount" => number_format((float) $foot_total_debit_amount, 2, '.', ''),
             "total_debit_net_amount" => number_format((float) $total_debit_net_amount, 2, '.', ''),
+            "supplier_total_gold_fine" => number_format($supplier_total_gold_fine, 3, '.', ''),
+            "supplier_total_silver_fine" => number_format($supplier_total_silver_fine, 3, '.', ''),
+            "supplier_total_amount" => number_format($supplier_total_amount, 2, '.', ''),
+            "supplier_total_net_amount" => number_format($supplier_total_net_amount, 2, '.', ''),
+            "customer_total_gold_fine" => number_format($customer_total_gold_fine, 3, '.', ''),
+            "customer_total_silver_fine" => number_format($customer_total_silver_fine, 3, '.', ''),
+            "customer_total_amount" => number_format($customer_total_amount, 2, '.', ''),
+            "customer_total_net_amount" => number_format($customer_total_net_amount, 2, '.', ''),
         );
         echo json_encode($output);
     }

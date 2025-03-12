@@ -7,7 +7,7 @@
 <div class="content-wrapper" id="body-content">
     <form class="form-horizontal" method="post" id="save_sell_purchase" novalidate enctype="multipart/form-data">
         <?php if (isset($sell_data->sell_id) && !empty($sell_data->sell_id)) { ?>
-            <input type="hidden" name="sell_id" class="sell_id" value="<?= $sell_data->sell_id ?>">
+                                        <input type="hidden" name="sell_id" class="sell_id" value="<?= $sell_data->sell_id ?>">
         <?php } ?>
             <input type="hidden" name="order_id" id="order_id" value=""/>
             <input type="hidden" id="total_grwt_sell" value=""/>
@@ -16,19 +16,26 @@
 
         <section class="content-header">
             <h1>
-                Add <?=$page_label?> <?=$page_shortcut?>
+                Add <?= $page_label ?> <?= $page_shortcut ?>
                 <?php $isEdit = $this->app_model->have_access_role(SELL_PURCHASE_MODULE_ID, "edit");
                 $isView = $this->app_model->have_access_role(SELL_PURCHASE_MODULE_ID, "view");
                 $isAdd = $this->app_model->have_access_role(SELL_PURCHASE_MODULE_ID, "add");
                 $allow_change_date = $this->app_model->have_access_role(SELL_PURCHASE_MODULE_ID, "allow_change_date"); ?>
-                <?php if (isset($sell_data->sell_id) && !empty($sell_data->sell_id)) { } else { if($isAdd) { $btn_disable = null; } else { $btn_disable = 'disabled';} } ?> 
-                <?php if(!isset($sell_data->account_id) || (isset($sell_data->account_id) && $sell_data->account_id != ADJUST_EXPENSE_ACCOUNT_ID)){ ?>
-                    <?php if(!isset($sell_data->audit_status) || (isset($sell_data->audit_status) && $sell_data->audit_status != AUDIT_STATUS_AUDITED)){ ?>
-                        <button type="submit" name="saveformwithprint" id="saveformwithprint" class="btn btn-primary pull-right module_save_btn btn-sm" ><strong><?= isset($sell_data->sell_id) ? 'Update' : 'Save' ?> & Print</strong> [ Ctrl + Shift +S ]</button>
-                        <button type="submit" name="saveform" id="saveform" class="btn btn-primary pull-right module_save_btn btn-sm" ><?= isset($sell_data->sell_id) ? 'Update' : 'Save' ?> [ Ctrl +S ]</button>
-                    <?php } ?>
+                <?php if (isset($sell_data->sell_id) && !empty($sell_data->sell_id)) {
+                } else {
+                    if ($isAdd) {
+                        $btn_disable = null;
+                    } else {
+                        $btn_disable = 'disabled';
+                    }
+                } ?> 
+                <?php if (!isset($sell_data->account_id) || (isset($sell_data->account_id) && $sell_data->account_id != ADJUST_EXPENSE_ACCOUNT_ID)) { ?>
+                                                <?php if (!isset($sell_data->audit_status) || (isset($sell_data->audit_status) && $sell_data->audit_status != AUDIT_STATUS_AUDITED)) { ?>
+                                                                                <button type="submit" name="saveformwithprint" id="saveformwithprint" class="btn btn-primary pull-right module_save_btn btn-sm" ><strong><?= isset($sell_data->sell_id) ? 'Update' : 'Save' ?> & Print</strong> [ Ctrl + Shift +S ]</button>
+                                                                                <button type="submit" name="saveform" id="saveform" class="btn btn-primary pull-right module_save_btn btn-sm" ><?= isset($sell_data->sell_id) ? 'Update' : 'Save' ?> [ Ctrl +S ]</button>
+                                                <?php } ?>
                 <?php } ?>
-                <a href="<?= $list_page_url ?>" class="btn btn-primary pull-right btn-sm" style="margin: 5px;" <?php echo isset($sell_data->sell_id) ? '' : $btn_disable;?>><?=$page_label?> List</a>
+                <a href="<?= $list_page_url ?>" class="btn btn-primary pull-right btn-sm" style="margin: 5px;" <?php echo isset($sell_data->sell_id) ? '' : $btn_disable; ?>><?= $page_label ?> List</a>
                 <span class="pull-right" style="margin-right: 20px;">
                     <div class="form-group">
                         <label for="send_sms" class="col-sm-12 input-sm" style="font-size: 18px; line-height: 25px;">
@@ -41,482 +48,496 @@
         <div class="clearfix">
             <div class="row">
                 <div style="margin: 15px;">
-                    <?php if($isAdd || $isEdit) { ?>
-                    <!-- Horizontal Form -->
-                    <div class="col-md-12">
-                        <div class="box box-primary">
-                            <div class="box-body">
-                                <div class="row">
-                                    <div class="clearfix"></div>
-                                    <?php if (isset($sell_data->sell_id) && !empty($sell_data->sell_id)) { ?>
-                                    <div class="col-md-1 bk_account_color">
-                                        <label for="sell_no">No.</label>
-                                        <input type="text" name="sell_no" id="sell_no" class="form-control" readonly value="<?= (isset($sell_data->sell_no) && !empty($sell_data->sell_no)) ? $sell_data->sell_no : ''; ?>"><br />
-                                    </div>
-                                    <?php } ?>
-                                    <div class="col-md-3 bk_account_color">
-                                        <label for="account_id">Account Name <span class="required-sign">&nbsp;*</span></label>
-                                        <select name="account_id" id="account_id" class="form-control select2" ></select>
-                                        <div class="clearfix"></div><br />
-                                    </div> 
-                                    <?php if($department_2 == '1') { ?>
-                                        <div class="col-md-2 bk_account_color">
-                                            <label for="process_id">Department <span class="required-sign">&nbsp;*</span></label>
-                                            <select name="process_id" id="process_id" class="form-control select2" ></select>
-                                            <div class="clearfix"></div><br />
-                                        </div>
-                                    <?php } else { ?>
-                                        <input type="hidden" name="process_id" id="process_id" value="<?php echo (isset($sell_data->process_id) && !empty ($sell_data->process_id)) ? $sell_data->process_id : $this->session->userdata(PACKAGE_FOLDER_NAME.'is_logged_in')['default_department_id']; ?>" >
-                                    <?php } ?>
-                                    <div class="col-md-1 bk_account_color">
-                                        <label for="date">Date <span class="required-sign">&nbsp;*</span></label>
-                                        <input type="text" name="sell_date" id="datepicker2" class="<?= !empty($allow_change_date) ? '' : 'disable_datepicker'; ?> form-control input-datepicker" <?= !empty($allow_change_date) ? '' : 'readonly'; ?> value="<?php if (isset($sell_data->sell_date) && !empty($sell_data->sell_date)) { echo date('d-m-Y', strtotime($sell_data->sell_date)); } else { echo date('d-m-Y'); } ?>" style="padding: 5px;"><br />
-                                    </div>
-                                    <?php if($remark_2 == '1') { ?>
-                                        <div class="col-md-3 bk_account_color">
-                                            <label for="sell_remark">Remark</label>
-                                            <input type="text" name="sell_remark" id="sell_remark" class="form-control" value="<?php if (isset($sell_data->sell_remark) && !empty($sell_data->sell_remark)) { echo $sell_data->sell_remark; } else { echo '';} ?>"><br />
-                                        </div>
-                                    <?php } ?>
-                                    <?php if($delivered_not_2 == '1') { ?>
-                                    <div class="col-md-2 bk_account_color">
-                                        <label for="delivery_type">Delivered / Not <span class="required-sign">&nbsp;*</span></label>
-                                        <select name="delivery_type" id="delivery_type" class="form-control select2" >
-                                            <option value="" disabled selected>--Select--</option>
-                                            <option value="1" <?= (isset($sell_data->delivery_type) && !empty($sell_data->delivery_type)) ? ($sell_data->delivery_type == '1') ? 'Selected' : '' : '';?> >Delivered</option>
-                                            <option value="2" <?= (isset($sell_data->delivery_type) && !empty($sell_data->delivery_type)) ? ($sell_data->delivery_type == '2') ? 'Selected' : '' : '';?>>Not Delivered</option>
-                                        </select>
-                                        <div class="clearfix"></div><br />
-                                    </div>
-                                    <?php } ?>
-                                    <div class="clearfix"></div>
-                                    <div class="line_item_form item_fields_div" style="height: 160px;">
-                                        <input type="hidden" name="line_items_index" id="line_items_index" />
-                                        <input type="hidden" name="line_items_data[sell_item_delete]" id="sell_item_delete" value="allow" />
-                                        <?php if (isset($sell_item) && !empty($sell_item)) { ?>
-                                            <input type="hidden" name="line_items_data[sell_purchase_id]" id="sell_purchase_id" value="0"/>
-                                            <input type="hidden" name="line_items_data[order_lot_item_id]" id="order_lot_item_id"/>
-                                            <input type="hidden" name="line_items_data[purchase_sell_item_id]" id="purchase_sell_item_id"/>
-                                            <input type="hidden" name="line_items_data[stock_type]" id="stock_type" />
-                                            <input type="hidden" name="line_items_data[sell_item_id]" id="sell_item_id" />
-                                        <?php } ?>
-                                        <div class="col-md-3">
-                                            <h4>
-                                                Line Item [F6]&nbsp;&nbsp;&nbsp;
-                                                <?php if($tunch_textbox_2 == '1') { ?>
-                                                    <span><label style="margin-bottom: 0px;"><input type="checkbox" name="line_items_data[tunch_textbox]" id="tunch_textbox"> <small>Tunch Textbox</small></label></span>
-                                                <?php } else { ?>
-                                                    <input type="hidden" name="line_items_data[tunch_textbox]" id="tunch_textbox" value="1">
-                                                <?php } ?>
-                                            </h4>
-                                        </div>
-                                        <?php
-                                            $use_rfid = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'use_rfid'));
-                                            $use_barcode = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'use_barcode'));
-                                            if($use_rfid == 1 || $use_barcode == 1) {
-                                        ?>
-                                            <div class="col-md-3">
-                                                <label for="rfid_number">Enter RFID</label>
-                                                <input type="hidden" name="line_items_data[item_stock_rfid_id]" id="item_stock_rfid_id">
-                                                <input type="text" name="line_items_data[rfid_number]" id="rfid_number" class="form-control">
-                                            </div>
-                                        <?php } ?>
-                                        <?php if($charges_2 == '1') { ?>
-                                            <div class="col-md-2">
-                                                <label for="charges_amt">Charges <a href="javascript:void(0)" id="sell_item_charges_details" class="module_save_btn" style="margin: 0; font-size: 9px;">Details[F9]</a></label>
-                                                <input type="text" name="line_items_data[charges_amt]" id="charges_amt" class="form-control num_only">
-                                            </div>
-                                        <?php } else { ?>
-                                                <input type="hidden" name="line_items_data[charges_amt]" id="charges_amt" value="0">
-                                        <?php } ?>
-                                        <div class="clearfix"></div>
-                                        <div class="col-md-1">
-                                            <label for="sell_type_id">Type<span class="required-sign">&nbsp;*</span></label>
-                                            <select name="line_items_data[type]" class="form-control sell_type_id select2" id="sell_type_id"></select>
-                                        </div>
-                                        <?php if($use_category == '1') { ?>
-                                            <div class="col-md-2">
-                                                <label for="category_id">Category<span class="required-sign">&nbsp;*</span></label>
-                                                <select name="line_items_data[category_id]" class="form-control category_id" id="category_id"></select>
-                                            </div>
-                                        <?php } else { ?>
-                                            <input type="hidden" name="line_items_data[category_id]" id="category_id" class="category_id">
-                                        <?php } ?>
-                                        <div class="col-md-2 pr0">
-                                            <label for="item_id">Item<span class="required-sign">&nbsp;*</span></label>
-                                            <select name="line_items_data[item_id]" class="form-control item_id select2" id="item_id">
-                                                <?php if(GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
-                                                    <option value="">--Select--</option>
-                                                    <?php foreach ($items_for_select as $item){ ?>
-                                                                <option value="<?php echo $item['item_id'] ?>"><?php echo $item['item_name'] ?></option>
-                                                    <?php } ?>
-                                                <?php } else { ?>
+                    <?php if ($isAdd || $isEdit) { ?>
+                                                <!-- Horizontal Form -->
+                                                <div class="col-md-12">
+                                                    <div class="box box-primary">
+                                                        <div class="box-body">
+                                                            <div class="row">
+                                                                <div class="clearfix"></div>
+                                                                <?php if (isset($sell_data->sell_id) && !empty($sell_data->sell_id)) { ?>
+                                                                                            <div class="col-md-1 bk_account_color">
+                                                                                                <label for="sell_no">No.</label>
+                                                                                                <input type="text" name="sell_no" id="sell_no" class="form-control" readonly value="<?= (isset($sell_data->sell_no) && !empty($sell_data->sell_no)) ? $sell_data->sell_no : ''; ?>"><br />
+                                                                                            </div>
+                                                                <?php } ?>
+                                                                <div class="col-md-3 bk_account_color">
+                                                                    <label for="account_id">Account Name <span class="required-sign">&nbsp;*</span></label>
+                                                                    <select name="account_id" id="account_id" class="form-control select2" ></select>
+                                                                    <div class="clearfix"></div><br />
+                                                                </div> 
+                                                                <?php if ($department_2 == '1') { ?>
+                                                                                                <div class="col-md-2 bk_account_color">
+                                                                                                    <label for="process_id">Department <span class="required-sign">&nbsp;*</span></label>
+                                                                                                    <select name="process_id" id="process_id" class="form-control select2" ></select>
+                                                                                                    <div class="clearfix"></div><br />
+                                                                                                </div>
+                                                                <?php } else { ?>
+                                                                                                <input type="hidden" name="process_id" id="process_id" value="<?php echo (isset($sell_data->process_id) && !empty($sell_data->process_id)) ? $sell_data->process_id : $this->session->userdata(PACKAGE_FOLDER_NAME . 'is_logged_in')['default_department_id']; ?>" >
+                                                                <?php } ?>
+                                                                <div class="col-md-1 bk_account_color">
+                                                                    <label for="date">Date <span class="required-sign">&nbsp;*</span></label>
+                                                                    <input type="text" name="sell_date" id="datepicker2" class="<?= !empty($allow_change_date) ? '' : 'disable_datepicker'; ?> form-control input-datepicker" <?= !empty($allow_change_date) ? '' : 'readonly'; ?> value="<?php if (isset($sell_data->sell_date) && !empty($sell_data->sell_date)) {
+                                                                                      echo date('d-m-Y', strtotime($sell_data->sell_date));
+                                                                                  } else {
+                                                                                      echo date('d-m-Y');
+                                                                                  } ?>" style="padding: 5px;"><br />
+                                                                </div>
+                                                                <?php if ($remark_2 == '1') { ?>
+                                                                                                <div class="col-md-3 bk_account_color">
+                                                                                                    <label for="sell_remark">Remark</label>
+                                                                                                    <input type="text" name="sell_remark" id="sell_remark" class="form-control" value="<?php if (isset($sell_data->sell_remark) && !empty($sell_data->sell_remark)) {
+                                                                                                        echo $sell_data->sell_remark;
+                                                                                                    } else {
+                                                                                                        echo '';
+                                                                                                    } ?>"><br />
+                                                                                                </div>
+                                                                <?php } ?>
+                                                                <?php if ($delivered_not_2 == '1') { ?>
+                                                                                            <div class="col-md-2 bk_account_color">
+                                                                                                <label for="delivery_type">Delivered / Not <span class="required-sign">&nbsp;*</span></label>
+                                                                                                <select name="delivery_type" id="delivery_type" class="form-control select2" >
+                                                                                                    <option value="" disabled selected>--Select--</option>
+                                                                                                    <option value="1" <?= (isset($sell_data->delivery_type) && !empty($sell_data->delivery_type)) ? ($sell_data->delivery_type == '1') ? 'Selected' : '' : ''; ?> >Delivered</option>
+                                                                                                    <option value="2" <?= (isset($sell_data->delivery_type) && !empty($sell_data->delivery_type)) ? ($sell_data->delivery_type == '2') ? 'Selected' : '' : ''; ?>>Not Delivered</option>
+                                                                                                </select>
+                                                                                                <div class="clearfix"></div><br />
+                                                                                            </div>
+                                                                <?php } ?>
+                                                                <div class="clearfix"></div>
+                                                                <div class="line_item_form item_fields_div" style="height: 160px;">
+                                                                    <input type="hidden" name="line_items_index" id="line_items_index" />
+                                                                    <input type="hidden" name="line_items_data[sell_item_delete]" id="sell_item_delete" value="allow" />
+                                                                    <?php if (isset($sell_item) && !empty($sell_item)) { ?>
+                                                                                                    <input type="hidden" name="line_items_data[sell_purchase_id]" id="sell_purchase_id" value="0"/>
+                                                                                                    <input type="hidden" name="line_items_data[order_lot_item_id]" id="order_lot_item_id"/>
+                                                                                                    <input type="hidden" name="line_items_data[purchase_sell_item_id]" id="purchase_sell_item_id"/>
+                                                                                                    <input type="hidden" name="line_items_data[stock_type]" id="stock_type" />
+                                                                                                    <input type="hidden" name="line_items_data[sell_item_id]" id="sell_item_id" />
+                                                                    <?php } ?>
+                                                                    <div class="col-md-3">
+                                                                        <h4>
+                                                                            Line Item [F6]&nbsp;&nbsp;&nbsp;
+                                                                            <?php if ($tunch_textbox_2 == '1') { ?>
+                                                                                                            <span><label style="margin-bottom: 0px;"><input type="checkbox" name="line_items_data[tunch_textbox]" id="tunch_textbox"> <small>Tunch Textbox</small></label></span>
+                                                                            <?php } else { ?>
+                                                                                                            <input type="hidden" name="line_items_data[tunch_textbox]" id="tunch_textbox" value="1">
+                                                                            <?php } ?>
+                                                                        </h4>
+                                                                    </div>
+                                                                    <?php
+                                                                    $use_rfid = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'use_rfid'));
+                                                                    $use_barcode = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'use_barcode'));
+                                                                    if ($use_rfid == 1 || $use_barcode == 1) {
+                                                                        ?>
+                                                                                                    <div class="col-md-3">
+                                                                                                        <label for="rfid_number">Enter RFID</label>
+                                                                                                        <input type="hidden" name="line_items_data[item_stock_rfid_id]" id="item_stock_rfid_id">
+                                                                                                        <input type="text" name="line_items_data[rfid_number]" id="rfid_number" class="form-control">
+                                                                                                    </div>
+                                                                    <?php } ?>
+                                                                    <?php if ($charges_2 == '1') { ?>
+                                                                                                    <div class="col-md-2">
+                                                                                                        <label for="charges_amt">Charges <a href="javascript:void(0)" id="sell_item_charges_details" class="module_save_btn" style="margin: 0; font-size: 9px;">Details[F9]</a></label>
+                                                                                                        <input type="text" name="line_items_data[charges_amt]" id="charges_amt" class="form-control num_only">
+                                                                                                    </div>
+                                                                    <?php } else { ?>
+                                                                                                        <input type="hidden" name="line_items_data[charges_amt]" id="charges_amt" value="0">
+                                                                    <?php } ?>
+                                                                    <div class="clearfix"></div>
+                                                                    <div class="col-md-1">
+                                                                        <label for="sell_type_id">Type<span class="required-sign">&nbsp;*</span></label>
+                                                                        <select name="line_items_data[type]" class="form-control sell_type_id select2" id="sell_type_id"></select>
+                                                                    </div>
+                                                                    <?php if ($use_category == '1') { ?>
+                                                                                                    <div class="col-md-2">
+                                                                                                        <label for="category_id">Category<span class="required-sign">&nbsp;*</span></label>
+                                                                                                        <select name="line_items_data[category_id]" class="form-control category_id" id="category_id"></select>
+                                                                                                    </div>
+                                                                    <?php } else { ?>
+                                                                                                    <input type="hidden" name="line_items_data[category_id]" id="category_id" class="category_id">
+                                                                    <?php } ?>
+                                                                    <div class="col-md-2 pr0">
+                                                                        <label for="item_id">Item<span class="required-sign">&nbsp;*</span></label>
+                                                                        <select name="line_items_data[item_id]" class="form-control item_id select2" id="item_id">
+                                                                            <?php if (GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
+                                                                                                            <option value="">--Select--</option>
+                                                                                                            <?php foreach ($items_for_select as $item) { ?>
+                                                                                                                                                    <option value="<?php echo $item['item_id'] ?>"><?php echo $item['item_name'] ?></option>
+                                                                                                            <?php } ?>
+                                                                            <?php } else { ?>
 
-                                                <?php }  ?>
-                                            </select>
-                                        </div>
-                                        <?php  if($line_item_remark == '1') { ?>
-                                            <div class="col-md-1 pr0">
-                                                <label for="li_narration">Remark</label>
-                                                <input type="text" name="line_items_data[li_narration]" class="form-control" id="li_narration" placeholder="" value="">
-                                            </div>
-                                        <?php  } ?>
-                                        <div class="col-md-1">
-                                            <label for="grwt">Gr.Wt.<span class="required-sign">&nbsp;*</span></label>
-                                            <input type="text" name="line_items_data[grwt]" class="form-control grwt num_only" id="grwt" placeholder="" value="">
-                                        </div>
-                                        <div class="col-md-1">
-                                            <label for="purchase_less" style="font-size: 12px;">Purch Less</label>
-                                            <input type="text" name="line_items_data[purchase_less]" class="form-control purchase_less num_only" id="purchase_less" placeholder="" value="">
-                                        </div>
-                                        <?php if($less_netwt_2 == '1') { ?>
-                                            <div class="col-md-1">
-                                                <label for="less" style="font-size: 12px;">
-                                                    Sell Less
-                                                    <?php if($ask_less_ad_details_in_sell_purchase == '1' ) { ?>
-                                                        <a href="javascript:void(0)" id="less_ad_details" class="module_save_btn" style="margin: 0; font-size: 9px;">Details[F8]</a>
-                                                    <?php } ?>
-                                                </label>
-                                                <input type="text" name="line_items_data[less]" class="form-control less num_only" id="less"  placeholder="" value="">
-                                            </div>
-                                            <div class="col-md-1">
-                                                <label for="unit">Net.Wt<span class="required-sign">&nbsp;*</span></label>
-                                                <input type="text" name="line_items_data[net_wt]" class="form-control net_wt num_only" id="net_wt" placeholder="" value="" readonly="">
-                                            </div>
-                                        <?php } else { ?>
-                                                <input type="hidden" name="line_items_data[less]" id="less" class="less" value="0">
-                                                <input type="hidden" name="line_items_data[net_wt]" id="net_wt" class="net_wt">
-                                        <?php } ?>
-                                        <div class="col-md-1">
-                                            <label for="touch_id">Tunch<span class="required-sign">&nbsp;*</span></label>
-                                            <div class="touch_select">
-                                                <select name="line_items_data[touch_id]" id="touch_id" class="form-control select2 touch_id">
-                                                    <option value=""> - Select - </option>
-                                                    <?php if(isset($touch) && !empty($touch)){ foreach ($touch as $value) { ?>
-                                                        <option value="<?= $value->purity; ?>"<?= isset($carat_id) && $value->purity == $carat_id ? 'selected="selected"' : ''; ?>><?= $value->purity; ?></option>
-                                                    <?php } } ?>
-                                                </select>
-                                            </div>
-                                            <div class="touch_input">
-                                                <input type="text" name="line_items_data[touch_id]" id="touch_data_id" class="form-control touch_id num_only" value="">
-                                            </div>
-                                        </div>
-                                        <?php  if($line_item_gold_silver_rate == '1') { ?>
-                                            <div class="col-md-1">
-                                                <label for="gold_silver_rate">Gold Rate</label>
-                                                <input type="text" name="line_items_data[gold_silver_rate]" class="form-control num_only" id="gold_silver_rate" placeholder="" value="">
-                                            </div>
-                                        <?php  } ?>
-                                        <?php if($wstg_2 == '1') { ?>
-                                            <div class="col-md-1">
-                                                <label for="wstg">Wstg<span class="required-sign field_required">&nbsp;*</span></label>
-                                                <input type="text" name="line_items_data[wstg]" class="form-control wstg num_only" id="wstg" placeholder="" value="" >
-                                                <input type="hidden" name="line_items_data[default_wstg]" id="default_wstg" placeholder="" value="">
-                                            </div>
-                                        <?php } else { ?>
-                                                <input type="hidden" name="line_items_data[wstg]" id="wstg" value="0" class="wstg">
-                                                <input type="hidden" name="line_items_data[default_wstg]" id="default_wstg">
-                                        <?php } ?>
-                                        <div class="col-md-1">
-                                            <label for="fine">Fine</label>
-                                            <input type="text" name="line_items_data[fine]" class="form-control fine" id="fine" placeholder="" value="" readonly>
-                                        </div>
-                                        <?php if($lineitem_image_2 == '1') { ?>
-                                            <div class="col-md-1">
-                                                <label for="file_upload">Image</label>
-                                                <input type="file" name="line_items_data[file_upload]" id="file_upload" class="from-control" onchange="readURL(this);" accept="image/*" value="" style="width: 90px;">
-                                                <input type="hidden" name="line_items_data[image]" id="image" class="from-control">
-                                            </div>
-                                        <?php } else { ?>
-                                                <input type="hidden" name="line_items_data[file_upload]" id="image">
-                                                <input type="hidden" name="line_items_data[image]" id="image">
-                                        <?php } ?>
-                                        <div class="clearfix"></div><br />
-                                        <div class="col-md-12">
-                                            <!--<label>&nbsp;</label>-->
-                                            <input type="button" id="add_lineitem" class="btn btn-info btn-sm add_lineitem pull-right" value="Add Item" style="margin:7px; <?php if (isset($sell_data->sell_id) && !empty($sell_data->sell_id)) { ?> margin-left: 10px; <?php } else { ?> margin-left: 10px; <?php } ?>"/>
-                                            <?php if (isset($sell_data->sell_id) && !empty($sell_data->sell_id)) { ?>
-                                                <div class="created_updated_info pull-right" style="margin-left: 10px;">
-                                                   Created by : <?php echo isset($sell_data ->created_by_name) ? $sell_data ->created_by_name :'' ; ?>
-                                                   @ <?php echo isset($sell_data ->created_at) ? date('d-m-Y h:i A',strtotime($sell_data ->created_at)) :'' ; ?><br/>
-                                                   Updated by : <?php echo isset($sell_data ->updated_by_name) ? $sell_data ->updated_by_name :'' ;?>
-                                                   @ <?php echo isset($sell_data ->updated_at) ? date('d-m-Y h:i A',strtotime($sell_data ->updated_at)) : '' ;?>
-                                                </div>
-                                            <?php } ?>
-                                            <button type="button" id="payment_receipt" class="btn btn-instagram module_save_btn" style="margin:1px;">Payment Receipt [F1]</button>
-                                            <button type="button" id="metal_receipt_payment" class="btn btn-info module_save_btn" style="margin:1px;">Metal Issue Receive [F2]</button>
-                                            <button type="button" id="gold_bhav" class="btn btn-success module_save_btn" style="margin:1px;">Gold Bhav [F3]</button>
-                                            <button type="button" id="silver_bhav" class="btn btn-danger module_save_btn" style="margin:1px;">Silver Bhav [F4]</button>
-                                            <button type="button" id="transfer" class="btn btn-warning module_save_btn" style="margin:1px;">Transfer [F5]</button>
-                                            <?php if($ask_ad_charges_in_sell_purchase == '1' ) { ?>
-                                                <button type="button" id="ad_charges" class="btn btn-dropbox module_save_btn" style="margin:1px;">Charges [F7]</button>
-                                            <?php } ?>
-                                            <?php if($c_r_amount_separate == '1' && $this->app_model->have_access_role(SELL_PURCHASE_MODULE_ID, "adjust c/r amount allowed") ) { ?>
-                                                <button type="button" id="adjust_cr" class="btn btn-instagram module_save_btn" style="margin:1px;">Adjust CR</button>
-                                            <?php } ?>
-                                        </div>
-                                    </div>
-                                    <div class="clearfix"></div>
-                                    <div class="col-sm-12">
-                                        <table style="" class="table custom-table border item-table">
-                                            <thead>
-                                                <tr>
-                                                    <th width="5%">Action</th>
-                                                    <th width="4%">Type</th>
-                                                    <?php if($use_category == '1') { ?>
-                                                        <th width="10%">Category</th>
-                                                    <?php } ?>
-                                                    <th width="8%">Description</th>
-                                                    <th width="5%" class="text-right">Gr.Wt.</th>
-                                                    <?php if($less_netwt_2 == '1') { ?>
-                                                        <th width="5%" class="text-right">Purchase Less</th>
-                                                        <th width="5%" class="text-right">Sell Less</th>
-                                                        <th width="5%" class="text-right">Net.Wt</th>
-                                                    <?php } ?>
-                                                    <th width="5%" class="text-right">Tunch</th>
-                                                    <?php if($wstg_2 == '1') { ?>
-                                                        <th width="4%" class="text-right">Wstg</th>
-                                                    <?php } ?>
-                                                    <th width="7%" class="text-right">Gold Fine</th>
-                                                    <th width="7%" class="text-right">Silver Fine</th>
-                                                    <th width="6%" class="text-right">Amount</th>
-                                                    <?php if($c_r_amount_separate == '1') { ?>
-                                                        <th width="5%" class="text-right">C Amt</th>
-                                                        <th width="5%" class="text-right">R Amt</th>
-                                                    <?php } ?>
-                                                    <?php if($lineitem_image_2 == '1') { ?>
-                                                        <th width="5%">Image</th>
-                                                    <?php } ?>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="lineitem_list"></tbody>
-                                            <tfoot id="lineitem_foot_list">
-                                                <tr>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <?php if($use_category == '1') { ?>
-                                                        <th></th>
-                                                    <?php } ?>
-                                                    <th>Total</th>
-                                                    <th class="text-right"><span id="total_grwt"></span></th>
-                                                    <?php if($less_netwt_2 == '1') { ?>
-                                                        <th class="text-right"><span id="total_purchase_less"></span></th>
-                                                        <th class="text-right"><span id="total_less"></span></th>
-                                                        <th class="text-right"><span id="total_ntwt"></span></th>
-                                                    <?php } ?>
-                                                    <th></th>
-                                                    <?php if($wstg_2 == '1') { ?>
-                                                        <th></th>
-                                                    <?php } ?>
-                                                    <th class="text-right"><span id="li_total_gold_fine"></span></th>
-                                                    <th class="text-right"><span id="li_total_silver_fine"></span></th>
-                                                    <th class="text-right"><span id="li_total_amount"></span></th>
-                                                    <?php if($c_r_amount_separate == '1') { ?>
-                                                        <th></th>
-                                                        <th></th>
-                                                    <?php } ?>
-                                                    <?php if($lineitem_image_2 == '1') { ?>
-                                                        <th></th>
-                                                    <?php } ?>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                        <table style="" class="table custom-table pay_rec_table" hidden="">
-                                            <tbody id="pop_up_pay_rec_list"></tbody>
-                                        </table>
-                                        <table style="" class="table custom-table metal_table" hidden="">
-                                            <tbody id="pop_up_metal_list"></tbody>
-                                        </table>
-                                        <table style="" class="table custom-table gold_table" hidden="">
-                                            <tbody id="pop_up_gold_list"></tbody>
-                                        </table>
-                                        <table style="" class="table custom-table silver_table" hidden="">
-                                            <tbody id="pop_up_silver_list"></tbody>
-                                        </table>
-                                        <table style="" class="table custom-table transfer_table" hidden="">
-                                            <tbody id="pop_up_transfer_list"></tbody>
-                                        </table>
-                                        <table style="" class="table custom-table ad_charges_table" hidden="">
-                                            <tbody id="pop_up_ad_charges_list"></tbody>
-                                        </table>
-                                        <table style="" class="table custom-table adjust_cr_table" hidden="">
-                                            <tbody id="pop_up_adjust_cr_list"></tbody>
-                                        </table>
-                                        <table style="" class="table custom-table item-table">
-                                            <tbody id="pop_up_total_list">
-                                                <?php if($ask_discount_in_sell_purchase == '1') { ?>
-                                                    <tr>
-                                                        <th width="5%"></th>
-                                                        <th width="4%"></th>
-                                                        <th width="10%"></th>
-                                                        <th width="8%"></th>
-                                                        <th width="5%"></th>
-                                                        <th width="5%"></th>
-                                                        <th width="5%"></th>
-                                                        <th width="9%" colspan="2" class="text-right">Discount Amount : </th>
-                                                        <th width="7%" class="text-right"></th>
-                                                        <th width="7%" class="text-right"></th>
-                                                        <th width="6%" class="text-right"><input type="text" name="discount_amount" id="discount_amount" class="form-control input-sm" value="<?php if (isset($sell_data->discount_amount) && !empty($sell_data->discount_amount)) { echo $sell_data->discount_amount; } else { echo '0';} ?>"></th>
-                                                        <?php if($c_r_amount_separate == '1') { ?>
-                                                            <th width="5%"></th>
-                                                            <th width="5%"></th>
-                                                        <?php } ?>
-                                                        <?php if($lineitem_image_2 == '1') { ?>
-                                                            <th width="5%"></th>
-                                                        <?php } ?>
-                                                    </tr>
-                                                <?php } else { ?>
-                                                    <tr class="hide">
-                                                        <th width="5%"><input type="hidden" name="discount_amount" id="discount_amount" class="form-control input-sm" value="0"></th>
-                                                    </tr>
-                                                <?php } ?>
-                                                <tr>
-                                                    <th width="5%"></th>
-                                                    <th width="4%"></th>
-                                                    <th width="10%"></th>
-                                                    <th width="8%"></th>
-                                                    <th width="5%"></th>
-                                                    <th width="5%"></th>
-                                                    <th width="5%"></th>
-                                                    <th width="9%" colspan="2" class="text-right">Bill Balance : </th>
-                                                    <!--<th width="4%"></th>-->
-                                                    <th width="7%" class="text-right"><span id="bill_gold_fine"></span></th>
-                                                    <th width="7%" class="text-right"><span id="bill_silver_fine"></span></th>
-                                                    <th width="6%" class="text-right"><span id="bill_amount"></span></th>
-                                                    <?php if($c_r_amount_separate == '1') { ?>
-                                                        <th width="5%" class="text-right"><span id="bill_cr_c_amount"></span></th>
-                                                        <th width="5%" class="text-right"><span id="bill_cr_r_amount"></span></th>
-                                                    <?php } ?>
-                                                    <?php if($lineitem_image_2 == '1') { ?>
-                                                        <th width="5%"></th>
-                                                    <?php } ?>
-                                                </tr>
-                                                <tr>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th>Bal.Date : </th>
-                                                    <th><span id="balance_date"></span></th>
-                                                    <th colspan="2" class="text-right">Old Balance : </th>
-                                                    <!--<th></th>-->
-                                                    <th class="text-right"><span id="old_gold_fine_val"></span></th>
-                                                    <th class="text-right"><span id="old_silver_fine_val"></span></th>
-                                                    <th class="text-right"><span id="old_amount_val"></span></th>
-                                                    <?php if($c_r_amount_separate == '1') { ?>
-                                                        <th class="text-right" width="5%"><span id="old_c_amount_val"></span></th>
-                                                        <th class="text-right" width="5%"><span id="old_r_amount_val"></span></th>
-                                                    <?php } ?>
-                                                    <?php if($lineitem_image_2 == '1') { ?>
-                                                        <th></th>
-                                                    <?php } ?>
-                                                </tr>
-                                                <tr>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th>RFID Pcs</th>
-                                                    <th class="text-right"><span id="total_rfid_pcs"></span></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th colspan="2" class="text-right">Net Balance : </th>
-                                                    <!--<th></th>-->
-                                                    <th class="text-right"><span id="net_gold_fine" class="net_gold_fine label label-success" style="font-size: 14px;"></span></th>
-                                                    <th class="text-right"><span id="net_silver_fine" class="net_silver_fine label label-success" style="font-size: 14px;"></span></th>
-                                                    <th class="text-right"><span id="net_amount" class="net_amount label label-success" style="font-size: 14px;"></span></th>
-                                                    <?php if($c_r_amount_separate == '1') { ?>
-                                                        <th class="text-right" width="5%"><span id="net_c_amount" class="net_c_amount label label-success" style="font-size: 14px;"></span></th>
-                                                        <th class="text-right" width="5%"><span id="net_r_amount" class="net_r_amount label label-success" style="font-size: 14px;"></span></th>
-                                                    <?php } ?>
-                                                    <?php if($lineitem_image_2 == '1') { ?>
-                                                        <th></th>
-                                                    <?php } ?>
-                                                </tr>
-                                                <tr>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th>Loose Pcs</th>
-                                                    <th class="text-right"><span id="total_loose_pcs"></span></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <?php if($approx_amount == '1') { ?>
-                                                        <th colspan="2" class="text-right">Approx Amount : </th>
-                                                        <!--<th></th>-->
-                                                        <th class="text-right"><span id="app_gold_fine"></span></th>
-                                                        <th class="text-right"><span id="app_silver_fine"></span></th>
-                                                        <th class="text-right"><span id="app_amount"></span></th>
-                                                    <?php } else { ?>
-                                                        <th></th>
-                                                        <th></th>
-                                                        <th></th>
-                                                        <th></th>
-                                                    <?php } ?>
-                                                    <?php if($c_r_amount_separate == '1') { ?>
-                                                        <th width="5%"></th>
-                                                        <th width="5%"></th>
-                                                    <?php } ?>
-                                                    <?php if($lineitem_image_2 == '1') { ?>
-                                                        <th></th>
-                                                    <?php } ?>
-                                                </tr>
-                                                <tr>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th>RFID Wt</th>
-                                                    <th class="text-right"><span id="total_rfid_wt"></span></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <?php if($approx_amount == '1') { ?>
-                                                        <th colspan="2" class="text-right">Approx Net Bal. : </th>
-                                                        <!--<th></th>-->
-                                                        <th class="text-right"><span id="app_net_amt"></span></th>
-                                                        <th></th>
-                                                        <th></th>
-                                                    <?php } else { ?>
-                                                        <th></th>
-                                                        <th></th>
-                                                        <th></th>
-                                                        <th></th>
-                                                    <?php } ?>
-                                                    <?php if($c_r_amount_separate == '1') { ?>
-                                                        <th width="5%"></th>
-                                                        <th width="5%"></th>
-                                                    <?php } ?>
-                                                    <?php if($lineitem_image_2 == '1') { ?>
-                                                        <th></th>
-                                                    <?php } ?>
-                                                </tr>
-                                                <tr>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th>Loose Wt</th>
-                                                    <th class="text-right"><span id="total_loose_wt"></span></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th></th>
-                                                    <th colspan="2" class="text-right"><a href="<?= base_url('master/setting') ?>" target="_blanck">Rate From Setting : </a></th>
-                                                    <!--<th></th>-->
-                                                    <th class="text-right"><?php echo $gold_rate; ?></th>
-                                                    <th class="text-right"><?php echo $silver_rate; ?></th>
-                                                    <th></th>
-                                                    <?php if($c_r_amount_separate == '1') { ?>
-                                                        <th width="5%"></th>
-                                                        <th width="5%"></th>
-                                                    <?php } ?>
-                                                    <?php if($lineitem_image_2 == '1') { ?>
-                                                        <th></th>
-                                                    <?php } ?>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                                                            <?php } ?>
+                                                                        </select>
+                                                                    </div>
+                                                                    <?php if ($line_item_remark == '1') { ?>
+                                                                                                    <div class="col-md-1 pr0">
+                                                                                                        <label for="li_narration">Remark</label>
+                                                                                                        <input type="text" name="line_items_data[li_narration]" class="form-control" id="li_narration" placeholder="" value="">
+                                                                                                    </div>
+                                                                    <?php } ?>
+                                                                    <div class="col-md-1">
+                                                                        <label for="grwt">Gr.Wt.<span class="required-sign">&nbsp;*</span></label>
+                                                                        <input type="text" name="line_items_data[grwt]" class="form-control grwt num_only" id="grwt" placeholder="" value="">
+                                                                    </div>
+                                                                    <div class="col-md-1">
+                                                                        <label for="purchase_less" style="font-size: 12px;">Purch Less</label>
+                                                                        <input type="text" name="line_items_data[purchase_less]" class="form-control purchase_less num_only" id="purchase_less" placeholder="" value="">
+                                                                    </div>
+                                                                    <?php if ($less_netwt_2 == '1') { ?>
+                                                                                                    <div class="col-md-1">
+                                                                                                        <label for="less" style="font-size: 12px;">
+                                                                                                            Sell Less
+                                                                                                            <?php if ($ask_less_ad_details_in_sell_purchase == '1') { ?>
+                                                                                                                                            <a href="javascript:void(0)" id="less_ad_details" class="module_save_btn" style="margin: 0; font-size: 9px;">Details[F8]</a>
+                                                                                                            <?php } ?>
+                                                                                                        </label>
+                                                                                                        <input type="text" name="line_items_data[less]" class="form-control less num_only" id="less"  placeholder="" value="">
+                                                                                                    </div>
+                                                                                                    <div class="col-md-1">
+                                                                                                        <label for="unit">Net.Wt<span class="required-sign">&nbsp;*</span></label>
+                                                                                                        <input type="text" name="line_items_data[net_wt]" class="form-control net_wt num_only" id="net_wt" placeholder="" value="" readonly="">
+                                                                                                    </div>
+                                                                    <?php } else { ?>
+                                                                                                        <input type="hidden" name="line_items_data[less]" id="less" class="less" value="0">
+                                                                                                        <input type="hidden" name="line_items_data[net_wt]" id="net_wt" class="net_wt">
+                                                                    <?php } ?>
+                                                                    <div class="col-md-1">
+                                                                        <label for="touch_id">Tunch<span class="required-sign">&nbsp;*</span></label>
+                                                                        <div class="touch_select">
+                                                                            <select name="line_items_data[touch_id]" id="touch_id" class="form-control select2 touch_id">
+                                                                                <option value=""> - Select - </option>
+                                                                                <?php if (isset($touch) && !empty($touch)) {
+                                                                                    foreach ($touch as $value) { ?>
+                                                                                                                                            <option value="<?= $value->purity; ?>"<?= isset($carat_id) && $value->purity == $carat_id ? 'selected="selected"' : ''; ?>><?= $value->purity; ?></option>
+                                                                                                            <?php }
+                                                                                } ?>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div class="touch_input">
+                                                                            <input type="text" name="line_items_data[touch_id]" id="touch_data_id" class="form-control touch_id num_only" value="">
+                                                                        </div>
+                                                                    </div>
+                                                                    <?php if ($line_item_gold_silver_rate == '1') { ?>
+                                                                                                    <div class="col-md-1">
+                                                                                                        <label for="gold_silver_rate">Gold Rate</label>
+                                                                                                        <input type="text" name="line_items_data[gold_silver_rate]" class="form-control num_only" id="gold_silver_rate" placeholder="" value="">
+                                                                                                    </div>
+                                                                    <?php } ?>
+                                                                    <?php if ($wstg_2 == '1') { ?>
+                                                                                                    <div class="col-md-1">
+                                                                                                        <label for="wstg">Wstg<span class="required-sign field_required">&nbsp;*</span></label>
+                                                                                                        <input type="text" name="line_items_data[wstg]" class="form-control wstg num_only" id="wstg" placeholder="" value="" >
+                                                                                                        <input type="hidden" name="line_items_data[default_wstg]" id="default_wstg" placeholder="" value="">
+                                                                                                    </div>
+                                                                    <?php } else { ?>
+                                                                                                        <input type="hidden" name="line_items_data[wstg]" id="wstg" value="0" class="wstg">
+                                                                                                        <input type="hidden" name="line_items_data[default_wstg]" id="default_wstg">
+                                                                    <?php } ?>
+                                                                    <div class="col-md-1">
+                                                                        <label for="fine">Fine</label>
+                                                                        <input type="text" name="line_items_data[fine]" class="form-control fine" id="fine" placeholder="" value="" readonly>
+                                                                    </div>
+                                                                    <?php if ($lineitem_image_2 == '1') { ?>
+                                                                                                    <div class="col-md-1">
+                                                                                                        <label for="file_upload">Image</label>
+                                                                                                        <input type="file" name="line_items_data[file_upload]" id="file_upload" class="from-control" onchange="readURL(this);" accept="image/*" value="" style="width: 90px;">
+                                                                                                        <input type="hidden" name="line_items_data[image]" id="image" class="from-control">
+                                                                                                    </div>
+                                                                    <?php } else { ?>
+                                                                                                        <input type="hidden" name="line_items_data[file_upload]" id="image">
+                                                                                                        <input type="hidden" name="line_items_data[image]" id="image">
+                                                                    <?php } ?>
+                                                                    <div class="clearfix"></div><br />
+                                                                    <div class="col-md-12">
+                                                                        <!--<label>&nbsp;</label>-->
+                                                                        <input type="button" id="add_lineitem" class="btn btn-info btn-sm add_lineitem pull-right" value="Add Item" style="margin:7px; <?php if (isset($sell_data->sell_id) && !empty($sell_data->sell_id)) { ?> margin-left: 10px; <?php } else { ?> margin-left: 10px; <?php } ?>"/>
+                                                                        <?php if (isset($sell_data->sell_id) && !empty($sell_data->sell_id)) { ?>
+                                                                                                        <div class="created_updated_info pull-right" style="margin-left: 10px;">
+                                                                                                           Created by : <?php echo isset($sell_data->created_by_name) ? $sell_data->created_by_name : ''; ?>
+                                                                                                           @ <?php echo isset($sell_data->created_at) ? date('d-m-Y h:i A', strtotime($sell_data->created_at)) : ''; ?><br/>
+                                                                                                           Updated by : <?php echo isset($sell_data->updated_by_name) ? $sell_data->updated_by_name : ''; ?>
+                                                                                                           @ <?php echo isset($sell_data->updated_at) ? date('d-m-Y h:i A', strtotime($sell_data->updated_at)) : ''; ?>
+                                                                                                        </div>
+                                                                        <?php } ?>
+                                                                        <button type="button" id="payment_receipt" class="btn btn-instagram module_save_btn" style="margin:1px;">Payment Receipt [F1]</button>
+                                                                        <button type="button" id="metal_receipt_payment" class="btn btn-info module_save_btn" style="margin:1px;">Metal Issue Receive [F2]</button>
+                                                                        <button type="button" id="gold_bhav" class="btn btn-success module_save_btn" style="margin:1px;">Gold Bhav [F3]</button>
+                                                                        <button type="button" id="silver_bhav" class="btn btn-danger module_save_btn" style="margin:1px;">Silver Bhav [F4]</button>
+                                                                        <button type="button" id="transfer" class="btn btn-warning module_save_btn" style="margin:1px;">Transfer [F5]</button>
+                                                                        <?php if ($ask_ad_charges_in_sell_purchase == '1') { ?>
+                                                                                                        <button type="button" id="ad_charges" class="btn btn-dropbox module_save_btn" style="margin:1px;">Charges [F7]</button>
+                                                                        <?php } ?>
+                                                                        <?php if ($c_r_amount_separate == '1' && $this->app_model->have_access_role(SELL_PURCHASE_MODULE_ID, "adjust c/r amount allowed")) { ?>
+                                                                                                        <button type="button" id="adjust_cr" class="btn btn-instagram module_save_btn" style="margin:1px;">Adjust CR</button>
+                                                                        <?php } ?>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="clearfix"></div>
+                                                                <div class="col-sm-12">
+                                                                    <table style="" class="table custom-table border item-table">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th width="5%">Action</th>
+                                                                                <th width="4%">Type</th>
+                                                                                <?php if ($use_category == '1') { ?>
+                                                                                                                <th width="10%">Category</th>
+                                                                                <?php } ?>
+                                                                                <th width="8%">Description</th>
+                                                                                <th width="5%" class="text-right">Gr.Wt.</th>
+                                                                                <?php if ($less_netwt_2 == '1') { ?>
+                                                                                                                <th width="5%" class="text-right">Purchase Less</th>
+                                                                                                                <th width="5%" class="text-right">Sell Less</th>
+                                                                                                                <th width="5%" class="text-right">Net.Wt</th>
+                                                                                <?php } ?>
+                                                                                <th width="5%" class="text-right">Tunch</th>
+                                                                                <?php if ($wstg_2 == '1') { ?>
+                                                                                                                <th width="4%" class="text-right">Wstg</th>
+                                                                                <?php } ?>
+                                                                                <th width="7%" class="text-right">Gold Fine</th>
+                                                                                <th width="7%" class="text-right">Silver Fine</th>
+                                                                                <th width="6%" class="text-right">Amount</th>
+                                                                                <?php if ($c_r_amount_separate == '1') { ?>
+                                                                                                                <th width="5%" class="text-right">C Amt</th>
+                                                                                                                <th width="5%" class="text-right">R Amt</th>
+                                                                                <?php } ?>
+                                                                                <?php if ($lineitem_image_2 == '1') { ?>
+                                                                                                                <th width="5%">Image</th>
+                                                                                <?php } ?>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody id="lineitem_list"></tbody>
+                                                                        <tfoot id="lineitem_foot_list">
+                                                                            <tr>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <?php if ($use_category == '1') { ?>
+                                                                                                                <th></th>
+                                                                                <?php } ?>
+                                                                                <th>Total</th>
+                                                                                <th class="text-right"><span id="total_grwt"></span></th>
+                                                                                <?php if ($less_netwt_2 == '1') { ?>
+                                                                                                                <th class="text-right"><span id="total_purchase_less"></span></th>
+                                                                                                                <th class="text-right"><span id="total_less"></span></th>
+                                                                                                                <th class="text-right"><span id="total_ntwt"></span></th>
+                                                                                <?php } ?>
+                                                                                <th></th>
+                                                                                <?php if ($wstg_2 == '1') { ?>
+                                                                                                                <th></th>
+                                                                                <?php } ?>
+                                                                                <th class="text-right"><span id="li_total_gold_fine"></span></th>
+                                                                                <th class="text-right"><span id="li_total_silver_fine"></span></th>
+                                                                                <th class="text-right"><span id="li_total_amount"></span></th>
+                                                                                <?php if ($c_r_amount_separate == '1') { ?>
+                                                                                                                <th></th>
+                                                                                                                <th></th>
+                                                                                <?php } ?>
+                                                                                <?php if ($lineitem_image_2 == '1') { ?>
+                                                                                                                <th></th>
+                                                                                <?php } ?>
+                                                                            </tr>
+                                                                        </tfoot>
+                                                                    </table>
+                                                                    <table style="" class="table custom-table pay_rec_table" hidden="">
+                                                                        <tbody id="pop_up_pay_rec_list"></tbody>
+                                                                    </table>
+                                                                    <table style="" class="table custom-table metal_table" hidden="">
+                                                                        <tbody id="pop_up_metal_list"></tbody>
+                                                                    </table>
+                                                                    <table style="" class="table custom-table gold_table" hidden="">
+                                                                        <tbody id="pop_up_gold_list"></tbody>
+                                                                    </table>
+                                                                    <table style="" class="table custom-table silver_table" hidden="">
+                                                                        <tbody id="pop_up_silver_list"></tbody>
+                                                                    </table>
+                                                                    <table style="" class="table custom-table transfer_table" hidden="">
+                                                                        <tbody id="pop_up_transfer_list"></tbody>
+                                                                    </table>
+                                                                    <table style="" class="table custom-table ad_charges_table" hidden="">
+                                                                        <tbody id="pop_up_ad_charges_list"></tbody>
+                                                                    </table>
+                                                                    <table style="" class="table custom-table adjust_cr_table" hidden="">
+                                                                        <tbody id="pop_up_adjust_cr_list"></tbody>
+                                                                    </table>
+                                                                    <table style="" class="table custom-table item-table">
+                                                                        <tbody id="pop_up_total_list">
+                                                                            <?php if ($ask_discount_in_sell_purchase == '1') { ?>
+                                                                                                            <tr>
+                                                                                                                <th width="5%"></th>
+                                                                                                                <th width="4%"></th>
+                                                                                                                <th width="10%"></th>
+                                                                                                                <th width="8%"></th>
+                                                                                                                <th width="5%"></th>
+                                                                                                                <th width="5%"></th>
+                                                                                                                <th width="5%"></th>
+                                                                                                                <th width="9%" colspan="2" class="text-right">Discount Amount : </th>
+                                                                                                                <th width="7%" class="text-right"></th>
+                                                                                                                <th width="7%" class="text-right"></th>
+                                                                                                                <th width="6%" class="text-right"><input type="text" name="discount_amount" id="discount_amount" class="form-control input-sm" value="<?php if (isset($sell_data->discount_amount) && !empty($sell_data->discount_amount)) {
+                                                                                                                    echo $sell_data->discount_amount;
+                                                                                                                } else {
+                                                                                                                    echo '0';
+                                                                                                                } ?>"></th>
+                                                                                                                <?php if ($c_r_amount_separate == '1') { ?>
+                                                                                                                                                <th width="5%"></th>
+                                                                                                                                                <th width="5%"></th>
+                                                                                                                <?php } ?>
+                                                                                                                <?php if ($lineitem_image_2 == '1') { ?>
+                                                                                                                                                <th width="5%"></th>
+                                                                                                                <?php } ?>
+                                                                                                            </tr>
+                                                                            <?php } else { ?>
+                                                                                                            <tr class="hide">
+                                                                                                                <th width="5%"><input type="hidden" name="discount_amount" id="discount_amount" class="form-control input-sm" value="0"></th>
+                                                                                                            </tr>
+                                                                            <?php } ?>
+                                                                            <tr>
+                                                                                <th width="5%"></th>
+                                                                                <th width="4%"></th>
+                                                                                <th width="10%"></th>
+                                                                                <th width="8%"></th>
+                                                                                <th width="5%"></th>
+                                                                                <th width="5%"></th>
+                                                                                <th width="5%"></th>
+                                                                                <th width="9%" colspan="2" class="text-right">Bill Balance : </th>
+                                                                                <!--<th width="4%"></th>-->
+                                                                                <th width="7%" class="text-right"><span id="bill_gold_fine"></span></th>
+                                                                                <th width="7%" class="text-right"><span id="bill_silver_fine"></span></th>
+                                                                                <th width="6%" class="text-right"><span id="bill_amount"></span></th>
+                                                                                <?php if ($c_r_amount_separate == '1') { ?>
+                                                                                                                <th width="5%" class="text-right"><span id="bill_cr_c_amount"></span></th>
+                                                                                                                <th width="5%" class="text-right"><span id="bill_cr_r_amount"></span></th>
+                                                                                <?php } ?>
+                                                                                <?php if ($lineitem_image_2 == '1') { ?>
+                                                                                                                <th width="5%"></th>
+                                                                                <?php } ?>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <th>Bal.Date : </th>
+                                                                                <th><span id="balance_date"></span></th>
+                                                                                <th colspan="2" class="text-right">Old Balance : </th>
+                                                                                <!--<th></th>-->
+                                                                                <th class="text-right"><span id="old_gold_fine_val"></span></th>
+                                                                                <th class="text-right"><span id="old_silver_fine_val"></span></th>
+                                                                                <th class="text-right"><span id="old_amount_val"></span></th>
+                                                                                <?php if ($c_r_amount_separate == '1') { ?>
+                                                                                                                <th class="text-right" width="5%"><span id="old_c_amount_val"></span></th>
+                                                                                                                <th class="text-right" width="5%"><span id="old_r_amount_val"></span></th>
+                                                                                <?php } ?>
+                                                                                <?php if ($lineitem_image_2 == '1') { ?>
+                                                                                                                <th></th>
+                                                                                <?php } ?>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <th>RFID Pcs</th>
+                                                                                <th class="text-right"><span id="total_rfid_pcs"></span></th>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <th colspan="2" class="text-right">Net Balance : </th>
+                                                                                <!--<th></th>-->
+                                                                                <th class="text-right"><span id="net_gold_fine" class="net_gold_fine label label-success" style="font-size: 14px;"></span></th>
+                                                                                <th class="text-right"><span id="net_silver_fine" class="net_silver_fine label label-success" style="font-size: 14px;"></span></th>
+                                                                                <th class="text-right"><span id="net_amount" class="net_amount label label-success" style="font-size: 14px;"></span></th>
+                                                                                <?php if ($c_r_amount_separate == '1') { ?>
+                                                                                                                <th class="text-right" width="5%"><span id="net_c_amount" class="net_c_amount label label-success" style="font-size: 14px;"></span></th>
+                                                                                                                <th class="text-right" width="5%"><span id="net_r_amount" class="net_r_amount label label-success" style="font-size: 14px;"></span></th>
+                                                                                <?php } ?>
+                                                                                <?php if ($lineitem_image_2 == '1') { ?>
+                                                                                                                <th></th>
+                                                                                <?php } ?>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <th>Loose Pcs</th>
+                                                                                <th class="text-right"><span id="total_loose_pcs"></span></th>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <?php if ($approx_amount == '1') { ?>
+                                                                                                                <th colspan="2" class="text-right">Approx Amount : </th>
+                                                                                                                <!--<th></th>-->
+                                                                                                                <th class="text-right"><span id="app_gold_fine"></span></th>
+                                                                                                                <th class="text-right"><span id="app_silver_fine"></span></th>
+                                                                                                                <th class="text-right"><span id="app_amount"></span></th>
+                                                                                <?php } else { ?>
+                                                                                                                <th></th>
+                                                                                                                <th></th>
+                                                                                                                <th></th>
+                                                                                                                <th></th>
+                                                                                <?php } ?>
+                                                                                <?php if ($c_r_amount_separate == '1') { ?>
+                                                                                                                <th width="5%"></th>
+                                                                                                                <th width="5%"></th>
+                                                                                <?php } ?>
+                                                                                <?php if ($lineitem_image_2 == '1') { ?>
+                                                                                                                <th></th>
+                                                                                <?php } ?>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <th>RFID Wt</th>
+                                                                                <th class="text-right"><span id="total_rfid_wt"></span></th>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <?php if ($approx_amount == '1') { ?>
+                                                                                                                <th colspan="2" class="text-right">Approx Net Bal. : </th>
+                                                                                                                <!--<th></th>-->
+                                                                                                                <th class="text-right"><span id="app_net_amt"></span></th>
+                                                                                                                <th></th>
+                                                                                                                <th></th>
+                                                                                <?php } else { ?>
+                                                                                                                <th></th>
+                                                                                                                <th></th>
+                                                                                                                <th></th>
+                                                                                                                <th></th>
+                                                                                <?php } ?>
+                                                                                <?php if ($c_r_amount_separate == '1') { ?>
+                                                                                                                <th width="5%"></th>
+                                                                                                                <th width="5%"></th>
+                                                                                <?php } ?>
+                                                                                <?php if ($lineitem_image_2 == '1') { ?>
+                                                                                                                <th></th>
+                                                                                <?php } ?>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <th>Loose Wt</th>
+                                                                                <th class="text-right"><span id="total_loose_wt"></span></th>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <th></th>
+                                                                                <th colspan="2" class="text-right"><a href="<?= base_url('master/setting') ?>" target="_blanck">Rate From Setting : </a></th>
+                                                                                <!--<th></th>-->
+                                                                                <th class="text-right"><?php echo $gold_rate; ?></th>
+                                                                                <th class="text-right"><?php echo $silver_rate; ?></th>
+                                                                                <th></th>
+                                                                                <?php if ($c_r_amount_separate == '1') { ?>
+                                                                                                                <th width="5%"></th>
+                                                                                                                <th width="5%"></th>
+                                                                                <?php } ?>
+                                                                                <?php if ($lineitem_image_2 == '1') { ?>
+                                                                                                                <th></th>
+                                                                                <?php } ?>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                     <?php } ?>
                     </div>
                 </div>
@@ -538,7 +559,7 @@
                         <div class="col-md-12">
                             <div class="pay_rec_form pay_rec_div">
                                 <?php if (isset($pay_rec_data)) { ?>
-                                    <input type="hidden" name="pay_rec_data[pay_rec_id]" id="pay_rec_id" />
+                                                                <input type="hidden" name="pay_rec_data[pay_rec_id]" id="pay_rec_id" />
                                 <?php } ?>
                                 <input type="hidden" name="pay_rec_index" id="pay_rec_index" />
                                 <div class="col-md-4">
@@ -607,7 +628,7 @@
                                 <input type="hidden" name="metal_index" id="metal_index" />
                                 <input type="hidden" name="metal_data[metal_item_delete]" id="metal_item_delete" value="allow" />
                                 <?php if (isset($metal_data) && !empty($metal_data)) { ?>
-                                <input type="hidden" name="metal_data[metal_pr_id]" id="metal_pr_id" value="0" />
+                                                            <input type="hidden" name="metal_data[metal_pr_id]" id="metal_pr_id" value="0" />
                                 <?php } ?>
                                 <div class="col-md-4">
                                     <label for="item_id">Item<span class="required-sign">&nbsp;*</span></label>
@@ -675,7 +696,7 @@
                         <div class="col-md-12">
                             <div class="gold_form metal_div">
                                 <?php if (isset($gold_data)) { ?>
-                                    <input type="hidden" name="gold_data[gold_id]" id="gold_id" />
+                                                                <input type="hidden" name="gold_data[gold_id]" id="gold_id" />
                                 <?php } ?>
                                 <input type="hidden" name="gold_index" id="gold_index" />
                                 <div class="col-md-4">
@@ -701,14 +722,14 @@
                                     <input type="text" name="gold_data[gold_value]" id="gold_value" class="form-control num_only" value="" readonly="">
                                 </div>
                                 <div class="clearfix"></div><br />
-                                <?php if($c_r_amount_separate == '1') { ?>
-                                    <div class="col-md-4">
-                                        <label>Amount Effect</label>
-                                        <select name="gold_data[gold_cr_effect]" class="form-control gold_cr_effect" id="gold_cr_effect">
-                                            <option value="1" selected="">C Amt</option>
-                                            <option value="2">R Amt</option>
-                                        </select>
-                                    </div>
+                                <?php if ($c_r_amount_separate == '1') { ?>
+                                                                <div class="col-md-4">
+                                                                    <label>Amount Effect</label>
+                                                                    <select name="gold_data[gold_cr_effect]" class="form-control gold_cr_effect" id="gold_cr_effect">
+                                                                        <option value="1" selected="">C Amt</option>
+                                                                        <option value="2">R Amt</option>
+                                                                    </select>
+                                                                </div>
                                 <?php } ?>
                                 <div class="col-md-8">
                                     <label>Narration</label>
@@ -759,7 +780,7 @@
                             <div class="silver_form metal_div">
                                 <input type="hidden" name="silver_index" id="silver_index" />
                                 <?php if (isset($silver_data)) { ?>
-                                    <input type="hidden" name="silver_data[silver_id]" id="silver_id" />
+                                                                <input type="hidden" name="silver_data[silver_id]" id="silver_id" />
                                 <?php } ?>
                                 <div class="col-md-4">
                                     <label><a href="<?= base_url('master/setting') ?>" target="_blanck">Rate From Setting : </a></label>
@@ -783,14 +804,14 @@
                                     <input type="text" name="silver_data[silver_value]" id="silver_value" class="form-control num_only" value="" readonly="">
                                 </div>
                                 <div class="clearfix"></div><br />
-                                <?php if($c_r_amount_separate == '1') { ?>
-                                    <div class="col-md-4">
-                                        <label>Amount Effect</label>
-                                        <select name="silver_data[silver_cr_effect]" class="form-control silver_cr_effect" id="silver_cr_effect">
-                                            <option value="1" selected="">C Amt</option>
-                                            <option value="2">R Amt</option>
-                                        </select>
-                                    </div>
+                                <?php if ($c_r_amount_separate == '1') { ?>
+                                                                <div class="col-md-4">
+                                                                    <label>Amount Effect</label>
+                                                                    <select name="silver_data[silver_cr_effect]" class="form-control silver_cr_effect" id="silver_cr_effect">
+                                                                        <option value="1" selected="">C Amt</option>
+                                                                        <option value="2">R Amt</option>
+                                                                    </select>
+                                                                </div>
                                 <?php } ?>
                                 <div class="col-md-8">
                                     <label>Narration</label>
@@ -839,7 +860,7 @@
                             <div class="transfer_form transfer_div">
                                 <input type="hidden" name="transfer_index" id="transfer_index" />
                                 <?php if (isset($transfer_data) && !empty($transfer_data)) { ?>
-                                    <input type="hidden" name="transfer_data[transfer_entry_id]" id="transfer_entry_id" />
+                                                                <input type="hidden" name="transfer_data[transfer_entry_id]" id="transfer_entry_id" />
                                 <?php } ?>
                                 <div class="col-md-5">
                                     <label><input type="radio" name="naam_jama" class="iradio_minimal-blue" id="naam_jama" value="1">&nbsp;Naam(Dr)</label>&nbsp;
@@ -911,8 +932,8 @@
                         <div class="col-md-12">
                             <div class="ad_lineitem_form">
                                 <input type="hidden" name="ad_lineitem_index" id="ad_lineitem_index" />
-                                <?php if(isset($ad_charges_data) && !empty($ad_charges_data)){ ?>
-                                    <input type="hidden" name="ad_lineitem_data[sell_ad_charges_id]" id="sell_ad_charges_id" />
+                                <?php if (isset($ad_charges_data) && !empty($ad_charges_data)) { ?>
+                                                                <input type="hidden" name="ad_lineitem_data[sell_ad_charges_id]" id="sell_ad_charges_id" />
                                 <?php } ?>
                                 <div class="col-md-6">
                                     <label for="ad_id">Ad<span class="required-sign">&nbsp;*</span></label>
@@ -957,8 +978,8 @@
                         <div class="col-md-12">
                             <div class="adjust_cr_lineitem_form">
                                 <input type="hidden" name="adjust_cr_lineitem_index" id="adjust_cr_lineitem_index" />
-                                <?php if(isset($adjust_cr_data) && !empty($adjust_cr_data)){ ?>
-                                    <input type="hidden" name="adjust_cr_data[sell_adjust_cr_id]" id="sell_adjust_cr_id" />
+                                <?php if (isset($adjust_cr_data) && !empty($adjust_cr_data)) { ?>
+                                                                <input type="hidden" name="adjust_cr_data[sell_adjust_cr_id]" id="sell_adjust_cr_id" />
                                 <?php } ?>
                                 <div class="col-md-4">
                                     <label>Adjust to<span class="required-sign">&nbsp;*</span></label>
@@ -998,8 +1019,8 @@
                             <div class="less_ad_details_form">
                                 <input type="hidden" name="less_ad_details_index" id="less_ad_details_index" />
                                 <input type="hidden" name="less_ad_details_data[less_ad_details_delete]" id="less_ad_details_delete" value="allow" />
-                                <?php if(isset($less_ad_details_data) && !empty($less_ad_details_data)){ ?>
-                                    <input type="hidden" name="less_ad_details_data[sell_less_ad_details_id]" id="sell_less_ad_details_id" />
+                                <?php if (isset($less_ad_details_data) && !empty($less_ad_details_data)) { ?>
+                                                                <input type="hidden" name="less_ad_details_data[sell_less_ad_details_id]" id="sell_less_ad_details_id" />
                                 <?php } ?>
                                 <div class="col-md-4">
                                     <label for="less_ad_details_ad_id">Ad<span class="required-sign">&nbsp;*</span></label>
@@ -1064,8 +1085,8 @@
                         <div class="col-md-12">
                             <div class="sell_item_charges_details_form">
                                 <input type="hidden" name="sell_item_charges_details_index" id="sell_item_charges_details_index" />
-                                <?php if(isset($sell_item_charges_details_data) && !empty($sell_item_charges_details_data)){ ?>
-                                    <input type="hidden" name="sell_item_charges_details_data[sell_item_charges_details_id]" id="sell_item_charges_details_id" />
+                                <?php if (isset($sell_item_charges_details_data) && !empty($sell_item_charges_details_data)) { ?>
+                                                                <input type="hidden" name="sell_item_charges_details_data[sell_item_charges_details_id]" id="sell_item_charges_details_id" />
                                 <?php } ?>
                                 <div class="col-md-4">
                                     <label for="sell_item_charges_details_ad_id">Ad<span class="required-sign">&nbsp;*</span></label>
@@ -1321,84 +1342,84 @@
     var silver_array_for_edit = [];
     var items = [];
 <?php if (isset($sell_item)) { ?>
-    var li_lineitem_objectdata = [<?php echo $sell_item; ?>];
-    if (li_lineitem_objectdata != '') {
-        $.each(li_lineitem_objectdata, function (index, value) {
-            lineitem_objectdata.push(value);
-        });
-    }
-<?php } 
+                                var li_lineitem_objectdata = [<?php echo $sell_item; ?>];
+                                if (li_lineitem_objectdata != '') {
+                                    $.each(li_lineitem_objectdata, function (index, value) {
+                                        lineitem_objectdata.push(value);
+                                    });
+                                }
+<?php }
 if (isset($pay_rec_data) && !empty($pay_rec_data)) { ?>
-    var pay_lineitem_objectdata = [<?php echo $pay_rec_data; ?>];
-    if (pay_lineitem_objectdata != '') {
-        $.each(pay_lineitem_objectdata, function (index, value) {
-            pay_rec_objectdata.push(value);
-        });
-    }
-    $('.pay_rec_table').show();
-<?php } 
+                                var pay_lineitem_objectdata = [<?php echo $pay_rec_data; ?>];
+                                if (pay_lineitem_objectdata != '') {
+                                    $.each(pay_lineitem_objectdata, function (index, value) {
+                                        pay_rec_objectdata.push(value);
+                                    });
+                                }
+                                $('.pay_rec_table').show();
+<?php }
 if (isset($metal_data)) { ?>
-    var metal_lineitem_objectdata = [<?php echo $metal_data; ?>];
-    if (metal_lineitem_objectdata != '') {
-        $.each(metal_lineitem_objectdata, function (index, value) {
-            metal_objectdata.push(value);
-        });
-    }
-    $('.metal_table').show();
-<?php } 
+                                var metal_lineitem_objectdata = [<?php echo $metal_data; ?>];
+                                if (metal_lineitem_objectdata != '') {
+                                    $.each(metal_lineitem_objectdata, function (index, value) {
+                                        metal_objectdata.push(value);
+                                    });
+                                }
+                                $('.metal_table').show();
+<?php }
 if (isset($gold_data)) { ?>
-    var gold_lineitem_objectdata = [<?php echo $gold_data; ?>];
-    if (gold_lineitem_objectdata != '') {
-        $.each(gold_lineitem_objectdata, function (index, value) {
-            gold_objectdata.push(value);
-        });
-    }
-    $('.gold_table').show();
-<?php } 
+                                var gold_lineitem_objectdata = [<?php echo $gold_data; ?>];
+                                if (gold_lineitem_objectdata != '') {
+                                    $.each(gold_lineitem_objectdata, function (index, value) {
+                                        gold_objectdata.push(value);
+                                    });
+                                }
+                                $('.gold_table').show();
+<?php }
 if (isset($silver_data)) { ?>
-    var silver_lineitem_objectdata = [<?php echo $silver_data; ?>];
-    if (silver_lineitem_objectdata != '') {
-        $.each(silver_lineitem_objectdata, function (index, value) {
-            silver_objectdata.push(value);
-        });
-    }
-    $('.silver_table').show();
-<?php } 
+                                var silver_lineitem_objectdata = [<?php echo $silver_data; ?>];
+                                if (silver_lineitem_objectdata != '') {
+                                    $.each(silver_lineitem_objectdata, function (index, value) {
+                                        silver_objectdata.push(value);
+                                    });
+                                }
+                                $('.silver_table').show();
+<?php }
 if (isset($transfer_data)) { ?>
-    var transfer_lineitem_objectdata = [<?php echo $transfer_data; ?>];
-    if (transfer_lineitem_objectdata != '') {
-        $.each(transfer_lineitem_objectdata, function (index, value) {
-            transfer_objectdata.push(value);
-        });
-    }
-    $('.transfer_table').show();
-<?php } 
+                                var transfer_lineitem_objectdata = [<?php echo $transfer_data; ?>];
+                                if (transfer_lineitem_objectdata != '') {
+                                    $.each(transfer_lineitem_objectdata, function (index, value) {
+                                        transfer_objectdata.push(value);
+                                    });
+                                }
+                                $('.transfer_table').show();
+<?php }
 if (isset($ad_charges_data)) { ?>
-    var ad_charges_lineitem_objectdata = [<?php echo $ad_charges_data; ?>];
-    if (ad_charges_lineitem_objectdata != '') {
-        $.each(ad_charges_lineitem_objectdata, function (index, value) {
-            ad_charges_objectdata.push(value);
-        });
-    }
-    $('.ad_charges_table').show();
-<?php } 
+                                var ad_charges_lineitem_objectdata = [<?php echo $ad_charges_data; ?>];
+                                if (ad_charges_lineitem_objectdata != '') {
+                                    $.each(ad_charges_lineitem_objectdata, function (index, value) {
+                                        ad_charges_objectdata.push(value);
+                                    });
+                                }
+                                $('.ad_charges_table').show();
+<?php }
 if (isset($adjust_cr_data)) { ?>
-    var adjust_cr_lineitem_objectdata = [<?php echo $adjust_cr_data; ?>];
-    if (adjust_cr_lineitem_objectdata != '') {
-        $.each(adjust_cr_lineitem_objectdata, function (index, value) {
-            adjust_cr_objectdata.push(value);
-        });
-    }
-    $('.adjust_cr_table').show();
+                                var adjust_cr_lineitem_objectdata = [<?php echo $adjust_cr_data; ?>];
+                                if (adjust_cr_lineitem_objectdata != '') {
+                                    $.each(adjust_cr_lineitem_objectdata, function (index, value) {
+                                        adjust_cr_objectdata.push(value);
+                                    });
+                                }
+                                $('.adjust_cr_table').show();
 <?php }
 if (isset($order_lot_item)) { ?>
-    var ots_li_lineitem_objectdata = [<?php echo $order_lot_item; ?>];
-    var ots_lineitem_objectdata = [];
-    if (ots_li_lineitem_objectdata != '') {
-        $.each(ots_li_lineitem_objectdata, function (index, value) {
-            ots_lineitem_objectdata.push(value);
-        });
-    }
+                                var ots_li_lineitem_objectdata = [<?php echo $order_lot_item; ?>];
+                                var ots_lineitem_objectdata = [];
+                                if (ots_li_lineitem_objectdata != '') {
+                                    $.each(ots_li_lineitem_objectdata, function (index, value) {
+                                        ots_lineitem_objectdata.push(value);
+                                    });
+                                }
 <?php } ?>
     
     var pts_lineitem_objectdata = [];
@@ -1415,12 +1436,12 @@ if (isset($order_lot_item)) { ?>
         $('#purchase_less').on('input', function () {
             $('#less').val($(this).val()).trigger('input').trigger('change'); 
         });
-        <?php if(GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
-            $.fn.select2.amd.require(['select2/compat/matcher'], function (oldMatcherSelect2) {
-                $("#item_id").select2({
-                    matcher: oldMatcherSelect2(matchStartSelect2)
-                })
-            });
+        <?php if (GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
+                                        $.fn.select2.amd.require(['select2/compat/matcher'], function (oldMatcherSelect2) {
+                                            $("#item_id").select2({
+                                                matcher: oldMatcherSelect2(matchStartSelect2)
+                                            })
+                                        });
         <?php } ?>
         
         $('#save_sell_purchase').on('keyup keypress', function(e) {
@@ -1435,62 +1456,62 @@ if (isset($order_lot_item)) { ?>
         });
 
         <?php if (isset($new_order_data->order_id)) { ?>
-            $('#order_id').val(<?php echo $new_order_data->order_id; ?>);
+                                        $('#order_id').val(<?php echo $new_order_data->order_id; ?>);
         <?php } ?>
         initAjaxSelect2($("#account_id"), "<?= base_url('app/party_name_with_number_select2_source/1') ?>");
         <?php if (isset($new_order_data->party_id)) { ?>
-            get_bill_balance(<?php echo $new_order_data->party_id; ?>);
-            setSelect2Value($("#account_id"), "<?= base_url('app/set_account_name_with_number_val_by_id/' . $new_order_data->party_id) ?>");
-        <?php } elseif (isset($sell_data->account_id) && !empty ($sell_data->account_id)) { ?>
-            get_bill_balance(<?php echo $sell_data->account_id; ?>);
-            setSelect2Value($("#account_id"), "<?= base_url('app/set_account_name_with_number_val_by_id/' . $sell_data->account_id) ?>");
-            initAjaxSelect2($("#transfer_account_id"), "<?= base_url('app/set_account_name_with_number_val_by_id/' . $sell_data->account_id) ?>");
+                                        get_bill_balance(<?php echo $new_order_data->party_id; ?>);
+                                        setSelect2Value($("#account_id"), "<?= base_url('app/set_account_name_with_number_val_by_id/' . $new_order_data->party_id) ?>");
+        <?php } elseif (isset($sell_data->account_id) && !empty($sell_data->account_id)) { ?>
+                                        get_bill_balance(<?php echo $sell_data->account_id; ?>);
+                                        setSelect2Value($("#account_id"), "<?= base_url('app/set_account_name_with_number_val_by_id/' . $sell_data->account_id) ?>");
+                                        initAjaxSelect2($("#transfer_account_id"), "<?= base_url('app/set_account_name_with_number_val_by_id/' . $sell_data->account_id) ?>");
         <?php } else { ?>
-            setSelect2Value($("#account_id"), "<?= base_url('app/set_account_name_with_number_val_by_id/' . CASE_CUSTOMER_ACCOUNT_ID) ?>");
+                                        setSelect2Value($("#account_id"), "<?= base_url('app/set_account_name_with_number_val_by_id/' . CASE_CUSTOMER_ACCOUNT_ID) ?>");
         <?php } ?>
-        <?php if (isset($sell_data->account_id) && !empty ($sell_data->account_id)) { ?>  
-            initAjaxSelect2($("#transfer_account_id"), "<?= base_url('app/account_name_from_main_party_select2_source/' . $sell_data->account_id.'/1') ?>");
+        <?php if (isset($sell_data->account_id) && !empty($sell_data->account_id)) { ?>  
+                                        initAjaxSelect2($("#transfer_account_id"), "<?= base_url('app/account_name_from_main_party_select2_source/' . $sell_data->account_id . '/1') ?>");
         <?php } else { ?>
-            initAjaxSelect2($("#transfer_account_id"), "<?= base_url('app/account_name_from_main_party_select2_source/' . CASE_CUSTOMER_ACCOUNT_ID.'/1')?>");
+                                        initAjaxSelect2($("#transfer_account_id"), "<?= base_url('app/account_name_from_main_party_select2_source/' . CASE_CUSTOMER_ACCOUNT_ID . '/1') ?>");
         <?php } ?>
-        <?php if($department_2 == '1') { ?>
-            initAjaxSelect2($("#process_id"), "<?= base_url('app/department_select2_source') ?>");
-            <?php if (isset($new_order_data->process_id)) { ?>
-                setSelect2Value($("#process_id"), "<?= base_url('app/set_process_master_select2_val_by_id/' . $new_order_data->process_id) ?>");
-            <?php } elseif (isset($sell_data->process_id) && !empty ($sell_data->process_id)) { ?>
-                setSelect2Value($("#process_id"), "<?= base_url('app/set_process_master_select2_val_by_id/' . $sell_data->process_id) ?>");
-            <?php } else { ?>
-                setSelect2Value($("#process_id"), "<?= base_url('app/set_process_master_select2_val_by_id/' . $this->session->userdata(PACKAGE_FOLDER_NAME.'is_logged_in')['default_department_id']) ?>");
-            <?php } ?>
+        <?php if ($department_2 == '1') { ?>
+                                        initAjaxSelect2($("#process_id"), "<?= base_url('app/department_select2_source') ?>");
+                                        <?php if (isset($new_order_data->process_id)) { ?>
+                                                                        setSelect2Value($("#process_id"), "<?= base_url('app/set_process_master_select2_val_by_id/' . $new_order_data->process_id) ?>");
+                                        <?php } elseif (isset($sell_data->process_id) && !empty($sell_data->process_id)) { ?>
+                                                                        setSelect2Value($("#process_id"), "<?= base_url('app/set_process_master_select2_val_by_id/' . $sell_data->process_id) ?>");
+                                        <?php } else { ?>
+                                                                        setSelect2Value($("#process_id"), "<?= base_url('app/set_process_master_select2_val_by_id/' . $this->session->userdata(PACKAGE_FOLDER_NAME . 'is_logged_in')['default_department_id']) ?>");
+                                        <?php } ?>
         <?php } ?>
             
-        <?php if(isset($order_to_sell_purchase) && !empty($order_to_sell_purchase)){ ?>
-            $('#item_selection_popup').modal('show');
-            var order_lineitem_html = '';
-            $.each(ots_lineitem_objectdata, function (index, value) {
-//                console.log(value);
-                if(value.less == 1){
-                    var input_less = '<input type="text" name="order_less[]" value="0">';
-                } else {
-                    var input_less = '<input type="text" name="order_less[]" value="0" disabled="">';
-                }
+        <?php if (isset($order_to_sell_purchase) && !empty($order_to_sell_purchase)) { ?>
+                                        $('#item_selection_popup').modal('show');
+                                        var order_lineitem_html = '';
+                                        $.each(ots_lineitem_objectdata, function (index, value) {
+                            //                console.log(value);
+                                            if(value.less == 1){
+                                                var input_less = '<input type="text" name="order_less[]" value="0">';
+                                            } else {
+                                                var input_less = '<input type="text" name="order_less[]" value="0" disabled="">';
+                                            }
                 
-                var row_html_order = '<tr class="lineitem_index_' + index + '">' +
-                    '<td class="text-center">' +
-                    '<input type="checkbox" data-item_id="' + value.item_id + '" data-selected_index="' + index + '" class="selected_index">' +
-                    '</td>' +
-                    '<td>' + value.item_name + '</td>' +
-                    '<td class="text-right"><input type="text" name="order_grwt[]" id="order_grwt" value="'+ value.grwt + '"></td>' +
-                    '<td class="text-right">' + input_less + '</td>';
-                    if (value.image !== null && value.image !== '') {
-                        var img_url = '<?php echo base_url(); ?>' + '/' + value.image;
-                        row_html_order += '<td><a href="javascript:void(0)" class="btn btn-xs btn-primary image_model" data-img_src="' + img_url + '" ><i class="fa fa-image"></i></a></td>';
-                    }
-                    row_html_order += '</tr>';
-                order_lineitem_html += row_html_order;
-            });
+                                            var row_html_order = '<tr class="lineitem_index_' + index + '">' +
+                                                '<td class="text-center">' +
+                                                '<input type="checkbox" data-item_id="' + value.item_id + '" data-selected_index="' + index + '" class="selected_index">' +
+                                                '</td>' +
+                                                '<td>' + value.item_name + '</td>' +
+                                                '<td class="text-right"><input type="text" name="order_grwt[]" id="order_grwt" value="'+ value.grwt + '"></td>' +
+                                                '<td class="text-right">' + input_less + '</td>';
+                                                if (value.image !== null && value.image !== '') {
+                                                    var img_url = '<?php echo base_url(); ?>' + '/' + value.image;
+                                                    row_html_order += '<td><a href="javascript:void(0)" class="btn btn-xs btn-primary image_model" data-img_src="' + img_url + '" ><i class="fa fa-image"></i></a></td>';
+                                                }
+                                                row_html_order += '</tr>';
+                                            order_lineitem_html += row_html_order;
+                                        });
         
-            $('tbody#item_selection_list').html(order_lineitem_html);
+                                        $('tbody#item_selection_list').html(order_lineitem_html);
         <?php } ?>
     
         $(document).on('click', '#select_all_order_to_sell', function () {
@@ -1514,8 +1535,8 @@ if (isset($order_lot_item)) { ?>
             checked_average_value();
         });
         
-        <?php if($use_category == '1') { ?>
-            initAjaxSelect2($("#category_id"), "<?= base_url('app/category_for_gold_and_silver_select2_source') ?>");
+        <?php if ($use_category == '1') { ?>
+                                        initAjaxSelect2($("#category_id"), "<?= base_url('app/category_for_gold_and_silver_select2_source') ?>");
         <?php } ?>
         initAjaxSelect2($("#metal_item_id"), "<?= base_url('app/item_name_from_select_category_for_metal_select2_source') ?>");
 //        initAjaxSelect2($("#sell_type_id"), "<?= base_url('app/sell_type_select2_source/') ?>" + sell_purchase );
@@ -1524,11 +1545,11 @@ if (isset($order_lot_item)) { ?>
             $('#sell_type_id').append($("<option>S</option>").attr("value", "<?php echo SELL_TYPE_SELL_ID ?>")); 
         } else if(sell_purchase == 'purchase'){
             $('#sell_type_id').append($("<option>--</option>").attr("value", "")); 
-            $('#sell_type_id').append($("<option>E</option>").attr("value", "<?php echo SELL_TYPE_EXCHANGE_ID ?>")); 
+            // $('#sell_type_id').append($("<option>E</option>").attr("value", "<?php echo SELL_TYPE_EXCHANGE_ID ?>")); 
             $('#sell_type_id').append($("<option>P</option>").attr("value", "<?php echo SELL_TYPE_PURCHASE_ID ?>")); 
         } else {
             $('#sell_type_id').append($("<option>--</option>").attr("value", "")); 
-            $('#sell_type_id').append($("<option>E</option>").attr("value", "<?php echo SELL_TYPE_EXCHANGE_ID ?>")); 
+            // $('#sell_type_id').append($("<option>E</option>").attr("value", "<?php echo SELL_TYPE_EXCHANGE_ID ?>")); 
             $('#sell_type_id').append($("<option>P</option>").attr("value", "<?php echo SELL_TYPE_PURCHASE_ID ?>")); 
             $('#sell_type_id').append($("<option>S</option>").attr("value", "<?php echo SELL_TYPE_SELL_ID ?>")); 
         }
@@ -1906,8 +1927,9 @@ if (isset($order_lot_item)) { ?>
                     $('.touch_input').hide();
                 }
                 $("#tunch_textbox").removeAttr('disabled', 'disabled');
-                <?php if($this->app_model->have_access_role(SELL_PURCHASE_MODULE_ID, "allow change wastage")){ } else { ?>
-                    $('#wstg').attr('readonly', 'readonly');
+                <?php if ($this->app_model->have_access_role(SELL_PURCHASE_MODULE_ID, "allow change wastage")) {
+                } else { ?>
+                                                $('#wstg').attr('readonly', 'readonly');
                 <?php } ?>
             } else if (sell_type_id == '2') {
                 $('.field_required').removeAttr('hidden', 'hidden');
@@ -1930,32 +1952,32 @@ if (isset($order_lot_item)) { ?>
                 $(".item_fields_div").css("background-color", "#ffffff");
             }
             
-            <?php if($use_category == '1') { ?>
-                $('#category_id').val(null).trigger('change');
-                $('#item_id').val(null).trigger('change');
+            <?php if ($use_category == '1') { ?>
+                                            $('#category_id').val(null).trigger('change');
+                                            $('#item_id').val(null).trigger('change');
             <?php } else { ?>
-                $('#item_id').val(null).trigger('change');
-//                initAjaxSelect2($("#item_id"), "<?= base_url('app/item_name_from_select_category_for_sell_select2_source') ?>/0/" + sell_type_id);
+                                            $('#item_id').val(null).trigger('change');
+                            //                initAjaxSelect2($("#item_id"), "<?= base_url('app/item_name_from_select_category_for_sell_select2_source') ?>/0/" + sell_type_id);
             <?php } ?>
-            <?php if(GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
+            <?php if (GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
                 
             <?php } else { ?>
-                initAjaxSelect2($("#item_id"), "<?= base_url('app/item_name_from_select_category_for_sell_select2_source') ?>/0/" + sell_type_id);
+                                            initAjaxSelect2($("#item_id"), "<?= base_url('app/item_name_from_select_category_for_sell_select2_source') ?>/0/" + sell_type_id);
             <?php } ?>
             if (sell_type_id == '<?php echo SELL_TYPE_EXCHANGE_ID; ?>') {
                 var exchange_default_category_id = '<?php echo EXCHANGE_DEFAULT_CATEGORY_ID; ?>';
                 var exchange_default_item_id = '<?php echo EXCHANGE_DEFAULT_ITEM_ID; ?>';
-                <?php if($use_category == '1') { ?>
-                    $("#category_id").val(exchange_default_category_id).trigger("change");
-                    setSelect2Value($("#category_id"), "<?= base_url('app/set_category_select2_val_by_id/') ?>" + exchange_default_category_id);
+                <?php if ($use_category == '1') { ?>
+                                                $("#category_id").val(exchange_default_category_id).trigger("change");
+                                                setSelect2Value($("#category_id"), "<?= base_url('app/set_category_select2_val_by_id/') ?>" + exchange_default_category_id);
                 <?php } else { ?>
-                    $("#category_id").val(exchange_default_category_id);
+                                                $("#category_id").val(exchange_default_category_id);
                 <?php } ?>
                 $("#item_id").val(exchange_default_item_id).trigger("change");
-                <?php if(GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
+                <?php if (GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
                 
                 <?php } else { ?>
-                    setSelect2Value($("#item_id"), "<?= base_url('app/set_item_name_select2_val_by_id/') ?>" + exchange_default_item_id);
+                                                setSelect2Value($("#item_id"), "<?= base_url('app/set_item_name_select2_val_by_id/') ?>" + exchange_default_item_id);
                 <?php } ?>
                 
             }
@@ -1965,10 +1987,10 @@ if (isset($order_lot_item)) { ?>
             $("#net_wt").val('');
             $("#touch_id").val(null).trigger("change");
             $("#touch_data_id").val('');
-            <?php if($wstg_2 == '1') { ?>
-                $("#wstg").val('');
+            <?php if ($wstg_2 == '1') { ?>
+                                            $("#wstg").val('');
             <?php } else { ?>
-                $("#wstg").val('0');
+                                            $("#wstg").val('0');
             <?php } ?>
             $("#fine").val('');
             if (sell_type_id == '3') {
@@ -1980,10 +2002,10 @@ if (isset($order_lot_item)) { ?>
             var category_id = $('#category_id').val();
             var sell_type_id = $('#sell_type_id').val();
             if (category_id != '' && category_id != null && sell_type_id != '' && sell_type_id != null) {
-                <?php if(GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
+                <?php if (GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
                 
                 <?php } else { ?>
-                    initAjaxSelect2($("#item_id"), "<?= base_url('app/item_name_from_select_category_for_sell_select2_source') ?>/" + category_id + '/' + sell_type_id);
+                                                initAjaxSelect2($("#item_id"), "<?= base_url('app/item_name_from_select_category_for_sell_select2_source') ?>/" + category_id + '/' + sell_type_id);
                 <?php } ?>
             } else {
                 $('#item_id').val(null).trigger('change');
@@ -1993,10 +2015,10 @@ if (isset($order_lot_item)) { ?>
                 $("#net_wt").val('');
                 $("#touch_id").val(null).trigger("change");
                 $("#touch_data_id").val('');
-                <?php if($wstg_2 == '1') { ?>
-                    $("#wstg").val('');
+                <?php if ($wstg_2 == '1') { ?>
+                                                $("#wstg").val('');
                 <?php } else { ?>
-                    $("#wstg").val('0');
+                                                $("#wstg").val('0');
                 <?php } ?>
                 $("#fine").val('');
             }
@@ -2007,10 +2029,10 @@ if (isset($order_lot_item)) { ?>
             $("#net_wt").val('');
             $("#touch_id").val(null).trigger("change");
             $("#touch_data_id").val('');
-            <?php if($wstg_2 == '1') { ?>
-                $("#wstg").val('');
+            <?php if ($wstg_2 == '1') { ?>
+                                            $("#wstg").val('');
             <?php } else { ?>
-                $("#wstg").val('0');
+                                            $("#wstg").val('0');
             <?php } ?>
             $("#fine").val('');
         });
@@ -2022,10 +2044,10 @@ if (isset($order_lot_item)) { ?>
             $("#net_wt").val('');
             $("#touch_id").val(null).trigger("change");
             $("#touch_data_id").val('');
-            <?php if($wstg_2 == '1') { ?>
-                $("#wstg").val('');
+            <?php if ($wstg_2 == '1') { ?>
+                                            $("#wstg").val('');
             <?php } else { ?>
-                $("#wstg").val('0');
+                                            $("#wstg").val('0');
             <?php } ?>
             $("#fine").val('');
             var item_id = $('#item_id').val();
@@ -2053,9 +2075,9 @@ if (isset($order_lot_item)) { ?>
                                 $('#purchase_less').focus();
                             });
                         }
-                        <?php if($use_category == '1') { ?>
+                        <?php if ($use_category == '1') { ?>
                         <?php } else { ?>
-                            $('#category_id').val(json.category_id);
+                                                        $('#category_id').val(json.category_id);
                         <?php } ?>
                         
                         if (json.stock_method == '2') {
@@ -2064,7 +2086,7 @@ if (isset($order_lot_item)) { ?>
                                 var process_id = $('#process_id').val();
                                 var sell_id = '';
                                 <?php if (isset($sell_data->sell_id) && !empty($sell_data->sell_id)) { ?>
-                                    sell_id = '<?php echo $sell_data->sell_id; ?>';
+                                                                sell_id = '<?php echo $sell_data->sell_id; ?>';
                                 <?php } ?>
                                 $.ajax({
                                     url: "<?php echo base_url('sell/get_purchase_to_sell_pending_item'); ?>/",
@@ -2126,7 +2148,17 @@ if (isset($order_lot_item)) { ?>
         $(document).on('keyup change', '#grwt, #less', function () {
             var grwt = parseFloat($('#grwt').val()) || 0;
             grwt = round(grwt, 3).toFixed(3);
-            var less = parseFloat($('#less').val()) || 0;
+
+            var sell_type_id = $('#sell_type_id').val();
+
+            if(sell_type_id === 2 || sell_type_id === '2'){
+                var less = parseFloat($('#purchase_less').val()) || 0;
+                // console.log("less", less);
+            }else{
+                var less = parseFloat($('#less').val()) || 0;
+            }
+            // console.log(sell_type_id);
+
             less = round(less, 3).toFixed(3);
             if(parseFloat(less) > parseFloat(grwt)){
                 show_notify('Less Can not be > grwt.', false);
@@ -2162,8 +2194,8 @@ if (isset($order_lot_item)) { ?>
         });
 
         <?php if (isset($sell_data->discount_amount) && !empty($sell_data->discount_amount)) { ?>
-            discount_amount = $('#discount_amount').val() || 0;
-            get_bill_total_amount();
+                                        discount_amount = $('#discount_amount').val() || 0;
+                                        get_bill_total_amount();
         <?php } ?>
         $(document).bind('keyup change', '#discount_amount', function () {
             discount_amount = $('#discount_amount').val() || 0;
@@ -2303,28 +2335,28 @@ if (isset($order_lot_item)) { ?>
                 return false;
             }else {
                 var total_grwt_metal = $('#total_grwt_metal').val();
-                <?php if($without_purchase_sell_allow == '1'){ ?>
-                    if(total_grwt_metal != '' && total_grwt_metal != null){
-                        var metal_grwt = parseFloat($('#metal_grwt').val()) || 0;
-                        metal_grwt = round(metal_grwt, 3).toFixed(3);
-                        if(parseFloat(metal_grwt) < parseFloat(total_grwt_metal)){
-                            show_notify("Gr.Wt. Should Be Grater Than " + total_grwt_metal , false);
-                            $('#metal_grwt').val(total_grwt_metal);
-                            $("#metal_grwt").focus();
-                            return false;
-                        }
-                    }
+                <?php if ($without_purchase_sell_allow == '1') { ?>
+                                                if(total_grwt_metal != '' && total_grwt_metal != null){
+                                                    var metal_grwt = parseFloat($('#metal_grwt').val()) || 0;
+                                                    metal_grwt = round(metal_grwt, 3).toFixed(3);
+                                                    if(parseFloat(metal_grwt) < parseFloat(total_grwt_metal)){
+                                                        show_notify("Gr.Wt. Should Be Grater Than " + total_grwt_metal , false);
+                                                        $('#metal_grwt').val(total_grwt_metal);
+                                                        $("#metal_grwt").focus();
+                                                        return false;
+                                                    }
+                                                }
                 <?php } ?>
             }
-            <?php if($without_purchase_sell_allow == '1'){ ?>
-                if(metal_payment_receipt == 1){
-                    var metal_pr_id = $("#metal_pr_id").val();
-                    var grwt_stock = get_stock_for_metal_receipt(department_id,metal_item_id,metal_tunch,metal_pr_id);
-                    if(parseFloat(grwt_stock) < parseFloat(metal_grwt)){
-                        show_notify('Please Enter GrWt Less than of ' + grwt_stock, false);
-                        return false;
-                    }
-                }
+            <?php if ($without_purchase_sell_allow == '1') { ?>
+                                            if(metal_payment_receipt == 1){
+                                                var metal_pr_id = $("#metal_pr_id").val();
+                                                var grwt_stock = get_stock_for_metal_receipt(department_id,metal_item_id,metal_tunch,metal_pr_id);
+                                                if(parseFloat(grwt_stock) < parseFloat(metal_grwt)){
+                                                    show_notify('Please Enter GrWt Less than of ' + grwt_stock, false);
+                                                    return false;
+                                                }
+                                            }
             <?php } ?>
             $('#metal_button').attr('disabled', 'disabled');
             var key = '';
@@ -2913,30 +2945,30 @@ if (isset($order_lot_item)) { ?>
                 if(ots_lineitem_objectdata[selected_index].group_name == '<?php echo CATEGORY_GROUP_SILVER_ID; ?>'){
                     order_silver_bhav = order_silver_bhav + parseFloat(ots_lineitem_objectdata[selected_index].fine);
                 }
-			});
+            });
             <?php if (isset($new_order_data->gold_price) && !empty($new_order_data->gold_price)) { ?>
-                if(order_gold_bhav != 0){
-                    $('input:radio[name=gold_sale_purchase]').filter('[value=1]').prop('checked', true);
-                    var gold_weight = order_gold_bhav;
-                    var gold_rate = <?php echo $new_order_data->gold_price; ?>;
-                    $('#gold_weight').val(gold_weight);
-                    $('#gold_rate').val(gold_rate);
-                    var value = gold_weight * (gold_rate / 10);
-                    $('#gold_value').val(value.toFixed(0));
-                    $('#gold_button').click();
-                }
+                                            if(order_gold_bhav != 0){
+                                                $('input:radio[name=gold_sale_purchase]').filter('[value=1]').prop('checked', true);
+                                                var gold_weight = order_gold_bhav;
+                                                var gold_rate = <?php echo $new_order_data->gold_price; ?>;
+                                                $('#gold_weight').val(gold_weight);
+                                                $('#gold_rate').val(gold_rate);
+                                                var value = gold_weight * (gold_rate / 10);
+                                                $('#gold_value').val(value.toFixed(0));
+                                                $('#gold_button').click();
+                                            }
             <?php } ?>
             <?php if (isset($new_order_data->silver_price) && !empty($new_order_data->silver_price)) { ?>
-                if(order_silver_bhav != 0){
-                    $('input:radio[name=silver_sale_purchase]').filter('[value=1]').prop('checked', true);
-                    var silver_weight = order_silver_bhav;
-                    var silver_rate = <?php echo $new_order_data->silver_price; ?>;
-                    $('#silver_weight').val(silver_weight);
-                    $('#silver_rate').val(silver_rate);
-                    var value = silver_weight * (silver_rate / 10);
-                    $('#silver_value').val(value.toFixed(0));
-                    $('#silver_button').click();
-                }
+                                            if(order_silver_bhav != 0){
+                                                $('input:radio[name=silver_sale_purchase]').filter('[value=1]').prop('checked', true);
+                                                var silver_weight = order_silver_bhav;
+                                                var silver_rate = <?php echo $new_order_data->silver_price; ?>;
+                                                $('#silver_weight').val(silver_weight);
+                                                $('#silver_rate').val(silver_rate);
+                                                var value = silver_weight * (silver_rate / 10);
+                                                $('#silver_value').val(value.toFixed(0));
+                                                $('#silver_button').click();
+                                            }
             <?php } ?>
             $('#item_selection_popup').modal('hide');
             lineitem_objectdata = selected_index_lineitems;
@@ -3034,10 +3066,10 @@ if (isset($order_lot_item)) { ?>
             $("#net_wt").val('');
             $("#touch_id").val(null).trigger("change");
             $("#touch_data_id").val('');
-            <?php if($wstg_2 == '1') { ?>
-                $("#wstg").val('');
+            <?php if ($wstg_2 == '1') { ?>
+                                            $("#wstg").val('');
             <?php } else { ?>
-                $("#wstg").val('0');
+                                            $("#wstg").val('0');
             <?php } ?>
             $("#fine").val('');
             $("#image").val('');
@@ -3045,41 +3077,41 @@ if (isset($order_lot_item)) { ?>
             $("#line_items_index").val('');
         });
         
-        <?php if(!isset($sell_data->audit_status) || (isset($sell_data->audit_status) && $sell_data->audit_status != AUDIT_STATUS_AUDITED)){ ?>
-            <?php if(!isset($sell_data->account_id) || (isset($sell_data->account_id) && $sell_data->account_id != ADJUST_EXPENSE_ACCOUNT_ID)){ ?>
-            $(document).bind("keydown", function(e){
-                if(e.ctrlKey && e.which == 83){
-                    if($('#payment_receipt_model').hasClass('in')){
-                        $("#payment_receipt_button").click();
-                        return false;
-                    }
-                    if($('#metal_receipt_payment_model').hasClass('in')){
-                        $("#metal_button").click();
-                        return false;
-                    }
-                    if($('#gold_bhav_model').hasClass('in')){
-                        $("#gold_button").click();
-                        return false;
-                    }
-                    if($('#silver_bhav_model').hasClass('in')){
-                        $("#silver_button").click();
-                        return false;
-                    }
-                    if($('#transfer_model').hasClass('in')){
-                        $("#transfer_button").click();
-                        return false;
-                    }
-                    if(save_sell_purchase_submit_flag == 0 ){
-                        if(e.shiftKey){
-                            $("#saveformwithprint").click();
-                        } else {
-                            $("#saveform").click();
-                        }
-                        return false;
-                    }
-                }
-            });
-            <?php } ?>
+        <?php if (!isset($sell_data->audit_status) || (isset($sell_data->audit_status) && $sell_data->audit_status != AUDIT_STATUS_AUDITED)) { ?>
+                                        <?php if (!isset($sell_data->account_id) || (isset($sell_data->account_id) && $sell_data->account_id != ADJUST_EXPENSE_ACCOUNT_ID)) { ?>
+                                                                    $(document).bind("keydown", function(e){
+                                                                        if(e.ctrlKey && e.which == 83){
+                                                                            if($('#payment_receipt_model').hasClass('in')){
+                                                                                $("#payment_receipt_button").click();
+                                                                                return false;
+                                                                            }
+                                                                            if($('#metal_receipt_payment_model').hasClass('in')){
+                                                                                $("#metal_button").click();
+                                                                                return false;
+                                                                            }
+                                                                            if($('#gold_bhav_model').hasClass('in')){
+                                                                                $("#gold_button").click();
+                                                                                return false;
+                                                                            }
+                                                                            if($('#silver_bhav_model').hasClass('in')){
+                                                                                $("#silver_button").click();
+                                                                                return false;
+                                                                            }
+                                                                            if($('#transfer_model').hasClass('in')){
+                                                                                $("#transfer_button").click();
+                                                                                return false;
+                                                                            }
+                                                                            if(save_sell_purchase_submit_flag == 0 ){
+                                                                                if(e.shiftKey){
+                                                                                    $("#saveformwithprint").click();
+                                                                                } else {
+                                                                                    $("#saveform").click();
+                                                                                }
+                                                                                return false;
+                                                                            }
+                                                                        }
+                                                                    });
+                                        <?php } ?>
         <?php } ?>
         
         $(document).on('submit', '#save_sell_purchase', function (event) {
@@ -3093,12 +3125,12 @@ if (isset($order_lot_item)) { ?>
                 $("#account_id").select2('open');
                 return false;
             }
-            <?php if($delivered_not_2 == '1') { ?>
-            if ($.trim($("#delivery_type").val()) == '') {
-                show_notify('Please Select Delivered / Not.', false);
-                $("#delivery_type").select2('open');
-                return false;
-            }
+            <?php if ($delivered_not_2 == '1') { ?>
+                                        if ($.trim($("#delivery_type").val()) == '') {
+                                            show_notify('Please Select Delivered / Not.', false);
+                                            $("#delivery_type").select2('open');
+                                            return false;
+                                        }
             <?php } ?>
             if ($.trim($("#process_id").val()) == '') {
                 show_notify('Please Select Department.', false);
@@ -3147,62 +3179,62 @@ if (isset($order_lot_item)) { ?>
                         return false;
                     }
                     <?php if (isset($sell_data->sell_id) && !empty($sell_data->sell_id)) { ?>
-                        if (($("#deleted_sell_item_id").length > 0)){
-                            var sell_id = '<?php echo $sell_data->sell_id;?>';
-                            $.ajax({
-                                url: "<?php echo site_url('sell/check_rfid_in_lineitems_or_not') ?>" + '/' + sell_id,
-                                type: "POST",
-                                data: '',
-                                async: false,
-                                success: function (response) {
-                                    var json = $.parseJSON(response);
-                                    if (json['have_rfid'] == '1') {
-                                        if (confirm('If you have RFID, Then Click on Ok Button to open RIFD, Otherwise Click on Cancel Button to Inc. Loose Stock.')) {
-                                            href_url = href_url + '/1';
-                                            save_form(postData, href_url);
-                                        } else {
-                                            save_form(postData, href_url);
-                                        }
-                                    } else {
-                                        save_form(postData, href_url);
-                                    }
-                                }
-                            });
-                        } else {
-                            save_form(postData, href_url);
-                        }
+                                                    if (($("#deleted_sell_item_id").length > 0)){
+                                                        var sell_id = '<?php echo $sell_data->sell_id; ?>';
+                                                        $.ajax({
+                                                            url: "<?php echo site_url('sell/check_rfid_in_lineitems_or_not') ?>" + '/' + sell_id,
+                                                            type: "POST",
+                                                            data: '',
+                                                            async: false,
+                                                            success: function (response) {
+                                                                var json = $.parseJSON(response);
+                                                                if (json['have_rfid'] == '1') {
+                                                                    if (confirm('If you have RFID, Then Click on Ok Button to open RIFD, Otherwise Click on Cancel Button to Inc. Loose Stock.')) {
+                                                                        href_url = href_url + '/1';
+                                                                        save_form(postData, href_url);
+                                                                    } else {
+                                                                        save_form(postData, href_url);
+                                                                    }
+                                                                } else {
+                                                                    save_form(postData, href_url);
+                                                                }
+                                                            }
+                                                        });
+                                                    } else {
+                                                        save_form(postData, href_url);
+                                                    }
                     <?php } else { ?>
-                        save_form(postData, href_url);
+                                                    save_form(postData, href_url);
                     <?php } ?>
                 // }
             } else {
                 <?php if (isset($sell_data->sell_id) && !empty($sell_data->sell_id)) { ?>
-                    if (($("#deleted_sell_item_id").length > 0)){
-                        var sell_id = '<?php echo $sell_data->sell_id;?>';
-                        $.ajax({
-                            url: "<?php echo site_url('sell/check_rfid_in_lineitems_or_not') ?>" + '/' + sell_id,
-                            type: "POST",
-                            data: '',
-                            async: false,
-                            success: function (response) {
-                                var json = $.parseJSON(response);
-                                if (json['have_rfid'] == '1') {
-                                    if (confirm('If you have RFID, Then Click on Ok Button to open RIFD, Otherwise Click on Cancel Button to Inc. Loose Stock.')) {
-                                        href_url = href_url + '/1';
-                                        save_form(postData, href_url);
-                                    } else {
-                                        save_form(postData, href_url);
-                                    }
-                                } else {
-                                    save_form(postData, href_url);
-                                }
-                            }
-                        });
-                    } else {
-                        save_form(postData, href_url);
-                    }
+                                                if (($("#deleted_sell_item_id").length > 0)){
+                                                    var sell_id = '<?php echo $sell_data->sell_id; ?>';
+                                                    $.ajax({
+                                                        url: "<?php echo site_url('sell/check_rfid_in_lineitems_or_not') ?>" + '/' + sell_id,
+                                                        type: "POST",
+                                                        data: '',
+                                                        async: false,
+                                                        success: function (response) {
+                                                            var json = $.parseJSON(response);
+                                                            if (json['have_rfid'] == '1') {
+                                                                if (confirm('If you have RFID, Then Click on Ok Button to open RIFD, Otherwise Click on Cancel Button to Inc. Loose Stock.')) {
+                                                                    href_url = href_url + '/1';
+                                                                    save_form(postData, href_url);
+                                                                } else {
+                                                                    save_form(postData, href_url);
+                                                                }
+                                                            } else {
+                                                                save_form(postData, href_url);
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    save_form(postData, href_url);
+                                                }
                 <?php } else { ?>
-                    save_form(postData, href_url);
+                                                save_form(postData, href_url);
                 <?php } ?>
             }
             save_sell_purchase_submit_flag = 1;
@@ -3236,17 +3268,17 @@ if (isset($order_lot_item)) { ?>
                 return false;
             } else {
                 var total_grwt_sell = $('#total_grwt_sell').val();
-                <?php if($without_purchase_sell_allow == '1'){ ?>
-                if(total_grwt_sell != '' && total_grwt_sell != null){
-                    var grwt = parseFloat($('#grwt').val()) || 0;
-                    grwt = round(grwt, 3).toFixed(3);
-                    if(parseFloat(grwt) < parseFloat(total_grwt_sell)){
-                        show_notify("GrWt Should Be Grater Than " + total_grwt_sell , false);
-                        $('#grwt').val('');
-                        $("#grwt").focus();
-                        return false;
-                    }
-                }
+                <?php if ($without_purchase_sell_allow == '1') { ?>
+                                            if(total_grwt_sell != '' && total_grwt_sell != null){
+                                                var grwt = parseFloat($('#grwt').val()) || 0;
+                                                grwt = round(grwt, 3).toFixed(3);
+                                                if(parseFloat(grwt) < parseFloat(total_grwt_sell)){
+                                                    show_notify("GrWt Should Be Grater Than " + total_grwt_sell , false);
+                                                    $('#grwt').val('');
+                                                    $("#grwt").focus();
+                                                    return false;
+                                                }
+                                            }
                 <?php } ?>
             }
             var less = $("#less").val();
@@ -3403,9 +3435,9 @@ if (isset($order_lot_item)) { ?>
             if (is_validate != '1') {
                 var type_data = $('#sell_type_id').select2('data');
                 lineitem['type_name'] = type_data[0].text;
-                <?php if($use_category == '1') { ?>
-                    var item_data = $('#category_id').select2('data');
-                    lineitem['category_name'] = item_data[0].text;
+                <?php if ($use_category == '1') { ?>
+                                                var item_data = $('#category_id').select2('data');
+                                                lineitem['category_name'] = item_data[0].text;
                 <?php } ?>
                 var item_data = $('#item_id').select2('data');
                 lineitem['item_name'] = item_data[0].text;
@@ -3457,14 +3489,14 @@ if (isset($order_lot_item)) { ?>
                                 data: {process_id : process_id, category_id : category_id, item_id : item_id, touch_id : touch_id, sell_item_id : sell_item_id},
                                 success: function (response) {
                                     var json = $.parseJSON(response);
-                                    <?php if($without_purchase_sell_allow == '1'){ ?>
-                                        if(parseFloat(grwt) > parseFloat(json.grwt)){
-                                            show_notify('Please Enter GrWt Less than of ' + json.grwt, false);
-                                            $("#grwt").focus();
-                                            $("#add_lineitem").removeAttr('disabled', 'disabled');
-                                            return false;
-                                        }
-                                    <?php }  ?>
+                                    <?php if ($without_purchase_sell_allow == '1') { ?>
+                                                                    if(parseFloat(grwt) > parseFloat(json.grwt)){
+                                                                        show_notify('Please Enter GrWt Less than of ' + json.grwt, false);
+                                                                        $("#grwt").focus();
+                                                                        $("#add_lineitem").removeAttr('disabled', 'disabled');
+                                                                        return false;
+                                                                    }
+                                    <?php } ?>
                                     var new_lineitem = JSON.parse(JSON.stringify(lineitem));
                                     line_items_index = $("#line_items_index").val();
                                     if (line_items_index != '') {
@@ -3494,10 +3526,10 @@ if (isset($order_lot_item)) { ?>
                                     $("#touch_id").val(null).trigger("change");
                                     $("#touch_data_id").val('');
                                     $("#gold_silver_rate").val('');
-                                    <?php if($wstg_2 == '1') { ?>
-                                        $("#wstg").val('');
+                                    <?php if ($wstg_2 == '1') { ?>
+                                                                    $("#wstg").val('');
                                     <?php } else { ?>
-                                        $("#wstg").val('0');
+                                                                    $("#wstg").val('0');
                                     <?php } ?>
                                     $("#defult_wstg").val('');
                                     $("#fine").val('');
@@ -3550,10 +3582,10 @@ if (isset($order_lot_item)) { ?>
                             $("#touch_id").val(null).trigger("change");
                             $("#touch_data_id").val('');
                             $("#gold_silver_rate").val('');
-                            <?php if($wstg_2 == '1') { ?>
-                                $("#wstg").val('');
+                            <?php if ($wstg_2 == '1') { ?>
+                                                            $("#wstg").val('');
                             <?php } else { ?>
-                                $("#wstg").val('0');
+                                                            $("#wstg").val('0');
                             <?php } ?>
                             $("#fine").val('');
                             $("#charges_amt").val('');
@@ -3625,17 +3657,17 @@ if (isset($order_lot_item)) { ?>
                         }
                         if(json.type){
                             $("#sell_type_id").val(json.type).trigger("change");
-                            <?php if($use_category == '1') { ?>
-                                $("#category_id").val(json.category_id).trigger("change");
-                                setSelect2Value($("#category_id"), "<?= base_url('app/set_category_select2_val_by_id/') ?>" + json.category_id);
+                            <?php if ($use_category == '1') { ?>
+                                                            $("#category_id").val(json.category_id).trigger("change");
+                                                            setSelect2Value($("#category_id"), "<?= base_url('app/set_category_select2_val_by_id/') ?>" + json.category_id);
                             <?php } else { ?>
-                                $("#category_id").val(json.category_id);
+                                                            $("#category_id").val(json.category_id);
                             <?php } ?>
                             $("#item_id").val(json.item_id).trigger("change");
-                            <?php if(GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
+                            <?php if (GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
                 
                             <?php } else { ?>
-                                setSelect2Value($("#item_id"), "<?= base_url('app/set_item_name_select2_val_by_id/') ?>" + json.item_id);
+                                                            setSelect2Value($("#item_id"), "<?= base_url('app/set_item_name_select2_val_by_id/') ?>" + json.item_id);
                             <?php } ?>
                             
                             $("#grwt").val(json.grwt);
@@ -3654,8 +3686,8 @@ if (isset($order_lot_item)) { ?>
                             $('#item_stock_rfid_id').val('');
                         } else {
                             var process_data = 'Default';
-                            <?php if($department_2 == '1') { ?>
-                                var process_data = $('#process_id').select2('data');
+                            <?php if ($department_2 == '1') { ?>
+                                                            var process_data = $('#process_id').select2('data');
                             <?php } ?>
                             show_notify('RFID Not Found In '+ process_data[0].text +' Department!', false);
                         }
@@ -3930,23 +3962,23 @@ if (isset($order_lot_item)) { ?>
                 data: '',
                 success: function (response) {
                     var json = $.parseJSON(response);
-                    <?php if(isset($sell_data) && !empty($sell_data)){ ?>
-                        var sell_data_total_gold_fine = <?php echo $sell_data->total_gold_fine; ?>;
-                        var sell_data_total_silver_fine = <?php echo $sell_data->total_silver_fine; ?>;
-                        var sell_data_total_amount = <?php echo $sell_data->total_amount; ?>;
-                        var sell_data_total_c_amount = <?php echo $sell_data->total_c_amount; ?>;
-                        var sell_data_total_r_amount = <?php echo $sell_data->total_r_amount; ?>;
-                        var gold_fine = parseFloat(json.gold_fine) - parseFloat(sell_data_total_gold_fine);
-                        var silver_fine = parseFloat(json.silver_fine) - parseFloat(sell_data_total_silver_fine);
-                        var amount = parseFloat(json.amount) - parseFloat(sell_data_total_amount);
-                        var c_amount = parseFloat(json.c_amount) - parseFloat(sell_data_total_c_amount);
-                        var r_amount = parseFloat(json.r_amount) - parseFloat(sell_data_total_r_amount);
+                    <?php if (isset($sell_data) && !empty($sell_data)) { ?>
+                                                    var sell_data_total_gold_fine = <?php echo $sell_data->total_gold_fine; ?>;
+                                                    var sell_data_total_silver_fine = <?php echo $sell_data->total_silver_fine; ?>;
+                                                    var sell_data_total_amount = <?php echo $sell_data->total_amount; ?>;
+                                                    var sell_data_total_c_amount = <?php echo $sell_data->total_c_amount; ?>;
+                                                    var sell_data_total_r_amount = <?php echo $sell_data->total_r_amount; ?>;
+                                                    var gold_fine = parseFloat(json.gold_fine) - parseFloat(sell_data_total_gold_fine);
+                                                    var silver_fine = parseFloat(json.silver_fine) - parseFloat(sell_data_total_silver_fine);
+                                                    var amount = parseFloat(json.amount) - parseFloat(sell_data_total_amount);
+                                                    var c_amount = parseFloat(json.c_amount) - parseFloat(sell_data_total_c_amount);
+                                                    var r_amount = parseFloat(json.r_amount) - parseFloat(sell_data_total_r_amount);
                     <?php } else { ?>
-                        var gold_fine = json.gold_fine;
-                        var silver_fine = json.silver_fine;
-                        var amount = json.amount;
-                        var c_amount = json.c_amount;
-                        var r_amount = json.r_amount;
+                                                    var gold_fine = json.gold_fine;
+                                                    var silver_fine = json.silver_fine;
+                                                    var amount = json.amount;
+                                                    var c_amount = json.c_amount;
+                                                    var r_amount = json.r_amount;
                     <?php } ?>
                     old_gold_fine_val = gold_fine = round(gold_fine, 3).toFixed(3);
                     old_silver_fine_val = silver_fine = round(silver_fine, 1).toFixed(3);
@@ -4117,8 +4149,8 @@ if (isset($order_lot_item)) { ?>
                     lineitem_delete_btn +
                     '</td>' +
                     '<td>' + value.type_name + '</td>';
-            <?php if($use_category == '1') { ?>
-                row_html += '<td>' + value.category_name + '</td>';
+            <?php if ($use_category == '1') { ?>
+                                            row_html += '<td>' + value.category_name + '</td>';
             <?php } ?>
             var value_li_narration = '';
             if(value.li_narration && value.li_narration != null){
@@ -4127,35 +4159,35 @@ if (isset($order_lot_item)) { ?>
             row_html += '<td>' + value.item_name + '<br><small>' + value_li_narration + '</small></td>' +
                     '<td class="text-right">' + parseFloat(grwt).toFixed(3) + '</td>';
                     row_html += '<td class="text-right">' + purchase_less + '</td>';
-            <?php if($less_netwt_2 == '1') { ?>
-                <?php if (isset($order_lot_item)) { ?>
-                    row_html += '<td class="text-right">' + parseFloat(value.less).toFixed(3) + '</td>';
-                <?php } else { ?>
-                    row_html += '<td class="text-right">' + parseFloat(less).toFixed(3) + '</td>';
-                <?php } ?>
-                row_html += '<td class="text-right">' + parseFloat(net_wt).toFixed(3) + '</td>';
+            <?php if ($less_netwt_2 == '1') { ?>
+                                            <?php if (isset($order_lot_item)) { ?>
+                                                                            row_html += '<td class="text-right">' + parseFloat(value.less).toFixed(3) + '</td>';
+                                            <?php } else { ?>
+                                                                            row_html += '<td class="text-right">' + parseFloat(less).toFixed(3) + '</td>';
+                                            <?php } ?>
+                                            row_html += '<td class="text-right">' + parseFloat(net_wt).toFixed(3) + '</td>';
             <?php } ?>
             row_html += '<td class="text-right">' + touch_id + '</td>';
-            <?php if($wstg_2 == '1') { ?>
-                row_html += '<td class="text-right">' + wstg + '</td>';
+            <?php if ($wstg_2 == '1') { ?>
+                                            row_html += '<td class="text-right">' + wstg + '</td>';
             <?php } ?>
             row_html += '<td class="text-right">' + parseFloat(gold_value || 0).toFixed(3) + '</td>'+
                     '<td class="text-right">' + parseFloat(silver_value || 0).toFixed(3) + '</td>';
             row_html += '<td class="text-right"><a href="javascript:void(0)" id="sell_lineitem_charges_details" data-index="' + index + '" data-net_wt="' + parseFloat(net_wt).toFixed(3) + '" class="module_save_btn sell_lineitem_charges_details_' + index + '" style="margin: 0;">' + parseFloat(amount).toFixed(2) + '</a></td>';
-            <?php if($c_r_amount_separate == '1') { ?>
-                row_html += '<td class="text-right">' + parseFloat(amount).toFixed(2) + '</td>';
-                row_html += '<td class="text-right"></td>';
+            <?php if ($c_r_amount_separate == '1') { ?>
+                                            row_html += '<td class="text-right">' + parseFloat(amount).toFixed(2) + '</td>';
+                                            row_html += '<td class="text-right"></td>';
             <?php } ?>
-            <?php if($lineitem_image_2 == '1') { ?>
-                if (value.image !== null && value.image !== '') {
-                    var value_image = value.image;
-                    if (value.order_lot_item_id && value_image.indexOf('uploads/order_item_photo') != -1) {
-                        var img_url = '<?php echo base_url(); ?>' + '/' + value.image;
-                    } else {
-                        var img_url = '<?php echo base_url(); ?>' + 'uploads/sell_item_photo/' + value.image;
-                    }
-                    row_html += '<td><a href="javascript:void(0)" class="btn btn-xs btn-primary image_model" data-img_src="' + img_url + '" ><i class="fa fa-image"></i></a></td>';
-                }
+            <?php if ($lineitem_image_2 == '1') { ?>
+                                            if (value.image !== null && value.image !== '') {
+                                                var value_image = value.image;
+                                                if (value.order_lot_item_id && value_image.indexOf('uploads/order_item_photo') != -1) {
+                                                    var img_url = '<?php echo base_url(); ?>' + '/' + value.image;
+                                                } else {
+                                                    var img_url = '<?php echo base_url(); ?>' + 'uploads/sell_item_photo/' + value.image;
+                                                }
+                                                row_html += '<td><a href="javascript:void(0)" class="btn btn-xs btn-primary image_model" data-img_src="' + img_url + '" ><i class="fa fa-image"></i></a></td>';
+                                            }
             <?php } ?>
             new_lineitem_html += row_html;
             
@@ -4200,17 +4232,17 @@ if (isset($order_lot_item)) { ?>
         }
         $("#sell_type_id").val(value.type).trigger("change");
 //        setSelect2Value($("#sell_type_id"), "<?= base_url('app/set_sell_type_select2_val_by_id/') ?>" + value.type);
-        <?php if($use_category == '1') { ?>
-            $("#category_id").val(value.category_id).trigger("change");
-            setSelect2Value($("#category_id"), "<?= base_url('app/set_category_select2_val_by_id/') ?>" + value.category_id);
+        <?php if ($use_category == '1') { ?>
+                                        $("#category_id").val(value.category_id).trigger("change");
+                                        setSelect2Value($("#category_id"), "<?= base_url('app/set_category_select2_val_by_id/') ?>" + value.category_id);
         <?php } else { ?>
-            $("#category_id").val(value.category_id);
+                                        $("#category_id").val(value.category_id);
         <?php } ?>
         $("#item_id").val(value.item_id).trigger("change");
-        <?php if(GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
+        <?php if (GET_ALL_DATA_IN_ITEM_SELECTION_IN_SELL_PURCHASE == '1' && empty($use_category)) { ?>
                 
         <?php } else { ?>
-            setSelect2Value($("#item_id"), "<?= base_url('app/set_item_name_select2_val_by_id/') ?>" + value.item_id);
+                                        setSelect2Value($("#item_id"), "<?= base_url('app/set_item_name_select2_val_by_id/') ?>" + value.item_id);
         <?php } ?>
         
         $("#li_narration").val(value.li_narration);
@@ -4334,9 +4366,9 @@ if (isset($order_lot_item)) { ?>
                     '<td width="7%"></td>' +
                     '<td width="7%" class="text-right"></td>' +
                     '<td width="6%" class="text-right">' + value_amount + '</td>';
-            <?php if($c_r_amount_separate == '1') { ?>
-                row_html += '<td width="5%" class="text-right">' + parseFloat(c_amount).toFixed(2) + '</td>';
-                row_html += '<td width="5%" class="text-right">' + parseFloat(r_amount).toFixed(2) + '</td>';
+            <?php if ($c_r_amount_separate == '1') { ?>
+                                            row_html += '<td width="5%" class="text-right">' + parseFloat(c_amount).toFixed(2) + '</td>';
+                                            row_html += '<td width="5%" class="text-right">' + parseFloat(r_amount).toFixed(2) + '</td>';
             <?php } ?>
             row_html += '<td width="5%"></td></tr>';
             new_lineitem_html += row_html;
@@ -4423,9 +4455,9 @@ if (isset($order_lot_item)) { ?>
                     '<td width="7%" class="text-right">' + parseFloat(gold_value || 0).toFixed(3) + '</td>' +  
                     '<td width="7%" class="text-right">' + parseFloat(silver_value || 0).toFixed(3) + '</td>' + 
                     '<td width="6%"></td>';
-            <?php if($c_r_amount_separate == '1') { ?>
-                metal_html += '<td width="5%" class="text-right"></td>';
-                metal_html += '<td width="5%" class="text-right"></td>';
+            <?php if ($c_r_amount_separate == '1') { ?>
+                                            metal_html += '<td width="5%" class="text-right"></td>';
+                                            metal_html += '<td width="5%" class="text-right"></td>';
             <?php } ?>
             metal_html += '<td width="5%"></td></tr>';
             new_metal_html += metal_html;
@@ -4524,9 +4556,9 @@ if (isset($order_lot_item)) { ?>
                     '<td width="7%" class="text-right">' + parseFloat(value_gold_weight).toFixed(3) + '</td>' +
                     '<td width="7%"></td>' +
                     '<td width="6%" class="text-right">' + value_gold_value + '</td>';
-            <?php if($c_r_amount_separate == '1') { ?>
-                row_html += '<td width="5%" class="text-right">' + parseFloat(c_amount).toFixed(2) + '</td>';
-                row_html += '<td width="5%" class="text-right">' + parseFloat(r_amount).toFixed(2) + '</td>';
+            <?php if ($c_r_amount_separate == '1') { ?>
+                                            row_html += '<td width="5%" class="text-right">' + parseFloat(c_amount).toFixed(2) + '</td>';
+                                            row_html += '<td width="5%" class="text-right">' + parseFloat(r_amount).toFixed(2) + '</td>';
             <?php } ?>
             row_html += '<td width="5%"></td></tr>';
             new_lineitem_html += row_html;
@@ -4619,9 +4651,9 @@ if (isset($order_lot_item)) { ?>
                     '<td width="7%"></td>' +
                     '<td width="7%" class="text-right">' + parseFloat(value_silver_weight).toFixed(3) + '</td>' +
                     '<td width="6%" class="text-right">' + value_silver_value + '</td>';
-            <?php if($c_r_amount_separate == '1') { ?>
-                row_html += '<td width="5%" class="text-right">' + parseFloat(c_amount).toFixed(2) + '</td>';
-                row_html += '<td width="5%" class="text-right">' + parseFloat(r_amount).toFixed(2) + '</td>';
+            <?php if ($c_r_amount_separate == '1') { ?>
+                                            row_html += '<td width="5%" class="text-right">' + parseFloat(c_amount).toFixed(2) + '</td>';
+                                            row_html += '<td width="5%" class="text-right">' + parseFloat(r_amount).toFixed(2) + '</td>';
             <?php } ?>
             row_html += '<td width="5%"></td></tr>';
             new_lineitem_html += row_html;
@@ -4708,9 +4740,9 @@ if (isset($order_lot_item)) { ?>
                     '<td width="7%" class="text-right"> ' + parseFloat(value_transfer_gold || 0).toFixed(3) + '</td>' +
                     '<td width="7%" class="text-right">' + parseFloat(value_transfer_silver || 0).toFixed(3) + '</td>' +
                     '<td width="6%" class="text-right">' + parseFloat(value_transfer_amount || 0).toFixed(2) + '</td>';
-            <?php if($c_r_amount_separate == '1') { ?>
-                row_html += '<td width="5%" class="text-right">' + parseFloat(value_transfer_amount).toFixed(2) + '</td>';
-                row_html += '<td width="5%" class="text-right"></td>';
+            <?php if ($c_r_amount_separate == '1') { ?>
+                                            row_html += '<td width="5%" class="text-right">' + parseFloat(value_transfer_amount).toFixed(2) + '</td>';
+                                            row_html += '<td width="5%" class="text-right"></td>';
             <?php } ?>
             row_html += '<td width="5%"></td></tr>';
             new_lineitem_html += row_html;
@@ -4779,9 +4811,9 @@ if (isset($order_lot_item)) { ?>
                     '<td width="7%" class="text-right"></td>' +
                     '<td width="7%" class="text-right"></td>' +
                     '<td width="6%" class="text-right">' + value_ad_charges_amount + '</td>';
-            <?php if($c_r_amount_separate == '1') { ?>
-                row_html += '<td width="5%" class="text-right">' + parseFloat(value_ad_charges_amount).toFixed(2) + '</td>';
-                row_html += '<td width="5%" class="text-right"></td>';
+            <?php if ($c_r_amount_separate == '1') { ?>
+                                            row_html += '<td width="5%" class="text-right">' + parseFloat(value_ad_charges_amount).toFixed(2) + '</td>';
+                                            row_html += '<td width="5%" class="text-right"></td>';
             <?php } ?>
             row_html += '<td width="5%"></td></tr>';
             new_lineitem_html += row_html;
@@ -4860,9 +4892,9 @@ if (isset($order_lot_item)) { ?>
                     '<td width="7%" class="text-right"></td>' +
                     '<td width="7%" class="text-right"></td>' +
                     '<td width="6%" class="text-right">' + parseFloat(0).toFixed(2) + '</td>';
-            <?php if($c_r_amount_separate == '1') { ?>
-                row_html += '<td width="5%" class="text-right">' + parseFloat(c_amount).toFixed(2) + '</td>';
-                row_html += '<td width="5%" class="text-right">' + parseFloat(r_amount).toFixed(2) + '</td>';
+            <?php if ($c_r_amount_separate == '1') { ?>
+                                            row_html += '<td width="5%" class="text-right">' + parseFloat(c_amount).toFixed(2) + '</td>';
+                                            row_html += '<td width="5%" class="text-right">' + parseFloat(r_amount).toFixed(2) + '</td>';
             <?php } ?>
             row_html += '<td width="5%"></td></tr>';
             new_lineitem_html += row_html;
@@ -5050,25 +5082,25 @@ if (isset($order_lot_item)) { ?>
     
     function get_wstg_from_account(){
         <?php //if (isset($order_lot_item) || isset($sell_item)){ } else { ?>
-        <?php if($wstg_2 == '1') { ?>
-            var account_id = $('#account_id').val();
-            var item_id = $('#item_id').val();
-            if (account_id != '' && account_id != null && item_id != '' && item_id != null) {
-                $.ajax({
-                    url: "<?= base_url('sell/get_wstg_from_account') ?>/" + account_id + '/' + item_id,
-                    type: 'GET',
-                    async: false,
-                    data: '',
-                    success: function (response) {
-                        var json = $.parseJSON(response);
-                        $('#wstg').val(json.account_data).change();
-                        $('#default_wstg').val(json.account_data).change();
-                    }
-                });
-            }
+        <?php if ($wstg_2 == '1') { ?>
+                                        var account_id = $('#account_id').val();
+                                        var item_id = $('#item_id').val();
+                                        if (account_id != '' && account_id != null && item_id != '' && item_id != null) {
+                                            $.ajax({
+                                                url: "<?= base_url('sell/get_wstg_from_account') ?>/" + account_id + '/' + item_id,
+                                                type: 'GET',
+                                                async: false,
+                                                data: '',
+                                                success: function (response) {
+                                                    var json = $.parseJSON(response);
+                                                    $('#wstg').val(json.account_data).change();
+                                                    $('#default_wstg').val(json.account_data).change();
+                                                }
+                                            });
+                                        }
         <?php } else { ?>
-            $('#wstg').val('0');
-            $('#default_wstg').val('0');
+                                        $('#wstg').val('0');
+                                        $('#default_wstg').val('0');
         <?php } ?>
         <?php //} ?>
     }
@@ -5195,158 +5227,158 @@ if (isset($order_lot_item)) { ?>
         });
     }
 </script>
-<?php 
+<?php
 $enter_key_to_next = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'enter_key_to_next'));
-if($enter_key_to_next == 1 ) {
+if ($enter_key_to_next == 1) {
     ?>
-<script type="text/javascript">
-    $(document).ready(function(){
-        $("#account_id").select2('open');
+                            <script type="text/javascript">
+                                $(document).ready(function(){
+                                    $("#account_id").select2('open');
 
-        var account_id = $('#account_id').val();
-        if(account_id == <?php echo CASE_CUSTOMER_ACCOUNT_ID; ?>){//mostly thid document.ready does Not work, in this file, there are 2 document.ready.
-            $('#delivery_type').val('1'); // Select the option with a value of '1'
-            $('#delivery_type').trigger('change');
-        }
-        $('body').on('keydown', '#wstg', function(e) {
-            if (e.keyCode == 13) {
-                $('#add_lineitem').click();
-            }
-        });
+                                    var account_id = $('#account_id').val();
+                                    if(account_id == <?php echo CASE_CUSTOMER_ACCOUNT_ID; ?>){//mostly thid document.ready does Not work, in this file, there are 2 document.ready.
+                                        $('#delivery_type').val('1'); // Select the option with a value of '1'
+                                        $('#delivery_type').trigger('change');
+                                    }
+                                    $('body').on('keydown', '#wstg', function(e) {
+                                        if (e.keyCode == 13) {
+                                            $('#add_lineitem').click();
+                                        }
+                                    });
 
-//        $(document).on('shown.bs.modal', function(e) {
-//            $('input:visible:enabled:first', e.target).focus();
-//        });
+                            //        $(document).on('shown.bs.modal', function(e) {
+                            //            $('input:visible:enabled:first', e.target).focus();
+                            //        });
 
-        $('body').on('keydown', 'input,select,.select2-search__field, textarea', function(e) {
-            var self = $(this)
-              , form = self.parents('form:eq(0)')
-              , focusable
-              , next
-              , prev
-              ;
+                                    $('body').on('keydown', 'input,select,.select2-search__field, textarea', function(e) {
+                                        var self = $(this)
+                                          , form = self.parents('form:eq(0)')
+                                          , focusable
+                                          , next
+                                          , prev
+                                          ;
 
-            if($('.modal.in').length > 0) { 
-                form = $('.modal.in');
-            }
+                                        if($('.modal.in').length > 0) { 
+                                            form = $('.modal.in');
+                                        }
             
-            var id = $(this).attr('id');
-            if(id == 'add_lineitem'){
-                $('#add_lineitem').click();
-            } else if (e.shiftKey) {
-                if (e.keyCode == 13 && $(this).is("textarea") == false) {
-                    focusable =   form.find('input,a,select,.select2-search__field,button,textarea').filter(':visible:not([readonly])');
-                    prev = focusable.eq(focusable.index(this)-1); 
-                    if($(prev['0']).attr('id') == 'sell_item_charges_details'){
-                        prev = focusable.eq(focusable.index(this)-2);
-                    }
-                    if($(prev['0']).attr('id') == 'tunch_textbox'){
-                        prev = focusable.eq(focusable.index(this)-3);
-                    }
-                    if (prev.length) {
-                       prev.focus();
-                    } else {
-                        form.submit();
-                    }
-                }
-            } else if (e.keyCode == 13 && $(this).is("textarea") == false) {
-                focusable = form.find('input,a,select,.select2-search__field,button,textarea').filter(':visible:not([readonly])');
-                next = focusable.eq(focusable.index(this)+1);
-                if($(next['0']).attr('id') == 'tunch_textbox'){
-                    next = focusable.eq(focusable.index(this)+2);
-                }
-                if($(next['0']).attr('id') == 'sell_item_charges_details'){
-                    next = focusable.eq(focusable.index(this)+3);
-                }
-                if (next.length) {
-                    next.focus();
-                } else {
-                    form.submit();
-                }
-                return false;
+                                        var id = $(this).attr('id');
+                                        if(id == 'add_lineitem'){
+                                            $('#add_lineitem').click();
+                                        } else if (e.shiftKey) {
+                                            if (e.keyCode == 13 && $(this).is("textarea") == false) {
+                                                focusable =   form.find('input,a,select,.select2-search__field,button,textarea').filter(':visible:not([readonly])');
+                                                prev = focusable.eq(focusable.index(this)-1); 
+                                                if($(prev['0']).attr('id') == 'sell_item_charges_details'){
+                                                    prev = focusable.eq(focusable.index(this)-2);
+                                                }
+                                                if($(prev['0']).attr('id') == 'tunch_textbox'){
+                                                    prev = focusable.eq(focusable.index(this)-3);
+                                                }
+                                                if (prev.length) {
+                                                   prev.focus();
+                                                } else {
+                                                    form.submit();
+                                                }
+                                            }
+                                        } else if (e.keyCode == 13 && $(this).is("textarea") == false) {
+                                            focusable = form.find('input,a,select,.select2-search__field,button,textarea').filter(':visible:not([readonly])');
+                                            next = focusable.eq(focusable.index(this)+1);
+                                            if($(next['0']).attr('id') == 'tunch_textbox'){
+                                                next = focusable.eq(focusable.index(this)+2);
+                                            }
+                                            if($(next['0']).attr('id') == 'sell_item_charges_details'){
+                                                next = focusable.eq(focusable.index(this)+3);
+                                            }
+                                            if (next.length) {
+                                                next.focus();
+                                            } else {
+                                                form.submit();
+                                            }
+                                            return false;
 
-            } else if (e.ctrlKey) {
-                if (e.keyCode == 13) {
-                    focusable =   form.find('input,a,select,.select2-search__field,button,textarea').filter(':visible:not([readonly])');
-                    prev = focusable.eq(focusable.index(this)+1); 
+                                        } else if (e.ctrlKey) {
+                                            if (e.keyCode == 13) {
+                                                focusable =   form.find('input,a,select,.select2-search__field,button,textarea').filter(':visible:not([readonly])');
+                                                prev = focusable.eq(focusable.index(this)+1); 
 
-                    if (prev.length) {
-                       prev.focus();
-                    } else {
-                        form.submit();
-                    }
-                }
-            }
-        });
+                                                if (prev.length) {
+                                                   prev.focus();
+                                                } else {
+                                                    form.submit();
+                                                }
+                                            }
+                                        }
+                                    });
 
-        /**
-            * WARNING: untested using Select2's option ['selectOnClose'=>true]
-            *
-            * This code was written because the Select2 widget does not handle
-            * tabbing from one form field to another.  The desired behavior is that
-            * the user can use [Enter] to select a value from Select2 and [Tab] to move
-            * to the next field on the form.
-            *
-            * The following code moves focus to the next form field when a Select2 'close'
-            * event is triggered.  If the next form field is a Select2 widget, the widget
-            * is opened automatically.
-            *
-            * Users that click elsewhere on the document will cause the active Select2
-            * widget to close.  To prevent the code from overriding the user's focus choice
-            * a flag is added to each element that the users clicks on.  If the flag is
-            * active, then the automatic focus script does not happen.
-            *
-            * To prevent conflicts with multiple Select2 widgets opening at once, a second
-            * flag is used to indicate the open status of a Select2 widget.  It was
-            * necessary to use a flag instead of reading the class '--open' because using the
-            * class '--open' as an indicator flag caused timing/bubbling issues.
-            *
-            * To simulate a Shift+Tab event, a flag is recorded every time the shift key
-            * is pressed.
-            */
-        var docBody = $(document.body);
-        var shiftPressed = false;
-        var clickedOutside = false;
-        //var keyPressed = 0;
+                                    /**
+                                        * WARNING: untested using Select2's option ['selectOnClose'=>true]
+                                        *
+                                        * This code was written because the Select2 widget does not handle
+                                        * tabbing from one form field to another.  The desired behavior is that
+                                        * the user can use [Enter] to select a value from Select2 and [Tab] to move
+                                        * to the next field on the form.
+                                        *
+                                        * The following code moves focus to the next form field when a Select2 'close'
+                                        * event is triggered.  If the next form field is a Select2 widget, the widget
+                                        * is opened automatically.
+                                        *
+                                        * Users that click elsewhere on the document will cause the active Select2
+                                        * widget to close.  To prevent the code from overriding the user's focus choice
+                                        * a flag is added to each element that the users clicks on.  If the flag is
+                                        * active, then the automatic focus script does not happen.
+                                        *
+                                        * To prevent conflicts with multiple Select2 widgets opening at once, a second
+                                        * flag is used to indicate the open status of a Select2 widget.  It was
+                                        * necessary to use a flag instead of reading the class '--open' because using the
+                                        * class '--open' as an indicator flag caused timing/bubbling issues.
+                                        *
+                                        * To simulate a Shift+Tab event, a flag is recorded every time the shift key
+                                        * is pressed.
+                                        */
+                                    var docBody = $(document.body);
+                                    var shiftPressed = false;
+                                    var clickedOutside = false;
+                                    //var keyPressed = 0;
 
-        docBody.on('keydown', function(e) {
-            var keyCaptured = (e.keyCode ? e.keyCode : e.which);
-            //shiftPressed = keyCaptured == 16 ? true : false;
-            if (keyCaptured == 16) { shiftPressed = true; }
-        });
-        docBody.on('keyup', function(e) {
-            var keyCaptured = (e.keyCode ? e.keyCode : e.which);
-            //shiftPressed = keyCaptured == 16 ? true : false;
-            if (keyCaptured == 16) { shiftPressed = false; }
-        });
+                                    docBody.on('keydown', function(e) {
+                                        var keyCaptured = (e.keyCode ? e.keyCode : e.which);
+                                        //shiftPressed = keyCaptured == 16 ? true : false;
+                                        if (keyCaptured == 16) { shiftPressed = true; }
+                                    });
+                                    docBody.on('keyup', function(e) {
+                                        var keyCaptured = (e.keyCode ? e.keyCode : e.which);
+                                        //shiftPressed = keyCaptured == 16 ? true : false;
+                                        if (keyCaptured == 16) { shiftPressed = false; }
+                                    });
 
-        docBody.on('mousedown', function(e){
-            // remove other focused references
-            clickedOutside = false;
-            // record focus
-            if ($(e.target).is('[class*="select2"]')!=true) {
-                clickedOutside = true;
-            }
-        });
+                                    docBody.on('mousedown', function(e){
+                                        // remove other focused references
+                                        clickedOutside = false;
+                                        // record focus
+                                        if ($(e.target).is('[class*="select2"]')!=true) {
+                                            clickedOutside = true;
+                                        }
+                                    });
 
-        docBody.on('select2:opening', function(e) {
-            // this element has focus, remove other flags
-            clickedOutside = false;
-            // flag this Select2 as open
-            $(e.target).attr('data-s2open', 1);
-        });
-        docBody.on('select2:closing', function(e) {
-            // remove flag as Select2 is now closed
-            $(e.target).removeAttr('data-s2open');
-        });
+                                    docBody.on('select2:opening', function(e) {
+                                        // this element has focus, remove other flags
+                                        clickedOutside = false;
+                                        // flag this Select2 as open
+                                        $(e.target).attr('data-s2open', 1);
+                                    });
+                                    docBody.on('select2:closing', function(e) {
+                                        // remove flag as Select2 is now closed
+                                        $(e.target).removeAttr('data-s2open');
+                                    });
 
-        docBody.on('select2:close', function(e) {
-            var elSelect = $(e.target);
-            elSelect.removeAttr('data-s2open');
-            var currentForm = elSelect.closest('form');
-            var othersOpen = currentForm.has('[data-s2open]').length;
-            if (othersOpen == 0 && clickedOutside==false) {
-                /* Find all inputs on the current form that would normally not be focus`able:
+                                    docBody.on('select2:close', function(e) {
+                                        var elSelect = $(e.target);
+                                        elSelect.removeAttr('data-s2open');
+                                        var currentForm = elSelect.closest('form');
+                                        var othersOpen = currentForm.has('[data-s2open]').length;
+                                        if (othersOpen == 0 && clickedOutside==false) {
+                                            /* Find all inputs on the current form that would normally not be focus`able:
                  *  - includes hidden <select> elements whose parents are visible (Select2)
                  *  - EXCLUDES hidden <input>, hidden <button>, and hidden <textarea> elements
                  *  - EXCLUDES disabled inputs
