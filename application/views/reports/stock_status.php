@@ -710,6 +710,7 @@
                 "url": "<?php echo site_url('reports/stock_status_datatable') ?>",
                 "type": "POST",
                 "data": function(d) {
+					
                     d.department_id = $('#department_id').val();
                     d.category_id = $('#category_id').val();
                     d.item_id = $('#item_id').val();

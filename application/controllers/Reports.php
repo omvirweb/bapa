@@ -1046,6 +1046,7 @@ class Reports extends CI_Controller
             $data['carat'] = $this->crud->get_all_records('carat', 'purity', 'ASC');
             $data['item_wise'] = $item_wise;
             $data['default_wastage'] = $this->crud->get_column_value_by_id('item_master', 'default_wastage', array('item_id' => $item_stock_data->item_id));
+            $data['stock_method'] = $this->crud->get_column_value_by_id('item_master', 'stock_method', array('item_id' => $item_stock_data->item_id));
             set_page('reports/stock_ledger', $data);
         } else {
             $this->session->set_flashdata('error_message', 'You have not permission to access this page.');
