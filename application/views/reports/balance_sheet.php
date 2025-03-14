@@ -17,11 +17,11 @@
                                 <div class="col-md-12">
                                     <div class="col-md-3">
                                         <label>From Date</label>
-                                        <input type="text" name="from_date" id="datepicker1" class="from_date form-control" value="<?php echo date("d-m-Y",strtotime($from_date));?>">
+                                        <input type="text" name="from_date" id="datepicker1" class="from_date form-control" value="<?php echo date("d-m-Y", strtotime($from_date)); ?>">
                                     </div>
                                     <div class="col-md-3">
                                         <label>To Date</label>
-                                        <input type="text" name="to_date" id="datepicker2" class="to_date form-control" value="<?php echo date('d-m-Y');?>">
+                                        <input type="text" name="to_date" id="datepicker2" class="to_date form-control" value="<?php echo date('d-m-Y'); ?>">
                                     </div>
                                     <div class="col-md-3">
                                             <label>Balance Sheet Format</label>
@@ -45,10 +45,10 @@
                                         <thead>
                                             <tr>
                                                 <th width="35%"><h4>Credit</h4>Particulars</th>
-                                                <th width="150">Amount</th>
+                                                <th width="150">Fine</th>
                                                 <th width="15"></th>
                                                 <th width="35%"><h4>Debit</h4>Particulars</th>
-                                                <th width="150">Amount</th>
+                                                <th width="150">Fine</th>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>

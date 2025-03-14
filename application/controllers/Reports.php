@@ -3923,7 +3923,15 @@ class Reports extends CI_Controller
                 $tmp_account_group_row = array();
                 $tmp_account_group_row['account_group_name'] = $account_group_row['account_group_name'];
                 $tmp_account_group_row['accounts'] = $account_group_row['accounts'];
-                $tmp_account_group_row['net_amount'] = number_format((float) abs($account_group_row['net_amount']), 2, '.', '');
+
+
+                $tempdata = number_format((float) abs($account_group_row['net_amount']), 2, '.', '');
+                $lastrate = $tempdata * 10 / (float) $gold_rate;
+                $tmp_account_group_row['net_amount'] = number_format((float) abs($lastrate), 2, '.', '');
+
+
+
+
 
                 if ($account_group_row['net_amount'] >= 0) {
                     $total_debit_amount += $account_group_row['net_amount'];
@@ -3940,15 +3948,18 @@ class Reports extends CI_Controller
 
             if ($capital >= 0) {
                 $total_credit_amount += $capital;
+                $gold_capital = $capital * 10 / (float) $gold_rate;
                 $cr_account_group_arr[] = array(
                     "account_group_name" => "CAPITAL",
-                    "net_amount" => number_format((float) abs($capital), 2, '.', '')
+                    "net_amount" => number_format((float) abs($gold_capital), 2, '.', '')
                 );
             } else {
                 $total_credit_amount += $capital;
+                $gold_capital = $capital * 10 / (float) $gold_rate;
+
                 $cr_account_group_arr[] = array(
                     "account_group_name" => "CAPITAL",
-                    "net_amount" => number_format((float) $capital, 2, '.', '')
+                    "net_amount" => number_format((float) $gold_capital, 2, '.', '')
                 );
             }
 
@@ -3960,10 +3971,11 @@ class Reports extends CI_Controller
 
                     $total_net_amount = $total_debit_amount;
                     $net_profit = $total_debit_amount - $total_credit_amount;
+                    $gold_net_profit = $net_profit * 10 / (float) $gold_rate;
 
                     $data[] = array(
                         'Net Profit',
-                        number_format((float) $net_profit, 2, '.', ''),
+                        number_format((float) $gold_net_profit, 2, '.', ''),
                         '',
                         '',
                         ''
@@ -3972,13 +3984,14 @@ class Reports extends CI_Controller
 
                     $total_net_amount = $total_credit_amount;
                     $net_loss = $total_credit_amount - $total_debit_amount;
+                    $gold_net_loss = $net_loss * 10 / (float) $gold_rate;
 
                     $data[] = array(
                         '',
                         '',
                         '',
                         'Net Loss',
-                        number_format((float) $net_loss, 2, '.', ''),
+                        number_format((float) $gold_net_loss, 2, '.', ''),
                     );
                 }
             } else {
@@ -4030,15 +4043,19 @@ class Reports extends CI_Controller
 
             if ($capital >= 0) {
                 $total_credit_amount += $capital;
+                $gold_capital = $capital * 10 / (float) $gold_rate;
+
                 $cr_account_arr[] = array(
                     "account_name" => "CAPITAL",
-                    "net_amount" => number_format((float) abs($capital), 2, '.', '')
+                    "net_amount" => number_format((float) abs($gold_capital), 2, '.', '')
                 );
             } else {
                 $total_credit_amount += $capital;
+                $gold_capital = $capital * 10 / (float) $gold_rate;
+
                 $cr_account_arr[] = array(
                     "account_name" => "CAPITAL",
-                    "net_amount" => number_format((float) $capital, 2, '.', '')
+                    "net_amount" => number_format((float) $gold_capital, 2, '.', '')
                 );
             }
 
@@ -4050,10 +4067,11 @@ class Reports extends CI_Controller
 
                     $total_net_amount = $total_debit_amount;
                     $net_profit = $total_debit_amount - $total_credit_amount;
+                    $gold_net_profit = $net_profit * 10 / (float) $gold_rate;
 
                     $data[] = array(
                         'Net Profit',
-                        number_format((float) $net_profit, 2, '.', ''),
+                        number_format((float) $gold_net_profit, 2, '.', ''),
                         '',
                         '',
                         ''
@@ -4062,13 +4080,14 @@ class Reports extends CI_Controller
 
                     $total_net_amount = $total_credit_amount;
                     $net_loss = $total_credit_amount - $total_debit_amount;
+                    $gold_net_loss = $net_loss * 10 / (float) $gold_rate;
 
                     $data[] = array(
                         '',
                         '',
                         '',
                         'Net Loss',
-                        number_format((float) $net_loss, 2, '.', ''),
+                        number_format((float) $gold_net_loss, 2, '.', ''),
                     );
                 }
             } else {
