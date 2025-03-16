@@ -5503,7 +5503,7 @@ class Reports extends CI_Controller
 
     function print_all_rfid_tags()
     {
-            $custom_data = $this->crud->get_all_records_with_three('item_stock','item_stock_id','');
+            $custom_data = $this->crud->get_all_records('item_stock','item_stock_id','');
             // echo '<pre>';
             // print_r($custom_data);
             // echo '<pre>';
