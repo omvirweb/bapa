@@ -133,6 +133,7 @@ if (!function_exists('get_stock_status_datatable')) {
         $to_date = '';
         $display_opening = 1;
         $final_profit_loss_amount = 0;
+        $item_counter = 0;
         foreach ($list as $stock) {
             $gold = 0;
             $silver = 0;
@@ -194,10 +195,10 @@ if (!function_exists('get_stock_status_datatable')) {
                 }
             }
 			
-          if($stock->stock_method==2)
+          /*if($stock->stock_method==2)
 		  {
             $stock_adjust_btn .= ' &nbsp; <a href="javascript:void(0);" data-stock-method="'.$stock->stock_method.'" id="'.$stock->item_stock_id.'" data-item_name="' . $stock->item_name . '" data-tunch="' . (($tunch > 100) ? number_format((float) 100, 2, '.', '') : $tunch) . '" class="btn btn-primary btn-xs item_stock_details pull-left" data-category_name="Stock" data-item_name="Stock" style="margin: 0px 3px;" > Stock </a>';
-          }
+          }*/
             if ($post_data['include_wstg'] == 'true') {
                 $opening_wstg = $CI->Crud->get_row_by_where("opening_stock",array('item_id'=>$stock->item_id));
                 if($stock->default_wastage==0){
@@ -207,6 +208,12 @@ if (!function_exists('get_stock_status_datatable')) {
             }
 
             $row = array();
+            $rowContent = '<input type="checkbox" class="stock-checkbox" value="'.$stock->item_stock_id.'" style="margin-right:5px;">';
+            $rowContent .= '<a href="javascript:void(0);" class="edit_rfid" data-item_stock_id="'.$stock->item_stock_id.'" style="margin-right:5px;"><i class="glyphicon glyphicon-edit"></i></a>';
+            $rowContent .= '<a href="'.base_url('reports/stock_status/').$stock->item_stock_id.'" class="btn btn-primary btn-xs" target="_blank" style="margin-right:5px;"><i class="fa fa-print"></i></a>';
+            $rowContent .= '<a href="'.base_url('reports/stock_status/').$stock->item_stock_id.'" title="Print RFID tag" class="btn btn-primary btn-xs" target="_blank" style="margin-right:5px;"><i class="fa fa-print"></i></a>';
+            $rowContent .= '<a href="javascript:void(0);" class="delete_rfid" data-href="'.base_url('reports/delete_rfid/').$stock->item_stock_id.'"><span class="glyphicon glyphicon-trash" style="color : red">&nbsp;</span></a>';
+            $row[] = $rowContent;
             $row[] = $stock->category_name;
             $filtered_data = array_filter([
                 'from_date' => $post_data['from_date'] ?? '',
@@ -299,6 +306,7 @@ if (!function_exists('get_stock_status_datatable')) {
             }
 
             $data[] = $row;
+            $item_counter++;
         }
         $totalRecodsCountForDatatable = count($data);
         

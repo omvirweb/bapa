@@ -81,7 +81,7 @@ $include_wastage = isset($_GET['include_wstg']) && $_GET['include_wstg'] == '1' 
                                             <label>Tunch</label>
                                             <select id="tunch" class="form-control select2">
 											<?php 
-											if ($stock_method==2) {
+											if ($stock_method==2 || $stock_method==3) {
                                                     echo '<option value="0" selected>All</option>';
                                             
 

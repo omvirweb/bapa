@@ -1215,7 +1215,7 @@ class Reports extends CI_Controller
             $touch_id = $stock_ledger->touch_id;
             $wstg = (is_numeric($stock_ledger->wstg)) ? $stock_ledger->wstg : '';
             if ($post_data['include_wastage'] == 'true') {
-                $opening_wstg = $this->Crud->get_row_by_where("opening_stock",array('item_id'=>$post_data['item_id']));
+                $opening_wstg = $this->crud->get_row_by_where("opening_stock",array('item_id'=>$post_data['item_id']));
                 if($post_data['default_wastage']==0){
                     @$wstg = $wstg + $opening_wstg->wstg;
                     $wstg = number_format($wstg,2);

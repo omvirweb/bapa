@@ -27,7 +27,7 @@
                                             <label>Balance Sheet Format</label>
                                             <select name="balance_sheet_format" class="form-control Format select2" id="balance_sheet_format">
                                                 <option value="group" selected="selected">Group</option>
-                                                <option value="account">Account</option>
+                                                <!--<option value="account">Account</option>-->
                                             </select>
                                         </div>
                                     <div class="col-md-1">
