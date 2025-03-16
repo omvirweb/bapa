@@ -209,7 +209,7 @@ if (!function_exists('get_stock_status_datatable')) {
 
             $row = array();
             $rowContent = '<input type="checkbox" class="stock-checkbox" value="'.$stock->item_stock_id.'" style="margin-right:5px;">';
-            $rowContent .= '<a href="javascript:void(0);" class="edit_rfid" data-item_stock_id="'.$stock->item_stock_id.'" style="margin-right:5px;"><i class="glyphicon glyphicon-edit"></i></a>';
+            $rowContent .= '<a href="#" class="edit_rfid" data-item_stock_id="'.$stock->item_stock_id.'" style="margin-right:5px;"><i class="glyphicon glyphicon-edit"></i></a>';
             $rowContent .= '<a href="'.base_url('reports/stock_status/').$stock->item_stock_id.'" class="btn btn-primary btn-xs" target="_blank" style="margin-right:5px;"><i class="fa fa-print"></i></a>';
             $rowContent .= '<a href="'.base_url('reports/stock_status/').$stock->item_stock_id.'" title="Print RFID tag" class="btn btn-primary btn-xs" target="_blank" style="margin-right:5px;"><i class="fa fa-print"></i></a>';
             $rowContent .= '<a href="javascript:void(0);" class="delete_rfid" data-href="'.base_url('reports/delete_rfid/').$stock->item_stock_id.'"><span class="glyphicon glyphicon-trash" style="color : red">&nbsp;</span></a>';

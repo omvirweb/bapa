@@ -975,7 +975,8 @@
             }],
         });
 
-        $(document).on("click", ".edit_rfid", function() {
+        $(document).on("click", ".edit_rfid", function(e) {
+            e.preventDefault();            
             var item_stock_rfid_id = $(this).attr('data-item_stock_rfid_id');
             $.ajax({
                 url: "<?php echo site_url('reports/get_created_rfid_data/') ?>" + item_stock_rfid_id,
