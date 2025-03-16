@@ -3216,6 +3216,7 @@ class Sell extends CI_Controller
 
                 $grwt = (float) $sell_item->grwt + (float) $pts_items->total_grwt + (float) $ptst_items->total_grwt + (float) $ptir_items->total_grwt + (float) $ptmhm_items->total_grwt + (float) $ptmc_items->total_grwt;
                 $less = (float) $sell_item->less + (float) $pts_items->total_less + (float) $ptst_items->total_less + (float) $ptir_items->total_less + (float) $ptmhm_items->total_less + (float) $ptmc_items->total_less;
+                $purchase_less = $sell_item->purchase_less;
                 if (!empty($grwt) && $grwt>=0) {
 
                     $wstg = 0;
@@ -3248,6 +3249,7 @@ class Sell extends CI_Controller
                     $sell_lineitem['less_allow'] = $less_allow;
                     $sell_lineitem['grwt'] = number_format($grwt, 3, '.', '');
                     $sell_lineitem['less'] = number_format($less, 3, '.', '');
+                    $sell_lineitem['purchase_less'] = number_format($purchase_less, 3, '.', '');
                     $sell_lineitem['net_wt'] = number_format($sell_item->net_wt, 3, '.', '');
                     $sell_lineitem['wstg'] = $wstg;
                     $sell_lineitem['fine'] = number_format($sell_item->fine, 3, '.', '');

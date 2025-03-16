@@ -569,7 +569,6 @@ class Crud extends CI_Model
     }
     
     function get_purchase_to_sell_items($department_id, $item_id) {
-
         $this->db->select("i.*, 'Opening Stock' AS account_name, c.category_name, '' as account_id, os.opening_stock_id as sell_item_id, os.opening_stock_id, '' AS reference_no, '' AS type_id, i.category_id, i.item_id, i.grwt, i.less, i.ntwt AS net_wt, i.tunch AS touch_id, i.fine, i.purchase_sell_item_id, '' AS sell_date ,i.stock_type, '0' AS wstg, '' AS image, os.design_no, os.rfid_number");
         $this->db->from('item_stock i');
         $this->db->join('opening_stock os', 'os.opening_stock_id = i.purchase_sell_item_id', 'left');
@@ -595,8 +594,11 @@ class Crud extends CI_Model
 //        echo '<pre>'. $this->db->last_query(); exit;
         $result = array_merge($o_result1, $o_result2);
 
-        $this->db->select("si.sell_item_id, si.sell_id, si.sell_item_no, si.type, is.category_id, is.item_id, is.grwt, is.less, is.ntwt AS net_wt, is.tunch AS touch_id, is.fine, is.purchase_sell_item_id, si.image, c.category_name, a.account_name, s.account_id, s.sell_date, is.stock_type, si.wstg");
-//        $this->db->select("si.sell_item_id, si.sell_id, si.sell_item_no, si.type, si.category_id, si.item_id, si.grwt, si.less, si.net_wt, si.touch_id, si.fine, is.purchase_sell_item_id, si.image, c.category_name, a.account_name, s.account_id, s.sell_date, is.stock_type, si.wstg");
+        $this->db->select("COALESCE(si.purchase_less, 0) AS purchase_less, si.sell_item_id, si.sell_id, si.sell_item_no, si.type, 
+            is.category_id, is.item_id, is.grwt, is.less, is.ntwt AS net_wt, is.tunch AS touch_id, is.fine, 
+            is.purchase_sell_item_id, si.image, c.category_name, a.account_name, s.account_id, s.sell_date, 
+            is.stock_type, si.wstg");
+
         $this->db->from('item_stock is');
         $this->db->join('sell_items si', 'si.sell_item_id = is.purchase_sell_item_id', 'left');
         $this->db->join('sell s', 's.sell_id = si.sell_id', 'left');
@@ -606,6 +608,7 @@ class Crud extends CI_Model
         $this->db->where('is.item_id', $item_id);
         $this->db->where('si.type != ', SELL_TYPE_SELL_ID);
         $this->db->where_in('is.stock_type', array(STOCK_TYPE_PURCHASE_ID, STOCK_TYPE_EXCHANGE_ID));
+
         $query1 = $this->db->get();
         $result1 = $query1->result();
         
@@ -664,13 +667,30 @@ class Crud extends CI_Model
         $query5 = $this->db->get();
         $result5 = $query5->result();
 //        echo '<pre>'. $this->db->last_query(); exit;
+
+        // Standardize each result set
+        $result = $this->standardizeResult($result);
+        $result1 = $this->standardizeResult($result1);
+        $result2 = $this->standardizeResult($result2);
+        $result3 = $this->standardizeResult($result3);
+        $result4 = $this->standardizeResult($result4);
+        $result5 = $this->standardizeResult($result5);
         
-        $result_array = array_merge($result, $result1, $result2, $result3, $result4, $result5);
+        $result_array = array_merge($result, $result1, $result2, $result3, $result4, $result5);        
         if ($result_array > 0) {
             return $result_array;
         } else {
             return null;
         }
+    }
+
+    function standardizeResult($resultSet) {
+        foreach ($resultSet as &$row) {
+            if (!isset($row->purchase_less)) {
+                $row->purchase_less = 0; // Default to 0 if missing
+            }
+        }
+        return $resultSet;
     }
     
     
