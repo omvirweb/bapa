@@ -988,7 +988,7 @@ $segment3 = $this->uri->segment(3);
                                                             href="<?= base_url(); ?>reports/stock_check/"><i
                                                                 class="fa fa-line-chart"></i>Stock Check</a></li>
                                                 <?php } ?>
-                                                <?php if ($this->applib->have_access_role(BALANCE_SHEET_MODULE_ID, "view")) { ?>
+                                                <!-- <?php if ($this->applib->have_access_role(BALANCE_SHEET_MODULE_ID, "view")) { ?>
                                                     <?php if ($sell_purchase_type_3_menu == '1') { ?>
                                                         <li class="<?= ($segment2 == 'balance_sheet') ? 'active' : '' ?>"><a
                                                                 href="<?= base_url(); ?>reports_new_sp3/balance_sheet/"><i
@@ -998,7 +998,7 @@ $segment3 = $this->uri->segment(3);
                                                                 href="<?= base_url(); ?>reports/balance_sheet/"><i
                                                                     class="fa fa-book"></i>Balance Sheet</a></li>
                                                     <?php } ?>
-                                                <?php } ?>
+                                                <?php } ?> -->
                                                 <?php if ($this->applib->have_access_role(BALANCE_SHEET_MODULE_ID, "view")) { ?>
 
                                                     <li class="<?= ($segment2 == 'balance_sheet_gold') ? 'active' : '' ?>"><a
