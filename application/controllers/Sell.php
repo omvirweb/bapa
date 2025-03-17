@@ -2422,7 +2422,7 @@ class Sell extends CI_Controller
                     }
                 } else {
                     if (isset($post_data['sell_purchase']) && $post_data['sell_purchase'] == "sell") {
-                        $action .= '<a href="' . base_url("sell/add/sell/" . $sell->sell_id) . '"><span class="edit_button glyphicon glyphicon-eye-open data-href="#"" style="color : #419bf4" >&nbsp;</span></a>';
+                        $action .= '<a href="' . base_url("sell/add/sell/" . $sell->sell_id.'') . '"><span class="edit_button glyphicon glyphicon-eye-open data-href="#"" style="color : #419bf4" >&nbsp;</span></a>';
 
                     } elseif (isset($post_data['sell_purchase']) && $post_data['sell_purchase'] == "purchase") {
                         $action .= '<a href="' . base_url("sell/add/purchase/" . $sell->sell_id) . '"><span class="edit_button glyphicon glyphicon-eye-open data-href="#"" style="color : #419bf4" >&nbsp;</span></a>';
@@ -3216,6 +3216,7 @@ class Sell extends CI_Controller
 
                 $grwt = (float) $sell_item->grwt + (float) $pts_items->total_grwt + (float) $ptst_items->total_grwt + (float) $ptir_items->total_grwt + (float) $ptmhm_items->total_grwt + (float) $ptmc_items->total_grwt;
                 $less = (float) $sell_item->less + (float) $pts_items->total_less + (float) $ptst_items->total_less + (float) $ptir_items->total_less + (float) $ptmhm_items->total_less + (float) $ptmc_items->total_less;
+                $purchase_less = $sell_item->purchase_less;
                 if (!empty($grwt) && $grwt>=0) {
 
                     $wstg = 0;
@@ -3248,6 +3249,7 @@ class Sell extends CI_Controller
                     $sell_lineitem['less_allow'] = $less_allow;
                     $sell_lineitem['grwt'] = number_format($grwt, 3, '.', '');
                     $sell_lineitem['less'] = number_format($less, 3, '.', '');
+                    $sell_lineitem['purchase_less'] = number_format($purchase_less, 3, '.', '');
                     $sell_lineitem['net_wt'] = number_format($sell_item->net_wt, 3, '.', '');
                     $sell_lineitem['wstg'] = $wstg;
                     $sell_lineitem['fine'] = number_format($sell_item->fine, 3, '.', '');
@@ -3830,10 +3832,11 @@ class Sell extends CI_Controller
             $total_gold_fine = 0;
             $total_silver_fine = 0;
             $total_amount = 0;
+            $from_zero = $post_data['from_zero']??'';
             foreach ($customer_ledger_data as $key => $customer_ledger) {
-                if (empty($customer_ledger->gold_fine) && empty($customer_ledger->silver_fine) && empty($customer_ledger->amount) && $post_data['from_zero'] == 1 && isset($customer_ledger->group_name) ? $customer_ledger->group_name != '3' : '') {
+                if (empty($customer_ledger->gold_fine) && empty($customer_ledger->silver_fine) && empty($customer_ledger->amount) && $from_zero == 1 && isset($customer_ledger->group_name) ? $customer_ledger->group_name != '3' : '') {
                 } else {
-                    if (empty($customer_ledger->gold_fine) && empty($customer_ledger->silver_fine) && empty($customer_ledger->amount) && $post_data['from_zero'] == 1 && isset($customer_ledger->group_name) ? $customer_ledger->group_name != '3' : '') {
+                    if (empty($customer_ledger->gold_fine) && empty($customer_ledger->silver_fine) && empty($customer_ledger->amount) && $from_zero == 1 && isset($customer_ledger->group_name) ? $customer_ledger->group_name != '3' : '') {
                         $total_grwt = 0;
                         $total_less = 0;
                         $total_net_wt = 0;
@@ -3850,12 +3853,12 @@ class Sell extends CI_Controller
                                 $total_silver_fine = number_format((float) $total_silver_fine, 3, '.', '') + number_format((float) $customer_ledger->silver_fine, 3, '.', '');
                                 $total_amount = number_format((float) $total_amount, 2, '.', '') + number_format((float) $customer_ledger->amount, 2, '.', '');
                             }
-                            echo " Total: " . $total_gold_fine . "<br>";
+                            //echo " Total: " . $total_gold_fine . "<br>";
                         }
                     }
                 }
             }
-            echo " Total: " . $total_gold_fine . "<br>";
+            //echo " Total: " . $total_gold_fine . "<br>";
             // exit;
             // For old balance and sell details end 
 

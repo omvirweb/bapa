@@ -11,6 +11,7 @@ $tunch = isset($_GET['tunch']) ? $_GET['tunch'] : '0';
 $rfid_filter = isset($_GET['rfid_filter']) ? $_GET['rfid_filter'] : '0';
 $include_wastage = isset($_GET['include_wstg']) && $_GET['include_wstg'] == '1' ? 'checked' : '';
 
+
 ?>
 
 <div class="content-wrapper">
@@ -78,8 +79,12 @@ $include_wastage = isset($_GET['include_wstg']) && $_GET['include_wstg'] == '1' 
                                         <div class="col-md-2">
                                             <label>Tunch</label>
                                             <select id="tunch" class="form-control select2">
-                                                <option value="0" <?= $tunch == '0' ? 'selected' : ''; ?>>All</option>
-                                                <?php
+											<?php 
+											if ($stock_method==2 || $stock_method==3) {
+                                                    echo '<option value="0" selected>All</option>';
+                                            
+
+                                                
                                                 $tunchFound = false;
                                                 foreach ($carat as $value) {
                                                     if ($tunch == $value->purity) {
@@ -89,9 +94,10 @@ $include_wastage = isset($_GET['include_wstg']) && $_GET['include_wstg'] == '1' 
                                                         echo '<option value="' . $value->purity . '">' . $value->purity . '</option>';
                                                     }
                                                 }
-                                                if (!$tunchFound && $tunch != '0') {
+											}
+												elseif (!$tunchFound && $tunch != '0') {
                                                     echo '<option value="' . $tunch . '" selected>' . $tunch . '</option>';
-                                                }
+                                                }												
                                                 ?>
                                             </select>
                                         </div>

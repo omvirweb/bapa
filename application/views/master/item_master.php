@@ -100,7 +100,7 @@
                                             <div class="col-md-6">
                                                 <label for="stock_method">Stock Method</label>
                                                 <select name="stock_method" id="stock_method" class="form-control " <?php echo isset($item_master_data->item_exist) && $item_master_data->item_exist == '1' ? 'disabled' : ''; ?>>
-                                                    <option value="1" <?php echo isset($item_master_data->stock_method) && $item_master_data->stock_method == '1' ? 'Selected' : ''; ?>>Default</option>
+                                                    <option value="1" <?php echo isset($item_master_data->stock_method) && $item_master_data->stock_method == '1' ? 'Selected' : ''; ?>>Tunch Wise</option>
                                                     <option value="2" <?php echo isset($item_master_data->stock_method) && $item_master_data->stock_method == '2' ? 'Selected' : ''; ?>>Item Wise</option>
                                                     <option value="3" <?php echo isset($item_master_data->stock_method) && $item_master_data->stock_method == '3' ? 'Selected' : ''; ?>>Combine</option>
                                                 </select>

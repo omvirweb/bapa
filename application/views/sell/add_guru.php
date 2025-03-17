@@ -3,6 +3,13 @@
     .sell_net_balance_data tr th, .sell_net_balance_data tr td{
         padding: 2px 10px;
     }
+    #pts_total_wstg, #pts_checked_wstg {
+        text-align: right !important;
+    }
+    #pts_total_average, #pts_checked_total_average {
+        position: relative;
+        left: 15px;
+    }
 </style>
 <div class="content-wrapper" id="body-content">
     <form class="form-horizontal" method="post" id="save_sell_purchase" novalidate enctype="multipart/form-data">
@@ -1224,9 +1231,11 @@
                                     <th></th>
                                     <th></th>
                                     <th class="text-right" id="pts_checked_total_grwt">0</th>
+                                    <th class="text-right" id="pts_checked_purhcase_less">0</th>
                                     <th class="text-right" id="pts_checked_total_less">0</th>
                                     <th class="text-right" id="pts_checked_total_ntwt">0</th>
-                                    <th class="text-center" id="pts_checked_total_average" colspan="2">0</th>
+                                    <th class="text-center" id="pts_checked_total_average"align="right">0</th>
+                                    <th class="text-center" id="pts_checked_wstg" align="right">0</th>
                                     <th class="text-right" id="pts_checked_total_fine">0</th>
                                 </tr>
                                 <tr>
@@ -1234,9 +1243,11 @@
                                     <th></th>
                                     <th></th>
                                     <th class="text-right" id="pts_total_grwt"></th>
+                                    <th class="text-right" id="pts_total_purhcase_less"></th>
                                     <th class="text-right" id="pts_total_less"></th>
                                     <th class="text-right" id="pts_total_ntwt"></th>
-                                    <th class="text-center" id="pts_total_average" colspan="2"></th>
+                                    <th class="text-center" id="pts_total_average" align="right"></th>
+                                    <th class="text-center" id="pts_total_wstg" align="right">0.000</th>
                                     <th class="text-right" id="pts_total_fine"></th>
                                 </tr>
                             </tfoot>
@@ -3852,6 +3863,7 @@ if (isset($order_lot_item)) { ?>
         var pts_total_ntwt = 0;
         var pts_total_average = 0;
         var pts_total_fine = 0;
+        var pts_total_purchase_less = 0;
         //console.log(lineitem_objectdata);
         $.each(pts_lineitem_objectdata, function (index, value) {
             var row_html_order = '<tr class="lineitem_index_' + index + ' _' + index + '">';
@@ -3944,6 +3956,7 @@ if (isset($order_lot_item)) { ?>
         });
         $('tbody#purchase_item_selection_list').html(pts_lineitem_html);
         $('#pts_total_grwt').html(pts_total_grwt.toFixed(3));
+        $('#pts_total_purhcase_less').html(pts_total_purchase_less.toFixed(3));
         $('#pts_total_less').html(pts_total_less.toFixed(3));
         $('#pts_total_ntwt').html(pts_total_ntwt.toFixed(3));
         if(pts_total_ntwt != 0 && pts_total_fine != 0){

@@ -1,5 +1,22 @@
 <?php $this->load->view('success_false_notify'); ?>
-
+<style>
+    .topcheckboxselection {
+        position: relative;
+        top: 20px;
+    }
+    .topcheckboxselection label {
+        margin-right: 5px;
+    }
+    .topcheckboxselection label input {
+        position: relative;
+        top: 2px;
+    }
+    .topcheckboxselection a {
+        position: relative;
+        top: 2px;
+        margin-left: 5px;
+    }
+</style>
 <div class="content-wrapper">
     <section class="content-header">
         <h1>Stock Status</h1>
@@ -69,11 +86,21 @@
                                                 <option value="2"> Without RFID Stock </option>
                                             </select>
                                         </div>                                        
-                                        <a href="javascript:void(0);" id="" class="btn btn-primary btn-md item_stock_details_all pull-left" data-category_name="Stock" data-item_name="Stock" style="margin: 25px 0px 0px 0px;" > Stock </a>
+                                        <!--<a href="javascript:void(0);" id="" class="btn btn-primary btn-md item_stock_details_all pull-left" data-category_name="Stock" data-item_name="Stock" style="margin: 25px 0px 0px 0px;" > Stock </a>-->
+                                        <div class="topcheckboxselection">
+                                            
+                                            <label for="toggleAllTopSelection">
+                                                <input type="checkbox" class="rfid-checkbox" id="toggleAllTopSelection" value="1">
+                                                Select All
+                                            </label>
+                                            <button type="button" onclick="generateTags()" class="btn btn-primary">Print Selected Tags</button>
+                                            <a href="<?= base_url('reports/print_all_rfid_tags') ?>" class="btn btn-primary" target="_blank">Print ALL Tags</a>
+                                        </div>
                                         <table class="table row-border table-bordered table-striped" style="width:100%" id="stock_status_table">
                                             <thead>
                                                 <tr>
                                                     <!--<th>Department</th>-->
+                                                    <th>Action</th>
                                                     <th>Category</th>
                                                     <th>Item Name</th>
                                                     <th>Gr.Wt.</th>
@@ -710,6 +737,7 @@
                 "url": "<?php echo site_url('reports/stock_status_datatable') ?>",
                 "type": "POST",
                 "data": function(d) {
+					
                     d.department_id = $('#department_id').val();
                     d.category_id = $('#category_id').val();
                     d.item_id = $('#item_id').val();
@@ -725,7 +753,7 @@
             },
             "columnDefs": [{
                 "className": "dt-right",
-                "targets": [2, 3, 4, 5, 6, 7, 8, 9, 10],
+                "targets": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
             }],
             "fnRowCallback": function(nRow, aData) {
 
@@ -947,7 +975,8 @@
             }],
         });
 
-        $(document).on("click", ".edit_rfid", function() {
+        $(document).on("click", ".edit_rfid", function(e) {
+            e.preventDefault();            
             var item_stock_rfid_id = $(this).attr('data-item_stock_rfid_id');
             $.ajax({
                 url: "<?php echo site_url('reports/get_created_rfid_data/') ?>" + item_stock_rfid_id,
@@ -1020,6 +1049,14 @@
             $('.stock-checkbox').prop('checked', !isCheckedAll);
             $(this).data('ischeckedall', !isCheckedAll);
             const label = $("label[for='toggleAllSelectionTWo']");
+            label.text(!isCheckedAll ? "Unselect All" : "Select All");
+        });
+
+        $(document).on("click", "#toggleAllTopSelection", function() {
+            let isCheckedAll = $(this).data('ischeckedall') || false;
+            $('.stock-checkbox').prop('checked', !isCheckedAll);
+            $(this).data('ischeckedall', !isCheckedAll);
+            const label = $("label[for='toggleAllSelection']");
             label.text(!isCheckedAll ? "Unselect All" : "Select All");
         });
 

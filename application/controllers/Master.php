@@ -1165,7 +1165,7 @@ class Master extends CI_Controller
             $row[] = $display_item_in;
             $stock_method = '';
             if ($item_master->stock_method == 1) {
-                $stock_method = 'Default';
+                $stock_method = 'Tunch Wise';
             } else if ($item_master->stock_method == 2) {
                 $stock_method = 'Item Wise';
             } else if ($item_master->stock_method == 3) {
