@@ -1655,6 +1655,7 @@ class Reports extends CI_Controller
     // Outstanding related Functions
     function outstanding()
     {
+        $selected_account_group_ids = [48,49];
         $this->crud->execuetSQL(" DELETE FROM reminder WHERE account_id IN (SELECT account_id FROM `account` WHERE gold_fine = 0 AND silver_fine = 0 AND amount = 0) ");
         if ($this->applib->have_access_role(OUTSTANDING_MODULE_ID, "view") && $this->applib->have_access_role(OUTSTANDING_MODULE_ID, 'view')) {
             $data['account_groups'] = $this->crud->getFromSQL('SELECT g.account_group_id,g.account_group_name FROM `user_account_group` ug JOIN account_group g ON(g.account_group_id = ug.account_group_id) WHERE ug.user_id = "' . $this->logged_in_id . '"');
@@ -1664,6 +1665,11 @@ class Reports extends CI_Controller
 
             $data['account_id'] = isset($_GET['account_id']) && !empty($_GET['account_id']) ? $_GET['account_id'] : '';
             $data['account_group_id'] = isset($_GET['account_group_id']) && !empty($_GET['account_group_id']) ? $_GET['account_group_id'] : '';
+            if(empty($_GET['account_group_id'])){
+                $data['selected_account_group_ids'] = $selected_account_group_ids;
+            } else {
+                $data['selected_account_group_ids'] = [$_GET['account_group_id']];
+            }
 
             set_page('reports/outstanding', $data);
         } else {
@@ -1674,6 +1680,10 @@ class Reports extends CI_Controller
 
     function outstanding_datatable()
     {
+        $foot_customer_cr = 0;
+        $foot_customer_dr = 0;
+        $foot_supplier_dr = 0;
+        $foot_supplier_cr = 0;
         $post_data = $this->input->post();
         $upto_balance_date = date('Y-m-d', strtotime($post_data['upto_balance_date']));
         $gold_rate = $this->crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'gold_rate'));
@@ -1852,6 +1862,20 @@ class Reports extends CI_Controller
         $outstanding_data_arr = array();
         $account_id_arr = array();
         foreach ($list as $key => $list_row) {
+            // echo '<pre>';
+            // print_r($list_row);
+            // exit;
+            if($list_row->account_group_id==48){
+                $foot_supplier_dr += $list_row->silver_fine;
+                $foot_supplier_cr += $list_row->gold_fine;
+            }
+            if($list_row->account_group_id==49){
+                $foot_customer_cr += $list_row->silver_fine;
+                $foot_customer_dr += $list_row->gold_fine;
+            }
+            
+            
+            
             $account_id = $list_row->account_id;
             if (!empty($post_data['account_id']) && $post_data['account_id'] != $account_id) {
                 continue;
@@ -1895,6 +1919,10 @@ class Reports extends CI_Controller
             }
         }
         $foot_total_gold_fine = 0;
+        $foot_customer_total_gold_fine = 0;
+        $foot_supplier_total_gold_fine = 0;
+        $foot_customer_total_gold_fine = $foot_customer_total_gold_fine + $foot_customer_dr - $foot_customer_cr;
+        $foot_supplier_total_gold_fine = $foot_supplier_total_gold_fine + $foot_supplier_dr - $foot_supplier_cr;
         $foot_total_silver_fine = 0;
         $foot_total_amount = 0;
         $total_net_amount = 0;
@@ -1906,6 +1934,7 @@ class Reports extends CI_Controller
         $foot_total_debit_silver_fine = 0;
         $foot_total_debit_amount = 0;
         $total_debit_net_amount = 0;
+
 
         foreach ($outstanding_data_arr as $outstanding_row) {
             $row = array();
@@ -2152,6 +2181,8 @@ class Reports extends CI_Controller
             "recordsFiltered" => count($data),
             "data" => $data,
             "foot_total_gold_fine" => number_format((float) $foot_total_gold_fine, 3, '.', ''),
+            "foot_customer_total_gold_fine" => number_format((float) $foot_customer_total_gold_fine, 3, '.', ''),
+            "foot_supplier_total_gold_fine" => number_format((float) $foot_supplier_total_gold_fine, 3, '.', ''),
             "foot_total_silver_fine" => number_format((float) $foot_total_silver_fine, 3, '.', ''),
             "foot_total_amount" => number_format((float) $foot_total_amount, 2, '.', ''),
             "total_net_amount" => number_format((float) $total_net_amount, 2, '.', ''),

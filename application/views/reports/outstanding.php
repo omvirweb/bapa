@@ -1,4 +1,5 @@
-<?php // $this->load->view('success_false_notify');       ?>
+<?php // $this->load->view('success_false_notify');
+?>
 <style>
     .reminder_class>a {
         color: red !important;
@@ -10,196 +11,203 @@
             Outstanding
             <button class="btn btn-primary btn-sm pull-right" id="send">Send</button>
             <?php /*<span class="pull-right" style="margin-right: 20px;">
-<div class="form-group">
-<label for="checkbox_all_whatsapp_sms" class="col-sm-12 input-sm text-green" style="font-size: 18px; line-height: 25px;">
-<input type="checkbox" name="" id="checkbox_all_whatsapp_sms" class="" checked="" style="width: 20px; height: 20px;">  &nbsp; Send<img src="<?php echo base_url(); ?>assets/dist/img/whatsapp_icon.png" style="width:25px;" >
-</label>
+            <div class="form-group">
+            <label for="checkbox_all_whatsapp_sms" class="col-sm-12 input-sm text-green" style="font-size: 18px; line-height: 25px;">
+            <input type="checkbox" name="" id="checkbox_all_whatsapp_sms" class="" checked="" style="width: 20px; height: 20px;">  &nbsp; Send<img src="<?php echo base_url(); ?>
+            ?>assets/dist/img/whatsapp_icon.png" style="width:25px;" >
+            </label>
 </div>
 </span>*/ ?>
-            <span class="pull-right" style="margin-right: 20px;">
-                <div class="form-group">
-                    <label for="checkbox_all_sms" class="col-sm-12 input-sm"
-                        style="font-size: 18px; line-height: 25px;">
-                        <input type="checkbox" name="" id="checkbox_all_sms" class="" checked=""
-                            style="width: 20px; height: 20px;"> &nbsp; Send SMS
-                    </label>
-                </div>
-            </span>
-        </h1>
-    </section>
-    <div class="clearfix">
-        <div class="row">
-            <div style="margin: 15px;">
-                <div class="col-md-12">
-                    <!-- Horizontal Form -->
-                    <div class="box box-primary">
-                        <div class="box-body">
-                            <div class="row">
-                                <div class="clearfix"></div>
-                                <div class="col-md-12">
-                                    <div class="col-md-2">
-                                        <label>Account Group</label>
-                                        <select name="account_group_id" id="account_group_id"
-                                            class="form-control select2" multiple >
-                                            <option value="0">All</option>
-                                            <?php if (!empty($account_groups)) {
+<span class="pull-right" style="margin-right: 20px;">
+    <div class="form-group">
+        <label for="checkbox_all_sms" class="col-sm-12 input-sm" style="font-size: 18px; line-height: 25px;">
+            <input type="checkbox" name="" id="checkbox_all_sms" class="" checked=""
+                style="width: 20px; height: 20px;"> &nbsp; Send SMS
+        </label>
+    </div>
+</span>
+</h1>
+</section>
+<div class="clearfix">
+    <div class="row">
+        <div style="margin: 15px;">
+            <div class="col-md-12">
+                <!-- Horizontal Form -->
+                <div class="box box-primary">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="clearfix"></div>
+                            <div class="col-md-12">
+                                <div class="col-md-2">
+                                    <label>Account Group</label>
+                                    <select name="account_group_id" id="account_group_id" class="form-control select2"
+                                        multiple>
+                                        <option value="0">All</option>
+                                        <?php if (!empty($account_groups)) {
                                                 foreach ($account_groups as $grp) { ?>
-                                                                                                                    <option value="<?php echo $grp->account_group_id ?>"
-                                                                                                                        <?= !empty($account_group_id) && $account_group_id == $grp->account_group_id ? 'selected' : '' ?>>
-                                                                                                                        <?php echo $grp->account_group_name; ?>
-                                                                                                                    </option>
-                                                                                <?php }
+                                        <option value="<?php echo $grp->account_group_id; ?>" <?php if(in_array($grp->account_group_id,$selected_account_group_ids)){?> selected
+                                            <?php }?>>
+                                            <?php echo $grp->account_group_name; ?>
+                                        </option>
+                                        <?php }
                                             } ?>
-                                        </select>
-                                     
-                                     
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label>Account</label>
-                                        <select name="account_id" id="account_id" class="form-control select2"></select>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label>Date</label>
-                                        <input type="text" name="upto_balance_date" id="datepicker1"
-                                            class="from_date form-control" value="<?php echo date('d-m-Y'); ?>">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label>Credit Limit</label>
-                                        <select name="credit_limit" id="credit_limit" class="form-control select2">
-                                            <option value="1">All</option>
-                                            <option value="2">In Limit</option>
-                                            <option value="3">Out Of Credit Limit</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <br /><button name="search" id="search" class="btn btn-primary btn-sm"><span
-                                                class="fa fa-search-plus"></span> Search</button>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label><a href="<?= base_url('master/setting') ?>" target="_blanck">Rate From
-                                                Setting : </a></label><br />
-                                        <label>Gold Rate : <?php echo $gold_rate; ?></label><br />
-                                        <label>Silver Rate : <?php echo $silver_rate; ?></label><br />
-                                    </div>
-                                    <div class="clearfix"></div><br />
-                                    <table id="outstanding_table" class="table row-border table-bordered table-striped"
-                                        style="width:100%">
-                                        <thead>
-                                            <tr>
-                                                <th style="text-align: center;">SMS</th>
-                                                <th style="text-align: center;">WhatsApp</th>
-                                                <th>Party Name</th>
-                                                <th>Mobile</th>
-                                                <th>Mobile</th>
-                                                <th>Address</th>
-                                                <th>Bal.Date</th>
-                                                <th class="text-right ">Gold Fine</th>
-                                                <th class="text-right">Silver Fine</th>
-                                                <th class="text-right">Amount</th>
-                                                <th class="text-right">Net Amount</th>
-                                                <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
-                                                            <th class="text-right">Net Amount</th>
-                                                <?php } else { ?>
-                                                            <!-- <th style="display: none;"></th> -->
-                                                <?php } ?>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <th id=""></th>
-                                                <th id=""></th>
-                                                <th id="" style="font-weight: bold; font-size: 16px;">Cr Total</th>
-                                                <th id=""></th>
-                                                <th id=""></th>
-                                                <th id=""></th>
-                                                <th id=""></th>
-                                                <th id="foot_total_credit_gold_fine"
-                                                    style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <th id="foot_total_credit_silver_fine"
-                                                    style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <th id="foot_total_credit_amount"
-                                                    style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
-                                                            <th id="total_credit_net_amount"
-                                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <?php } else { ?>
-                                                            <th id="total_credit_net_amount" style="display: none;"></th>
-                                                <?php } ?>
-                                            </tr>
-                                            <tr>
-                                                <th id=""></th>
-                                                <th id=""></th>
-                                                <th id="" style="font-weight: bold; font-size: 16px;">Dr Total</th>
-                                                <th id=""></th>
-                                                <th id=""></th>
-                                                <th id=""></th>
-                                                <th id=""></th>
-                                                <th id="foot_total_debit_gold_fine"
-                                                    style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <th id="foot_total_debit_silver_fine"
-                                                    style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <th id="foot_total_debit_amount"
-                                                    style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
-                                                            <th id="total_debit_net_amount"
-                                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <?php } else { ?>
-                                                            <th id="total_debit_net_amount" style="display: none;"></th>
-                                                <?php } ?>
-                                            </tr>
-                                            <tr>
-                                                <th></th>
-                                                <th></th>
-                                                <th style="font-weight: bold; font-size: 16px;">Supplier Total</th>
-                                                <th></th>
-                                                <th></th>
-                                                <th></th>
-                                                <th></th>
-                                                <th id="supplier_total_gold_fine" style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <th id="supplier_total_silver_fine" style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <th id="supplier_total_amount" style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <th id="supplier_total_net_amount" style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                            </tr>
-                                            <tr>
-                                                <th></th>
-                                                <th></th>
-                                                <th style="font-weight: bold; font-size: 16px;">Customer Total</th>
-                                                <th></th>
-                                                <th></th>
-                                                <th></th>
-                                                <th></th>
-                                                <th id="customer_total_gold_fine" style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <th id="customer_total_silver_fine" style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <th id="customer_total_amount" style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <th id="customer_total_net_amount" style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                            </tr>
+                                    </select>
 
-                                            <tr>
-                                                <th id=""></th>
-                                                <th id=""></th>
-                                                <th id="" style="font-weight: bold; font-size: 16px;">Total</th>
-                                                <th id=""></th>
-                                                <th id=""></th>
-                                                <th id=""></th>
-                                                <th id=""></th>
-                                                <th id="foot_total_gold_fine"
-                                                    style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <th id="foot_total_silver_fine"
-                                                    style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <th id="foot_total_amount"
-                                                    style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
-                                                            <th id="total_net_amount"
-                                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
-                                                <?php } else { ?>
-                                                            <th id="total_net_amount" style="display: none;"></th>
-                                                <?php } ?>
-                                            </tr>
-                                            
-                                        </tfoot>
-                                    </table>
+
                                 </div>
+                                <div class="col-md-3">
+                                    <label>Account</label>
+                                    <select name="account_id" id="account_id" class="form-control select2"></select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Date</label>
+                                    <input type="text" name="upto_balance_date" id="datepicker1"
+                                        class="from_date form-control" value="<?php echo date('d-m-Y'); ?>">
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Credit Limit</label>
+                                    <select name="credit_limit" id="credit_limit" class="form-control select2">
+                                        <option value="1">All</option>
+                                        <option value="2">In Limit</option>
+                                        <option value="3">Out Of Credit Limit</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <br /><button name="search" id="search" class="btn btn-primary btn-sm"><span
+                                            class="fa fa-search-plus"></span> Search</button>
+                                </div>
+                                <div class="col-md-2">
+                                    <label><a href="<?= base_url('master/setting') ?>" target="_blanck">Rate From
+                                            Setting : </a></label><br />
+                                    <label>Gold Rate : <?php echo $gold_rate; ?></label><br />
+                                    <label>Silver Rate : <?php echo $silver_rate; ?></label><br />
+                                </div>
+                                <div class="clearfix"></div><br />
+                                <table id="outstanding_table" class="table row-border table-bordered table-striped"
+                                    style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: center;">SMS</th>
+                                            <th style="text-align: center;">WhatsApp</th>
+                                            <th>Party Name</th>
+                                            <th>Mobile</th>
+                                            <th>Mobile</th>
+                                            <th>Address</th>
+                                            <th>Bal.Date</th>
+                                            <th class="text-right ">Gold Fine</th>
+                                            <th class="text-right">Silver Fine</th>
+                                            <th class="text-right">Amount</th>
+                                            <th class="text-right">Net Amount</th>
+                                            <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
+                                            <th class="text-right">Net Amount</th>
+                                            <?php } else { ?>
+                                            <!-- <th style="display: none;"></th> -->
+                                            <?php } ?>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th id=""></th>
+                                            <th id=""></th>
+                                            <th id="" style="font-weight: bold; font-size: 16px;">Cr Total</th>
+                                            <th id=""></th>
+                                            <th id=""></th>
+                                            <th id=""></th>
+                                            <th id=""></th>
+                                            <th id="foot_total_credit_gold_fine"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <th id="foot_total_credit_silver_fine"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <th id="foot_total_credit_amount"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
+                                            <th id="total_credit_net_amount"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <?php } else { ?>
+                                            <th id="total_credit_net_amount" style="display: none;"></th>
+                                            <?php } ?>
+                                        </tr>
+                                        <tr>
+                                            <th id=""></th>
+                                            <th id=""></th>
+                                            <th id="" style="font-weight: bold; font-size: 16px;">Dr Total</th>
+                                            <th id=""></th>
+                                            <th id=""></th>
+                                            <th id=""></th>
+                                            <th id=""></th>
+                                            <th id="foot_total_debit_gold_fine"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <th id="foot_total_debit_silver_fine"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <th id="foot_total_debit_amount"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
+                                            <th id="total_debit_net_amount"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <?php } else { ?>
+                                            <th id="total_debit_net_amount" style="display: none;"></th>
+                                            <?php } ?>
+                                        </tr>
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                            <th style="font-weight: bold; font-size: 16px;">Supplier Total</th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th id="supplier_total_gold_fine"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <th id="supplier_total_silver_fine"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <th id="supplier_total_amount"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <th id="supplier_total_net_amount"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                        </tr>
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                            <th style="font-weight: bold; font-size: 16px;">Customer Total</th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th id="customer_total_gold_fine"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <th id="customer_total_silver_fine"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <th id="customer_total_amount"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <th id="customer_total_net_amount"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                        </tr>
+
+                                        <tr>
+                                            <th id=""></th>
+                                            <th id=""></th>
+                                            <th id="" style="font-weight: bold; font-size: 16px;">Total</th>
+                                            <th id=""></th>
+                                            <th id=""></th>
+                                            <th id=""></th>
+                                            <th id=""></th>
+                                            <th id="foot_total_gold_fine"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <th id="foot_total_silver_fine"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <th id="foot_total_amount"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
+                                            <th id="total_net_amount"
+                                                style="font-weight: bold; font-size: 16px; text-align: right;"></th>
+                                            <?php } else { ?>
+                                            <th id="total_net_amount" style="display: none;"></th>
+                                            <?php } ?>
+                                        </tr>
+
+                                    </tfoot>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -207,6 +215,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 <input type="hidden" id="foot_total_gold_fine1">
 <input type="hidden" id="foot_total_silver_fine1">
@@ -244,7 +253,7 @@
                 <div class="col-md-6">
                     <label>Reminder Date<span class="required-sign">&nbsp;*</span></label>
                     <input type="text" name="reminder_date" id="datepicker2" class="form-control"
-                        value="<?php echo date('d-m-Y', strtotime("+1 day")); ?>">
+                        value="<?php echo date('d-m-Y', strtotime('+1 day')); ?>">
                 </div>
                 <div class="col-md-6">
                     <label>Debit/Credit<span class="required-sign">&nbsp;*</span></label>
@@ -285,19 +294,24 @@
 </div>
 <script>
     var table = '';
-    $(document).ready(function () {
+    $(document).ready(function() {
         var selected_rows = [];
         $('#ajax-loader').show();
         $('.select2').select2();
-        $('#debit_credit').select2({ width: '100%' });
+        $('#debit_credit').select2({
+            width: '100%'
+        });
         initAjaxSelect2($("#account_id"), "<?= base_url('app/account_name_with_number_select2_source') ?>");
         <?php if (!empty($account_id)) { ?>
-                    setSelect2Value($("#account_id"), "<?= base_url('app/set_account_name_with_number_val_by_id/' . $account_id) ?>");
+        setSelect2Value($("#account_id"),
+            "<?= base_url('app/set_account_name_with_number_val_by_id/' . $account_id) ?>");
         <?php } ?>
 
-        $(document).on('change', '#account_group_id', function () {
+        $(document).on('change', '#account_group_id', function() {
             var account_group_id = $('#account_group_id').val();
-            initAjaxSelect2($("#account_id"), "<?= base_url('app/account_name_with_number_select2_source') ?>/" + account_group_id);
+            initAjaxSelect2($("#account_id"),
+                "<?= base_url('app/account_name_with_number_select2_source') ?>/" + account_group_id
+                );
         });
 
         $('.account_address').tooltip('fixTitle');
@@ -310,7 +324,9 @@
                 text: 'Outstanding',
                 orientation: 'landscape',
                 //                footer: true,
-                title: function () { return ('Outstanding_<?php echo date('Y_m_d_H_i_s'); ?>') },
+                title: function() {
+                    return ('Outstanding_<?php echo date('Y_m_d_H_i_s'); ?>')
+                },
                 exportOptions: {
                     //                    stripNewlines: false,
                     //                    format : {
@@ -320,9 +336,9 @@
                     //                        }
                     //                    },
                     <?php if (isset($display_net_amount_in_outstanding) && $display_net_amount_in_outstanding == '1') { ?>
-                                                                    columns: [2, 4, 5, 6, 7, 8, 9, 10],
+                    columns: [2, 4, 5, 6, 7, 8, 9, 10],
                     <?php } else { ?>
-                                                                    columns: [2, 4, 5, 6, 7, 8, 9],
+                    columns: [2, 4, 5, 6, 7, 8, 9],
                     <?php } ?>
                 },
             }],
@@ -335,21 +351,21 @@
             "order": [],
             "searching": false,
             "ajax": {
-                "beforeSend": function () {
+                "beforeSend": function() {
                     $('#ajax-loader').show();
                 },
-                "url": "<?php echo site_url('reports/outstanding_datatable') ?>",
+                "url": "<?php echo site_url('reports/outstanding_datatable'); ?>",
                 "type": "POST",
-                "data": function (d) {
+                "data": function(d) {
                     d.upto_balance_date = $('#datepicker1').val();
                     d.credit_limit = $('#credit_limit').val();
                     d.account_group_id = $('#account_group_id').val();
                     d.account_id = $('#account_id').val();
                 },
-                "complete": function () {
+                "complete": function() {
                     $('#ajax-loader').hide();
                 },
-                "dataSrc": function (jsondata) {
+                "dataSrc": function(jsondata) {
                     if (jsondata.foot_total_gold_fine) {
                         $('#foot_total_gold_fine1').val(jsondata.foot_total_gold_fine);
                     } else {
@@ -365,8 +381,8 @@
                     } else {
                         $('#foot_total_amount1').val('');
                     }
-                    if (jsondata.supplier_total_gold_fine) {
-                        $('#supplier_total_gold_fine1').val(jsondata.supplier_total_gold_fine);
+                    if (jsondata.foot_supplier_total_gold_fine) {
+                        $('#supplier_total_gold_fine1').val(jsondata.foot_supplier_total_gold_fine);
                     } else {
                         $('#supplier_total_gold_fine1').val('');
                     }
@@ -386,8 +402,8 @@
                         $('#supplier_total_net_amount1').val('');
                     }
                     // Similarly for customers
-                    if (jsondata.customer_total_gold_fine) {
-                        $('#customer_total_gold_fine1').val(jsondata.customer_total_gold_fine);
+                    if (jsondata.foot_customer_total_gold_fine) {
+                        $('#customer_total_gold_fine1').val(jsondata.foot_customer_total_gold_fine);
                     } else {
                         $('#customer_total_gold_fine1').val('');
                     }
@@ -407,20 +423,22 @@
                         $('#customer_total_net_amount1').val('');
                     }
                     <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
-                                if (jsondata.total_net_amount) {
-                                    $('#total_net_amount1').val(jsondata.total_net_amount);
-                                } else {
-                                    $('#total_net_amount1').val('');
-                                }
+                    if (jsondata.total_net_amount) {
+                        $('#total_net_amount1').val(jsondata.total_net_amount);
+                    } else {
+                        $('#total_net_amount1').val('');
+                    }
                     <?php } ?>
 
                     if (jsondata.foot_total_credit_gold_fine) {
-                        $('#foot_total_credit_gold_fine1').val(jsondata.foot_total_credit_gold_fine);
+                        $('#foot_total_credit_gold_fine1').val(jsondata
+                        .foot_total_credit_gold_fine);
                     } else {
                         $('#foot_total_credit_gold_fine1').val('');
                     }
                     if (jsondata.foot_total_credit_silver_fine) {
-                        $('#foot_total_credit_silver_fine1').val(jsondata.foot_total_credit_silver_fine);
+                        $('#foot_total_credit_silver_fine1').val(jsondata
+                            .foot_total_credit_silver_fine);
                     } else {
                         $('#foot_total_credit_silver_fine1').val('');
                     }
@@ -430,11 +448,11 @@
                         $('#foot_total_credit_amount1').val('');
                     }
                     <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
-                                if (jsondata.total_credit_net_amount) {
-                                    $('#total_credit_net_amount1').val(jsondata.total_credit_net_amount);
-                                } else {
-                                    $('#total_credit_net_amount1').val('');
-                                }
+                    if (jsondata.total_credit_net_amount) {
+                        $('#total_credit_net_amount1').val(jsondata.total_credit_net_amount);
+                    } else {
+                        $('#total_credit_net_amount1').val('');
+                    }
                     <?php } ?>
 
                     if (jsondata.foot_total_debit_gold_fine) {
@@ -443,7 +461,8 @@
                         $('#foot_total_debit_gold_fine1').val('');
                     }
                     if (jsondata.foot_total_debit_silver_fine) {
-                        $('#foot_total_debit_silver_fine1').val(jsondata.foot_total_debit_silver_fine);
+                        $('#foot_total_debit_silver_fine1').val(jsondata
+                            .foot_total_debit_silver_fine);
                     } else {
                         $('#foot_total_debit_silver_fine1').val('');
                     }
@@ -453,51 +472,76 @@
                         $('#foot_total_debit_amount1').val('');
                     }
                     <?php if (DISPLAY_NET_AMOUNT == 1) { ?>
-                                if (jsondata.total_debit_net_amount) {
-                                    $('#total_debit_net_amount1').val(jsondata.total_debit_net_amount);
-                                } else {
-                                    $('#total_debit_net_amount1').val('');
-                                }
+                    if (jsondata.total_debit_net_amount) {
+                        $('#total_debit_net_amount1').val(jsondata.total_debit_net_amount);
+                    } else {
+                        $('#total_debit_net_amount1').val('');
+                    }
                     <?php } ?>
                     return jsondata.data;
                 },
             },
-            "columnDefs": [
-                { "className": "dt-right", "targets": [] },
-                { "className": "text-right", "targets": [7, 8, 9, 10] },
-                { "orderable": false, "targets": [0, 1] },
-                { "className": "text-nowrap", "targets": [6] },
+            "columnDefs": [{
+                    "className": "dt-right",
+                    "targets": []
+                },
+                {
+                    "className": "text-right",
+                    "targets": [7, 8, 9, 10]
+                },
+                {
+                    "orderable": false,
+                    "targets": [0, 1]
+                },
+                {
+                    "className": "text-nowrap",
+                    "targets": [6]
+                },
             ],
-            "drawCallback": function (settings) {
+            "drawCallback": function(settings) {
                 $('input[type="checkbox"].send_sms').css("height", "20px");
                 $('input[type="checkbox"].send_sms').css("width", "20px");
                 $('input[type="checkbox"].send_whatsapp_sms').css("height", "20px");
                 $('input[type="checkbox"].send_whatsapp_sms').css("width", "20px");
             },
-            "footerCallback": function (row, data, start, end, display) {
+            "footerCallback": function(row, data, start, end, display) {
                 $('tfoot tr th#foot_total_gold_fine').html($('#foot_total_gold_fine1').val());
                 $('tfoot tr th#foot_total_silver_fine').html($('#foot_total_silver_fine1').val());
                 $('tfoot tr th#foot_total_amount').html($('#foot_total_amount1').val());
                 $('tfoot tr th#total_net_amount').html($('#total_net_amount1').val());
-                $('tfoot tr th#foot_total_credit_gold_fine').html($('#foot_total_credit_gold_fine1').val());
-                $('tfoot tr th#foot_total_credit_silver_fine').html($('#foot_total_credit_silver_fine1').val());
-                $('tfoot tr th#foot_total_credit_amount').html($('#foot_total_credit_amount1').val());
+                $('tfoot tr th#foot_total_credit_gold_fine').html($('#foot_total_credit_gold_fine1')
+                    .val());
+                $('tfoot tr th#foot_total_credit_silver_fine').html($(
+                    '#foot_total_credit_silver_fine1').val());
+                $('tfoot tr th#foot_total_credit_amount').html($('#foot_total_credit_amount1')
+                .val());
                 $('tfoot tr th#total_credit_net_amount').html($('#total_credit_net_amount1').val());
-                $('tfoot tr th#foot_total_debit_gold_fine').html($('#foot_total_debit_gold_fine1').val());
-                $('tfoot tr th#foot_total_debit_silver_fine').html($('#foot_total_debit_silver_fine1').val());
+                $('tfoot tr th#foot_total_debit_gold_fine').html($('#foot_total_debit_gold_fine1')
+                    .val());
+                $('tfoot tr th#foot_total_debit_silver_fine').html($(
+                    '#foot_total_debit_silver_fine1').val());
                 $('tfoot tr th#foot_total_debit_amount').html($('#foot_total_debit_amount1').val());
                 $('tfoot tr th#total_debit_net_amount').html($('#total_debit_net_amount1').val());
-                $('tfoot tr th#supplier_total_gold_fine').html($('input[id="supplier_total_gold_fine1"]')[0].value);
-                $('tfoot tr th#supplier_total_silver_fine').html($('input[id="supplier_total_silver_fine1"]')[0].value);
-                $('tfoot tr th#supplier_total_amount').html($('input[id="supplier_total_amount1"]')[0].value);
-                $('tfoot tr th#supplier_total_net_amount').html($('input[id="supplier_total_net_amount1"]')[0].value);
-                $('tfoot tr th#customer_total_gold_fine').html($('input[id="customer_total_gold_fine1"]')[0].value);
-                $('tfoot tr th#customer_total_silver_fine').html($('input[id="customer_total_silver_fine1"]')[0].value);
-                $('tfoot tr th#customer_total_amount').html($('input[id="customer_total_amount1"]')[0].value);
-                $('tfoot tr th#customer_total_net_amount').html($('input[id="customer_total_net_amount1"]')[0].value);
+                $('tfoot tr th#supplier_total_gold_fine').html($(
+                    'input[id="supplier_total_gold_fine1"]')[0].value);
+                $('tfoot tr th#supplier_total_silver_fine').html($(
+                    'input[id="supplier_total_silver_fine1"]')[0].value);
+                $('tfoot tr th#supplier_total_amount').html($('input[id="supplier_total_amount1"]')[
+                    0].value);
+                $('tfoot tr th#supplier_total_net_amount').html($(
+                    'input[id="supplier_total_net_amount1"]')[0].value);
+                $('tfoot tr th#customer_total_gold_fine').html($(
+                    'input[id="customer_total_gold_fine1"]')[0].value);
+                $('tfoot tr th#customer_total_silver_fine').html($(
+                    'input[id="customer_total_silver_fine1"]')[0].value);
+                $('tfoot tr th#customer_total_amount').html($('input[id="customer_total_amount1"]')[
+                    0].value);
+                $('tfoot tr th#customer_total_net_amount').html($(
+                    'input[id="customer_total_net_amount1"]')[0].value);
             },
-            "fnRowCallback": function (nRow, aData) {
-                var api = this.api(), data;
+            "fnRowCallback": function(nRow, aData) {
+                var api = this.api(),
+                    data;
                 var $nRow = $(nRow);
                 var account_text = '';
                 if (aData[2] != '') {
@@ -523,12 +567,14 @@
         table.columns([5]).visible(false);
         <?php if (isset($display_net_amount_in_outstanding) && $display_net_amount_in_outstanding == '1') {
         } else { ?>
-                    table.columns([10]).visible(false);
+        table.columns([10]).visible(false);
         <?php } ?>
         $('.dt-button.buttons-excel').css('border', 'none');
-        $('.dt-button.buttons-excel').html('<img src="<?php echo base_url(); ?>assets/dist/img/excel_icon.png" style="width:25px;" alt="Excel" title="Excel" >');
+        $('.dt-button.buttons-excel').html(
+            '<img src="<?php echo base_url(); ?>assets/dist/img/excel_icon.png" style="width:25px;" alt="Excel" title="Excel" >'
+            );
 
-        $('#outstanding_table tbody').on('click', 'tr', function () {
+        $('#outstanding_table tbody').on('click', 'tr', function() {
             if ($(this).hasClass('selected') == false) {
                 console.log($(this).attr('data-row_particular'));
                 selected_rows.push($(this).attr('data-row_particular'));
@@ -538,23 +584,23 @@
             $(this).toggleClass('selected');
         });
 
-        $(document).on('click', '#search', function () {
+        $(document).on('click', '#search', function() {
             $('#ajax-loader').show();
             table.draw();
         });
 
-        $('#checkbox_all_sms').click(function () {
+        $('#checkbox_all_sms').click(function() {
             $('.send_sms').not(this).prop('checked', this.checked);
         });
-        $('#checkbox_all_whatsapp_sms').click(function () {
+        $('#checkbox_all_whatsapp_sms').click(function() {
             $('.send_whatsapp_sms').not(this).prop('checked', this.checked);
         });
 
         account = [];
-        $(document).on("click", "#send", function () {
+        $(document).on("click", "#send", function() {
             var pre_transaction = '';
             var pre_our_bank = '';
-            $('input[name="send_sms[]"]').map(function () {
+            $('input[name="send_sms[]"]').map(function() {
                 if ($(this).prop('checked')) {
                     account.push({
                         id: $(this).data('acc_id'),
@@ -571,9 +617,12 @@
                 $.ajax({
                     url: '<?php echo base_url('reports/send_sms'); ?>',
                     type: 'POST',
-                    data: { accounts: accounts, message_type: 'sms' },
+                    data: {
+                        accounts: accounts,
+                        message_type: 'sms'
+                    },
                     async: false,
-                    success: function (response) {
+                    success: function(response) {
                         var json = $.parseJSON(response);
                         account = [];
                         $("#ajax-loader").hide();
@@ -582,13 +631,12 @@
                         }
                     }
                 });
-            }
-            else {
+            } else {
                 show_notify('Please Select At Least One Account To Send SMS!', false);
             }
         });
 
-        $(document).on("click", ".reminder", function () {
+        $(document).on("click", ".reminder", function() {
             $('#myModal').modal('show');
             $('#r_account_id').val($(this).data('account_id'));
             var n_amt = $(this).data('amount');
@@ -599,13 +647,14 @@
             }
         });
 
-        $(document).on("click", "#save_reminder", function () {
+        $(document).on("click", "#save_reminder", function() {
             if ($.trim($("#datepicker2").val()) == '') {
                 show_notify('Please enter Reminder Date.', false);
                 $("#datepicker2").focus();
                 return false;
             }
-            if ($.trim($("#rem_amount").val()) == '' && $.trim($("#rem_gold").val()) == '' && $.trim($("#rem_silver").val()) == '') {
+            if ($.trim($("#rem_amount").val()) == '' && $.trim($("#rem_gold").val()) == '' && $.trim($(
+                    "#rem_silver").val()) == '') {
                 show_notify('Please enter any one Gold/Silver/Amount !', false);
                 $("#rem_amount").focus();
                 return false;
@@ -623,7 +672,7 @@
                     remarks: $("#remarks").val()
                 },
                 async: false,
-                success: function (response) {
+                success: function(response) {
                     var json = $.parseJSON(response);
                     if (json['success'] == 'Added') {
                         $("#r_account_id").val('');
@@ -654,9 +703,6 @@
         }
         return array;
     }
-
 </script>
 
-<script>
-
-</script>
+<script></script>
