@@ -70,7 +70,7 @@
                                         <div class="col-md-2">
                                             <label><input type="checkbox" name="in_stock" id="in_stock" checked> In stock</label><br />
                                             <label><input type="checkbox" name="item_wise" id="item_wise"> Item Wise</label><br />
-                                            <label><input type="checkbox" name="include_wstg" id="include_wstg"> Include Wastage</label>
+                                            <label><input type="checkbox" name="include_wstg" id="include_wstg" checked> Include Wastage</label>
                                         </div>
                                         <div class="col-md-2">
                                             <label><a href="<?= base_url('master/setting') ?>" target="_blanck">Rate From Setting : </a></label><br />
@@ -745,6 +745,8 @@
                     d.in_stock = $('input[name="in_stock"]').prop('checked');
                     d.item_wise = $('input[name="item_wise"]').prop('checked');
                     d.include_wstg = $('input[name="include_wstg"]').prop('checked');
+
+                    // d.include_wstg = $('input[name="include_wstg"]').prop('checked', true).prop('checked');
                     d.rfid_filter = $('#rfid_filter').val();
                 },
                 "complete": function() {
