@@ -194,16 +194,11 @@ if (!function_exists('get_stock_status_datatable')) {
                     $stock_adjust_btn .= '<span class="pull-right">&nbsp;' . $rfid_count . '&nbsp;</span>';
                 }
             }
-<<<<<<< HEAD
-
-            $stock_adjust_btn .= ' &nbsp; <a href="javascript:void(0);" id="'.$stock->item_stock_id.'" data-item_name="' . $stock->item_name . '" data-tunch="' . (($tunch > 100) ? number_format((float) 100, 2, '.', '') : $tunch) . '" class="btn btn-primary btn-xs item_stock_details pull-left" data-category_name="Stock" data-item_name="Stock" style="margin: 0px 3px;" > Stock </a>';
-
-=======
 			
-          /*if($stock->stock_method==2)
+          if($stock->stock_method==2)
 		  {
             $stock_adjust_btn .= ' &nbsp; <a href="javascript:void(0);" data-stock-method="'.$stock->stock_method.'" id="'.$stock->item_stock_id.'" data-item_name="' . $stock->item_name . '" data-tunch="' . (($tunch > 100) ? number_format((float) 100, 2, '.', '') : $tunch) . '" class="btn btn-primary btn-xs item_stock_details pull-left" data-category_name="Stock" data-item_name="Stock" style="margin: 0px 3px;" > Stock </a>';
-          }*/
+          }
             if ($post_data['include_wstg'] == 'true') {
                 $opening_wstg = $CI->Crud->get_row_by_where("opening_stock",array('item_id'=>$stock->item_id));
                 if($stock->default_wastage==0){
@@ -211,7 +206,6 @@ if (!function_exists('get_stock_status_datatable')) {
                     $tunch = number_format($tunch,2);
                 }                
             }
->>>>>>> 29ba4fb7cab44701a300398a14040cfd371a5727
 
             $row = array();
             $rowContent = '<input type="checkbox" class="stock-checkbox" value="'.$stock->item_stock_id.'" style="margin-right:5px;">';
