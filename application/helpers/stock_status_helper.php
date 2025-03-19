@@ -195,16 +195,16 @@ if (!function_exists('get_stock_status_datatable')) {
                 }
             }
 			
-            if (isset($post_data['include_wstg']) && $post_data['include_wstg'] == 'true') {
+            if ($post_data['item_wise'] == 'true' && $post_data['include_wstg'] == 'true') {
+                $opening_wstg = $CI->Crud->get_row_by_where("opening_stock",array('item_id'=>$stock->item_id,'grwt'=>$stock->grwt));
+                
+                @$tunch = $tunch + $opening_wstg->wstg;
+                $tunch = number_format($tunch,2);
+            } else if ($post_data['item_wise']='true' && $post_data['include_wstg'] == 'true') {
                 $opening_wstg = $CI->Crud->get_row_by_where("opening_stock",array('item_id'=>$stock->item_id));
                 
-                if($stock->default_wastage==0){
-                    @$tunch = $tunch + $opening_wstg->wstg;
-                    $tunch = number_format($tunch,2);
-                }  else {
-                    @$tunch = $tunch + $stock->default_wastage;
-                    $tunch = number_format($tunch,2);
-                } 
+                @$tunch = (float)$tunch + $opening_wstg->wstg;
+                $tunch = number_format($tunch,2);
                 
             }
 
