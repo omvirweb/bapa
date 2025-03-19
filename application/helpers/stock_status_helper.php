@@ -58,7 +58,7 @@ if (!function_exists('get_stock_status_datatable')) {
         $use_barcode = $CI->Crud->get_column_value_by_id('settings', 'settings_value', array('settings_key' => 'use_barcode'));
         $config['table'] = 'item_stock s';
         if (isset($post_data['include_wstg']) && $post_data['include_wstg'] == 'true') {
-            $config['select'] = '`s`.`department_id`, `s`.`category_id`, `s`.`item_id`, `s`.`item_stock_id`, `s`.`tunch`, `s`.`rfid_created_grwt`,`cat`.`category_name`, `im`.`item_name`, `im`.`stock_method`, `cat`.`category_group_id`,SUM(s.grwt) AS grwt,SUM(s.ntwt) AS ntwt,sum(s.less) AS less, SUM((s.ntwt * (s.tunch + im.default_wastage))/100) AS fine';
+            $config['select'] = '`s`.`department_id`, `s`.`category_id`, `s`.`item_id`, `s`.`item_stock_id`, `s`.`tunch`, `s`.`rfid_created_grwt`,`cat`.`category_name`, `im`.`item_name`, `im`.`stock_method`, `cat`.`category_group_id`,SUM(s.grwt) AS grwt,SUM(s.ntwt) AS ntwt,sum(s.less) AS less, SUM((s.ntwt * (s.tunch + im.default_wastage))/100) AS fine, CAST(ROUND(im.default_wastage) AS UNSIGNED) AS default_wastage';
         } else {
             $config['select'] = '`s`.`department_id`, `s`.`category_id`, `s`.`item_id`, `s`.`item_stock_id`, `s`.`tunch`, `s`.`rfid_created_grwt`,`cat`.`category_name`, `im`.`item_name`, `im`.`stock_method`, `cat`.`category_group_id`,SUM(s.grwt) AS grwt,SUM(s.ntwt) AS ntwt,sum(s.less) AS less, SUM((s.ntwt * s.tunch)/100) AS fine';
         }
@@ -196,15 +196,15 @@ if (!function_exists('get_stock_status_datatable')) {
             }
 			
             if (isset($post_data['include_wstg']) && $post_data['include_wstg'] == 'true') {
-
                 $opening_wstg = $CI->Crud->get_row_by_where("opening_stock",array('item_id'=>$stock->item_id));
                 
-                if(!empty($stock->default_wastage)){
-                    if($stock->default_wastage==0){
-                        @$tunch = $tunch + $opening_wstg->wstg;
-                        $tunch = number_format($tunch,2);
-                    }                
-                }
+                if($stock->default_wastage==0){
+                    @$tunch = $tunch + $opening_wstg->wstg;
+                    $tunch = number_format($tunch,2);
+                }  else {
+                    @$tunch = $tunch + $stock->default_wastage;
+                    $tunch = number_format($tunch,2);
+                } 
                 
             }
 
