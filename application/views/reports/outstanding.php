@@ -44,11 +44,10 @@
                                             <option value="0">All</option>
                                             <?php if (!empty($account_groups)) {
                                                 foreach ($account_groups as $grp) { ?>
-                                                                                                                    <option value="<?php echo $grp->account_group_id ?>"
-                                                                                                                        <?= !empty($account_group_id) && $account_group_id == $grp->account_group_id ? 'selected' : '' ?>>
-                                                                                                                        <?php echo $grp->account_group_name; ?>
-                                                                                                                    </option>
-                                                                                <?php }
+                                                    <option value="<?php echo $grp->account_group_id; ?>" <?php if(in_array($grp->account_group_id,$selected_account_group_ids)){?> selected<?php }?>>
+                                                        <?php echo $grp->account_group_name; ?>
+                                                    </option>
+                                                    <?php }
                                             } ?>
                                         </select>
                                      
@@ -365,8 +364,8 @@
                     } else {
                         $('#foot_total_amount1').val('');
                     }
-                    if (jsondata.supplier_total_gold_fine) {
-                        $('#supplier_total_gold_fine1').val(jsondata.supplier_total_gold_fine);
+                    if (jsondata.foot_supplier_total_gold_fine) {
+                        $('#supplier_total_gold_fine1').val(jsondata.foot_supplier_total_gold_fine);
                     } else {
                         $('#supplier_total_gold_fine1').val('');
                     }
@@ -386,8 +385,8 @@
                         $('#supplier_total_net_amount1').val('');
                     }
                     // Similarly for customers
-                    if (jsondata.customer_total_gold_fine) {
-                        $('#customer_total_gold_fine1').val(jsondata.customer_total_gold_fine);
+                    if (jsondata.foot_customer_total_gold_fine) {
+                        $('#customer_total_gold_fine1').val(jsondata.foot_customer_total_gold_fine);
                     } else {
                         $('#customer_total_gold_fine1').val('');
                     }
@@ -415,7 +414,8 @@
                     <?php } ?>
 
                     if (jsondata.foot_total_credit_gold_fine) {
-                        $('#foot_total_credit_gold_fine1').val(jsondata.foot_total_credit_gold_fine);
+                        $('#foot_total_credit_gold_fine1').val(jsondata
+                        .foot_total_credit_gold_fine);
                     } else {
                         $('#foot_total_credit_gold_fine1').val('');
                     }

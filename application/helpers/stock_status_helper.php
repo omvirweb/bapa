@@ -194,22 +194,15 @@ if (!function_exists('get_stock_status_datatable')) {
                     $stock_adjust_btn .= '<span class="pull-right">&nbsp;' . $rfid_count . '&nbsp;</span>';
                 }
             }
-			
-          if($stock->stock_method==2)
-		  {
-            $stock_adjust_btn .= ' &nbsp; <a href="javascript:void(0);" data-stock-method="'.$stock->stock_method.'" id="'.$stock->item_stock_id.'" data-item_name="' . $stock->item_name . '" data-tunch="' . (($tunch > 100) ? number_format((float) 100, 2, '.', '') : $tunch) . '" class="btn btn-primary btn-xs item_stock_details pull-left" data-category_name="Stock" data-item_name="Stock" style="margin: 0px 3px;" > Stock </a>';
-          }
-            if (isset($post_data['include_wstg']) && $post_data['include_wstg'] == 'true') {
 
-                $opening_wstg = $CI->Crud->get_row_by_where("opening_stock",array('item_id'=>$stock->item_id));
+            if ($post_data['item_wise'] == 'true' && $post_data['include_wstg'] == 'true') {
+                $opening_wstg = $CI->Crud->get_row_by_where("opening_stock",array('item_id'=>$stock->item_id,'grwt'=>$stock->grwt));
                 
-                if(!empty($stock->default_wastage)){
-                    if($stock->default_wastage==0){
-                        @$tunch = $tunch + $opening_wstg->wstg;
-                        $tunch = number_format($tunch,2);
-                    }                
-                }
-                
+                @$tunch = $tunch + $opening_wstg->wstg;
+                $tunch = number_format($tunch,2);
+            } else if ($post_data['item_wise']='true' && $post_data['include_wstg'] == 'true') {
+                @$tunch = (float)$tunch + $opening_wstg->wstg;
+                $tunch = number_format($tunch,2);
             }
 
             $row = array();

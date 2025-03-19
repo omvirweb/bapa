@@ -87,15 +87,17 @@
                                             </select>
                                         </div>                                        
                                         <!--<a href="javascript:void(0);" id="" class="btn btn-primary btn-md item_stock_details_all pull-left" data-category_name="Stock" data-item_name="Stock" style="margin: 25px 0px 0px 0px;" > Stock </a>-->
-                                        <div class="topcheckboxselection">
-                                            
-                                            <label for="toggleAllTopSelection">
-                                                <input type="checkbox" class="rfid-checkbox" id="toggleAllTopSelection" value="1">
-                                                Select All
-                                            </label>
-                                            <button type="button" onclick="generateTags()" class="btn btn-primary">Print Selected Tags</button>
-                                            <a href="<?= base_url('reports/print_all_rfid_tags') ?>" class="btn btn-primary" target="_blank">Print ALL Tags</a>
-                                        </div>
+                                        <div class="col-md-6">
+                                             <div class="topcheckboxselection">
+                                                 
+                                                 <label for="toggleAllTopSelection">
+                                                     <input type="checkbox" class="rfid-checkbox" id="toggleAllTopSelection" value="1">
+                                                     Select All
+                                                 </label>
+                                                 <button type="button" onclick="generateTags()" class="btn btn-primary">Print Selected Tags</button>
+                                                 <a href="<?= base_url('reports/print_all_rfid_tags') ?>" class="btn btn-primary" target="_blank">Print ALL Tags</a>
+                                             </div>
+                                            </div>
                                         <table class="table row-border table-bordered table-striped" style="width:100%" id="stock_status_table">
                                             <thead>
                                                 <tr>
