@@ -201,7 +201,11 @@ if (!function_exists('get_stock_status_datatable')) {
                 @$tunch = $tunch + $opening_wstg->wstg;
                 $tunch = number_format($tunch,2);
             } else if ($post_data['item_wise']='true' && $post_data['include_wstg'] == 'true') {
-                @$tunch = (float)$tunch + $opening_wstg->wstg;
+                // $opening_wstg = $CI->Crud->get_row_by_where("opening_stock",array('item_id'=>$stock->item_id,'grwt'=>$stock->grwt));
+                // @$tunch = (float)$tunch + $opening_wstg->wstg;
+                // $tunch = number_format($tunch,2);
+                $tunch = $CI->Crud->get_tunch_value($stock->item_id);
+               
                 $tunch = number_format($tunch,2);
             }
 

@@ -5883,4 +5883,22 @@ class Crud extends CI_Model
         return $query->result();
     }
 
+    function get_tunch_value($item_id){
+      
+        $this->db->select('(SUM(net_wt * (touch_id + wstg)) / 100) AS TotalGoldWstg, SUM(net_wt) AS TotalNetWt');
+        $this->db->from('sell_items');
+        $this->db->where('item_id', $item_id);  
+        $query = $this->db->get();
+        if ($query->num_rows() > 0) {
+            $result = $query->row();
+            if ($result->TotalNetWt != 0) {
+                $final_value = ($result->TotalGoldWstg / $result->TotalNetWt) * 100;
+            } else {
+                $final_value = 0;
+            }
+            return $final_value; 
+        }
+        return null; 
+    }
+    
 }
