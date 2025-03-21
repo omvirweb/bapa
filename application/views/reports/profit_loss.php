@@ -52,7 +52,8 @@
                                         </div>
                                         <div class="col-md-2">
                                             <label><input type="checkbox" name="in_stock" id="in_stock" checked> In stock</label><br />
-                                            <label><input type="checkbox" name="item_wise" id="item_wise"> Item Wise</label><br />
+                                            <!-- <label><input type="checkbox" name="item_wise" id="item_wise"> Item Wise</label><br /> -->
+                                            <input type="hidden" name="item_wise" id="item_wise" value="false">
                                             <label><input type="checkbox" name="include_wstg" id="include_wstg"> Include Wastage</label>
                                         </div>
                                         <div class="col-md-2">
