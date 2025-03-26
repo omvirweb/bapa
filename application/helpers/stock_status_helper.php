@@ -194,6 +194,8 @@ if (!function_exists('get_stock_status_datatable')) {
                     $stock_adjust_btn .= '<span class="pull-right">&nbsp;' . $rfid_count . '&nbsp;</span>';
                 }
             }
+
+            $tunch_without_wastage_for_stock_ledger = $tunch;
 			
             if ($post_data['item_wise'] == 'true' && $post_data['include_wstg'] == 'true') {
                 $opening_wstg = $CI->Crud->get_row_by_where("opening_stock",array('item_id'=>$stock->item_id,'grwt'=>$stock->grwt));
@@ -221,8 +223,10 @@ if (!function_exists('get_stock_status_datatable')) {
                 'to_date' => $post_data['to_date'] ?? '',
                 'department_id' => $post_data['department_id'] ?? '',
                 'category_id' => $post_data['category_id'] ?? '',
-                'item_id' => $post_data['item_id'] ?? '',
+                // 'item_id' => $post_data['item_id'] ?? '',
+                'item_id' => $stock->item_id ?? $post_data['item_id'],
                 'tunch' => $tunch ?? '',
+                'tunch_without_wastage' => $tunch_without_wastage_for_stock_ledger ?? '',
                 'include_wstg' => isset($post_data['include_wstg']) && $post_data['include_wstg'] === 'true' ? 1 : 0,
                 'rfid_filter' => $post_data['rfid_filter'] ?? '',
             ]);

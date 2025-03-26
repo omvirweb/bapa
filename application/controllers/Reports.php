@@ -505,6 +505,7 @@ class Reports extends CI_Controller
     {
         if ($this->applib->have_access_role(STOCK_STATUS_MODULE_ID, "view") && $this->applib->have_access_role(REPORT_MODULE_ID, 'view')) {
             $data = array();
+            // $item_stock_data = $this->crud->get_data_row_by_id('item_stock', 'item_stock_id', $item_stock_id);
             $item_stock_data = $this->crud->get_data_row_by_id('item_stock', 'item_stock_id', $item_stock_id);
             $data['stock_method'] = $this->crud->get_column_value_by_id('item_master', 'stock_method', array('item_id' => $item_stock_data->item_id));
             $item_stock_data->item_stock_id = $item_stock_id;

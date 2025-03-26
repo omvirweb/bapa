@@ -8,8 +8,11 @@ $department_id = isset($_GET['department_id']) ? $_GET['department_id'] : '';
 $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : '0';
 $item_id = isset($_GET['item_id']) ? $_GET['item_id'] : '0';
 $tunch = isset($_GET['tunch']) ? $_GET['tunch'] : '0';
+$tunch_without_wastage = isset($_GET['tunch_without_wastage']) ? $_GET['tunch_without_wastage'] : '0';
 $rfid_filter = isset($_GET['rfid_filter']) ? $_GET['rfid_filter'] : '0';
-$include_wastage = isset($_GET['include_wstg']) && $_GET['include_wstg'] == '1' ? 'checked' : '';
+// $include_wastage = isset($_GET['include_wstg']) && $_GET['include_wstg'] == '1' ? 'checked' : '';
+$include_wastage = $_GET['include_wstg'];
+$tunch = $tunch_without_wastage;
 
 
 ?>
@@ -151,7 +154,7 @@ $include_wastage = isset($_GET['include_wstg']) && $_GET['include_wstg'] == '1' 
                                         <div class="col-md-3">
                                             <label>&nbsp;</label><br />
                                             <label><input type="checkbox" name="include_wastage" id="include_wastage"
-                                                    <?= $include_wastage; ?>>
+                                                    <?php if($include_wastage==1){?> checked <?php }?> checked>
                                                 Include Wastage *(Only for Balance Fine)</label>
                                         </div>
 
