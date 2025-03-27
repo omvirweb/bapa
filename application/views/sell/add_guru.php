@@ -2166,15 +2166,15 @@ if (isset($order_lot_item)) { ?>
                 var less = parseFloat($('#purchase_less').val()) || 0;
                 // console.log("less", less);
             }else{
-                var less = parseFloat($('#less').val()) || 0;
+                var less = parseFloat($('#purchase_less').val()) || 0;
             }
             // console.log(sell_type_id);
 
             less = round(less, 3).toFixed(3);
             if(parseFloat(less) > parseFloat(grwt)){
                 show_notify('Less Can not be > grwt.', false);
-                $("#less").val('');
-                $("#less").focus();
+                $("#purchase_less").val('');
+                $("#purchase_less").focus();
                 $("#grwt").trigger('change');
                 return false;
             }
