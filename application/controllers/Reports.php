@@ -724,6 +724,7 @@ class Reports extends CI_Controller
                     } else {
                         $wstg = 0;
                     }
+                    
                 } else {
                     $balance_grwt = $stock_ledger_data[$key]->balance_grwt = number_format((float) $stock_ledger_data[$pre_key]->balance_grwt, '3', '.', '') + number_format((float) $grwt, '3', '.', '');
                     $balance_net_wt = $stock_ledger_data[$key]->balance_net_wt = number_format((float) $stock_ledger_data[$pre_key]->balance_net_wt, '3', '.', '') + number_format((float) $net_wt, '3', '.', '');
