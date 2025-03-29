@@ -202,12 +202,16 @@ if (!function_exists('get_stock_status_datatable')) {
                 
                 @$tunch = $tunch + $opening_wstg->wstg;
                 $tunch = number_format($tunch,2);
+                @$gold = $gold + $opening_wstg->wstg;
+                $gold = number_format($gold,3);
             } else if ($post_data['item_wise']='true' && $post_data['include_wstg'] == 'true') {
                 $opening_wstg = $CI->Crud->get_row_by_where("opening_stock",array('item_id'=>$stock->item_id));
                 
                 @$tunch = (float)$tunch + $opening_wstg->wstg;
-                $tunch = number_format($tunch,2);
+                $tunch = number_format($tunch,3);
                 
+                @$gold = (float)$gold + $opening_wstg->wstg;
+                $gold = number_format($gold,3);
             }
 
             $row = array();

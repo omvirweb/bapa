@@ -712,17 +712,45 @@ class Reports extends CI_Controller
                     $balance_grwt = $stock_ledger_data[$key]->balance_grwt;
                     $balance_net_wt = $stock_ledger_data[$key]->balance_net_wt;
                     $balance_fine = $stock_ledger_data[$key]->balance_fine;
+                    if ($post_data['include_wastage'] === 'true') {
+                        $opening_wstg = $this->crud->get_row_by_where("opening_stock",array('item_id'=>$post_data['item_id'],'grwt'=>$stock_ledger->grwt));
+                        @$balance_fine = $balance_fine + $opening_wstg->wstg;
+                        $balance_fine = number_format($balance_fine,3);
+                        @$touch_id = $touch_id + $opening_wstg->wstg;
+                        $touch_id = number_format($touch_id,2);
+                        if($wstg==0.00){
+                            $wstg = $opening_wstg->wstg??0;
+                        }                        
+                    } else {
+                        $wstg = 0;
+                    }
                 } else {
                     $balance_grwt = $stock_ledger_data[$key]->balance_grwt = number_format((float) $stock_ledger_data[$pre_key]->balance_grwt, '3', '.', '') + number_format((float) $grwt, '3', '.', '');
                     $balance_net_wt = $stock_ledger_data[$key]->balance_net_wt = number_format((float) $stock_ledger_data[$pre_key]->balance_net_wt, '3', '.', '') + number_format((float) $net_wt, '3', '.', '');
 
-                    if ($post_data['include_wastage'] == 'true') {
+                    /*if ($post_data['include_wastage'] == 'true') {
                         $default_wstg = $this->crud->get_column_value_by_id('item_master', 'default_wastage', array('item_id' => $stock_ledger->item_id));
                         $with_wastage_fine = number_format((float) $net_wt, '3', '.', '') * ((float) $touch_id + (float) $default_wstg) / 100;
                         $balance_fine = $stock_ledger_data[$key]->balance_fine = number_format((float) $stock_ledger_data[$pre_key]->balance_fine, '3', '.', '') + number_format((float) $with_wastage_fine, '3', '.', '');
                     } else {
                         $without_wastage_fine = (float) $net_wt * (float) $touch_id / 100;
                         $balance_fine = $stock_ledger_data[$key]->balance_fine = number_format((float) $stock_ledger_data[$pre_key]->balance_fine, '3', '.', '') + number_format((float) $without_wastage_fine, '3', '.', '');
+                    }*/
+                    if ($post_data['include_wastage'] == 'true') {
+                        $opening_wstg = $this->crud->get_row_by_where("opening_stock",array('item_id'=>$post_data['item_id'],'grwt'=>$stock_ledger->grwt));
+                        @$balance_fine = $balance_fine + $opening_wstg->wstg;
+                        $balance_fine = number_format($balance_fine,3);
+                        @$touch_id = $touch_id + $opening_wstg->wstg;
+                        $touch_id = number_format($touch_id,2);
+                        if($wstg==0.00){
+                            $wstg = $opening_wstg->wstg;
+                        }                        
+                    } else {
+                        $opening_wstg = $this->crud->get_row_by_where("opening_stock",array('item_id'=>$post_data['item_id']));
+                
+                        @$touch_id = (float)$touch_id + $opening_wstg->wstg;
+                        $touch_id = number_format($touch_id,3);
+                        $wstg = 0;
                     }
                     $pre_key = $key;
                 }
@@ -730,6 +758,7 @@ class Reports extends CI_Controller
                 $balance_grwt = 0;
                 $balance_net_wt = 0;
                 $balance_fine = 0;
+                $wstg = 0;
             }
 
             $row = array();
