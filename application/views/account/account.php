@@ -165,7 +165,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="account_city" class="control-label">City</label>
-                                            <select name="account_city" id="account_city" class="form-control select2" ></select>
+                                            <input type="text" name="account_city" class="form-control">
                                         </div>
                                     </div>
                                     <div class="clearfix"></div>
@@ -437,7 +437,7 @@
         $('.from_account_id_div').hide();
         $(document).on('change','#account_group_id', function(){
             var account_group_id = $('#account_group_id').val();
-            if(account_group_id == <?= CUSTOMER_GROUP; ?> || account_group_id == <?= SUNDRY_CREDITORS_ACCOUNT_GROUP; ?> || account_group_id == <?= SUNDRY_DEBTORS_ACCOUNT_GROUP; ?>){
+            if(account_group_id == <?= CUSTOMER_GROUP; ?> || account_group_id == <?= SUNDRY_CREDITORS_ACCOUNT_GROUP; ?> || account_group_id == <?= SUNDRY_DEBTORS_ACCOUNT_GROUP; ?> || account_group_id == <?= SUPPLIER; ?>){
                 if(account_mobile_no_is_required == '1'){
                     $('.mobile_required').show();
                     need_account_mobile_no = 1;

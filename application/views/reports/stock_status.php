@@ -1,5 +1,22 @@
 <?php $this->load->view('success_false_notify'); ?>
-
+<style>
+    .topcheckboxselection {
+        position: relative;
+        top: 20px;
+    }
+    .topcheckboxselection label {
+        margin-right: 5px;
+    }
+    .topcheckboxselection label input {
+        position: relative;
+        top: 2px;
+    }
+    .topcheckboxselection a {
+        position: relative;
+        top: 2px;
+        margin-left: 5px;
+    }
+</style>
 <div class="content-wrapper">
     <section class="content-header">
         <h1>Stock Status</h1>
@@ -53,7 +70,7 @@
                                         <div class="col-md-2">
                                             <label><input type="checkbox" name="in_stock" id="in_stock" checked> In stock</label><br />
                                             <label><input type="checkbox" name="item_wise" id="item_wise"> Item Wise</label><br />
-                                            <label><input type="checkbox" name="include_wstg" id="include_wstg"> Include Wastage</label>
+                                            <label><input type="checkbox" name="include_wstg" id="include_wstg" checked> Include Wastage</label>
                                         </div>
                                         <div class="col-md-2">
                                             <label><a href="<?= base_url('master/setting') ?>" target="_blanck">Rate From Setting : </a></label><br />
@@ -68,19 +85,24 @@
                                                 <option value="1"> Only RFID Stock </option>
                                                 <option value="2"> Without RFID Stock </option>
                                             </select>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label>From Date</label>
-                                            <input type="text" name="from_date" id="datepicker1" class="form-control" value="<?php echo date("d-m-Y"); ?>">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label>To Date</label>
-                                            <input type="text" name="to_date" id="datepicker2" class="form-control" value="<?php echo date('d-m-Y'); ?>">
+                                        </div>                                        
+                                        <!--<a href="javascript:void(0);" id="" class="btn btn-primary btn-md item_stock_details_all pull-left" data-category_name="Stock" data-item_name="Stock" style="margin: 25px 0px 0px 0px;" > Stock </a>-->
+                                        <div class="col-md-6">
+                                            <div class="topcheckboxselection">
+                                                
+                                                <label for="toggleAllTopSelection">
+                                                    <input type="checkbox" class="rfid-checkbox" id="toggleAllTopSelection" value="1">
+                                                    Select All
+                                                </label>
+                                                <button type="button" onclick="generateTags()" class="btn btn-primary">Print Selected Tags</button>
+                                                <a href="<?= base_url('reports/print_all_rfid_tags') ?>" class="btn btn-primary" target="_blank">Print ALL Tags</a>
+                                            </div>
                                         </div>
                                         <table class="table row-border table-bordered table-striped" style="width:100%" id="stock_status_table">
                                             <thead>
                                                 <tr>
                                                     <!--<th>Department</th>-->
+                                                    <th>Action</th>
                                                     <th>Category</th>
                                                     <th>Item Name</th>
                                                     <th>Gr.Wt.</th>
@@ -92,8 +114,6 @@
                                                     <th>Tunch</th>
                                                     <th>Gold</th>
                                                     <th>Silver</th>
-                                                    <!-- <th>Amount</th> -->
-                                                    <th>Profit/loss Fine</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -238,6 +258,7 @@
                                     Select All
                                 </label>
                                 <button type="button" onclick="generateRFIDTags()" class="btn btn-primary">Print Selected RFID Tags</button>
+                                <a href="<?= base_url('reports/print_all_rfid_tags') ?>" class="btn btn-primary" target="_blank">Print ALL Tags</a>
                             </div>
                             <table class="table row-border table-bordered table-striped" style="width:100%" id="created_rfid_table">
                                 <thead>
@@ -266,9 +287,56 @@
         </div>
     </div>
 </div>
+<div id="stock_item_model" class="modal fade stock_item_model" tabindex="-1" role="dialog" aria-labelledby="stock_item_modelLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background-color:#f1e8e1;">
+            <div class="modal-header">
+                <div class="col-md-6">
+                    <h4 class="modal-title" id="stock_item_modelLabel">Stock Items <span id="titleToAppend"></span></h4>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body edit-content">
+                <form class="form-horizontal" method="post" id="stock_item_form" novalidate enctype="multipart/form-data">
+                <input type="hidden" name="item_stock_rfid_id" id="item_stock_rfid_id">
+                <input type="hidden" name="item_stock_id" id="item_stock_id">
+                    <div class="row">                        
+                        <div class="col-md-12">
+                            <div class="">
+                                <input type="checkbox" class="stock-checkbox" id="toggleAllSelectionTWo" value="1">
+                                <label for="toggleAllSelectionTWo" style="margin-right: 5px;">
+                                    Select All
+                                </label>
+                                <button type="button" onclick="generateTags()" class="btn btn-primary">Print Selected Tags</button>
+                            </div>
+                            <table class="table row-border table-bordered table-striped" style="width:100%" id="created_stock_item_table">
+                                <thead>
+                                    <tr>
+                                        <th width="100px">Action</th>
+                                        <th width="40px">Sr. no</th>
+                                        <th>Gr.Wt.</th>
+                                        <th>Less</th>
+                                        <th>NtWt</th>
+                                        <th>Fine</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <script type="text/javascript">
     var table;
     var created_rfid_table;
+    var created_stock_item_table;
     var selected_rows = [];
     var adjust_type = '';
     var category_group_id = '';
@@ -368,6 +436,69 @@
 
             created_rfid_table.draw();
         });
+
+        $(document).on('click', '.item_stock_details_all', function(e) {
+            e.preventDefault();            
+            var category_name = $(this).attr('data-category_name');
+            var item_id = $(this).attr('data-item_id');
+            var item_name = $(this).attr('data-item_name');
+            var grwt = $(this).attr('data-grwt');
+            var tunch = $(this).attr('data-tunch');
+            var item_stock_id = $(this).attr('id');
+            $("#stock_item_model #rfid_category").val(category_name);
+            $("#stock_item_model #rfid_item_name").val(item_name);
+            $("#stock_item_model #rfid_item_cur_stock").val(grwt);
+            $("#stock_item_model #rfid_tunch").val(tunch);
+            $("#item_stock_id").val(item_stock_id);
+            $('#stock_item_model').modal('show');
+
+            $.ajax({
+                url: "<?php echo base_url('sell/get_stock_item_data'); ?>/",
+                type: "GET",
+                async: false,
+                success: function(response) {
+                    var json = $.parseJSON(response);
+                    if ($.fn.DataTable.isDataTable('#created_stock_item_table')) {
+                        created_stock_item_table.ajax.reload(null, false); // Reload with updated data 
+                        $("#titleToAppend").html(" ");                       
+                    }
+                }
+            });
+        });
+
+
+        $(document).on('click', '.item_stock_details', function(e) {
+            e.preventDefault();            
+            var category_name = $(this).attr('data-category_name');
+            var item_id = $(this).attr('data-item_id');
+            var item_name = $(this).attr('data-item_name');
+            var grwt = $(this).attr('data-grwt');
+            var tunch = $(this).attr('data-tunch');
+            var item_stock_id = $(this).attr('id');
+            $("#stock_item_model #rfid_category").val(category_name);
+            $("#stock_item_model #rfid_item_name").val(item_name);
+            $("#stock_item_model #rfid_item_cur_stock").val(grwt);
+            $("#stock_item_model #rfid_tunch").val(tunch);
+            $("#item_stock_id").val(item_stock_id);
+            $('#stock_item_model').modal('show');
+
+            $.ajax({
+                url: "<?php echo base_url('sell/get_single_stock_item_data'); ?>/",
+                type: "POST",
+                async: false,
+                data:{item_stock_id:item_stock_id},
+                success: function(response) {
+                    var json = $.parseJSON(response);
+                    if ($.fn.DataTable.isDataTable('#created_stock_item_table')) {
+                        created_stock_item_table.ajax.reload(null, false); // Reload with updated data
+                        $("#titleToAppend").html(" - "+item_name+": "+tunch+" Tunch");
+                    }
+                }
+            });
+            
+        });
+
+
         $('#rfid_model').on('shown.bs.modal', function() {
             $("#rfid_grwt").focus();
             $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
@@ -599,15 +730,16 @@
             "scrollY": "480px",
             "scrollX": true,
             "search": true,
-            "paging": false,
+            "pageLength": 50,
+            "lengthChange": false,
+            "paging": true,
             "ordering": [1, "desc"],
             "order": [],
             "ajax": {
                 "url": "<?php echo site_url('reports/stock_status_datatable') ?>",
                 "type": "POST",
                 "data": function(d) {
-                    d.from_date = $('#datepicker1').val();
-                    d.to_date = $('#datepicker2').val();
+					
                     d.department_id = $('#department_id').val();
                     d.category_id = $('#category_id').val();
                     d.item_id = $('#item_id').val();
@@ -615,6 +747,8 @@
                     d.in_stock = $('input[name="in_stock"]').prop('checked');
                     d.item_wise = $('input[name="item_wise"]').prop('checked');
                     d.include_wstg = $('input[name="include_wstg"]').prop('checked');
+
+                    // d.include_wstg = $('input[name="include_wstg"]').prop('checked', true).prop('checked');
                     d.rfid_filter = $('#rfid_filter').val();
                 },
                 "complete": function() {
@@ -624,7 +758,7 @@
             "columnDefs": [{
                 "className": "dt-right",
                 "targets": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-            }, ],
+            }],
             "fnRowCallback": function(nRow, aData) {
 
                 //alert(aData);
@@ -658,7 +792,7 @@
 
         $('#stock_status_table tbody').on('click', 'tr', function() {
             if ($(this).hasClass('selected') == false) {
-                console.log($(this).attr('data-row_particular'));
+                // console.log($(this).attr('data-row_particular'));
                 selected_rows.push($(this).attr('data-row_particular'));
             } else {
                 remove_selected_rows(selected_rows, $(this).attr('data-row_particular'));
@@ -775,6 +909,10 @@
             return false;
         });
 
+        $('#stock_item_model').on('shown.bs.modal', function () {
+            $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+        });
+
         created_rfid_table = $('#created_rfid_table').DataTable({
             "serverSide": true,
             "scrollY": "300px",
@@ -812,7 +950,37 @@
             }, ],
         });
 
-        $(document).on("click", ".edit_rfid", function() {
+        created_stock_item_table = $('#created_stock_item_table').DataTable({
+            "autoWidth": false,
+            "responsive": true,
+            "serverSide": true,
+            "scrollY": "300px",
+            "scrollX": true,
+            "search": true,
+            "paging": false,
+            "order": [[1, "asc"]],
+            "ajax": {
+                "url": "<?php echo site_url('reports/get_created_stock_items_list') ?>",
+                "data": function(d) {
+                    d.item_stock_id = $('#item_stock_id').val();
+                },
+                "complete": function() {
+                    $('#ajax-loader').hide();
+                },
+                "dataSrc": function(jsondata) {
+                    $('#created_stock_item_table #rfid_stock').val(jsondata.rfid_stock || '0');
+                    $('#created_stock_item_table #rfid_pcs').val(jsondata.rfid_pcs || '0');
+                    return jsondata.data;
+                }
+            },
+            "columnDefs": [{
+                "className": "dt-right",
+                "targets": [0,1,2,3,4,5,6]
+            }],
+        });
+
+        $(document).on("click", ".edit_rfid", function(e) {
+            e.preventDefault();            
             var item_stock_rfid_id = $(this).attr('data-item_stock_rfid_id');
             $.ajax({
                 url: "<?php echo site_url('reports/get_created_rfid_data/') ?>" + item_stock_rfid_id,
@@ -880,6 +1048,24 @@
             label.text(!isCheckedAll ? "Unselect All" : "Select All");
         });
 
+        $(document).on("click", "#toggleAllSelectionTWo", function() {
+            let isCheckedAll = $(this).data('ischeckedall') || false;
+            $('.stock-checkbox').prop('checked', !isCheckedAll);
+            $(this).data('ischeckedall', !isCheckedAll);
+            const label = $("label[for='toggleAllSelectionTWo']");
+            label.text(!isCheckedAll ? "Unselect All" : "Select All");
+        });
+
+        $(document).on("click", "#toggleAllTopSelection", function() {
+            let isCheckedAll = $(this).data('ischeckedall') || false;
+            $('.stock-checkbox').prop('checked', !isCheckedAll);
+            $(this).data('ischeckedall', !isCheckedAll);
+            const label = $("label[for='toggleAllSelection']");
+            label.text(!isCheckedAll ? "Unselect All" : "Select All");
+        });
+
+        
+
     });
 
     function toggleSelectAll(selectAllCheckbox) {
@@ -901,6 +1087,23 @@
         }
         let idsString = selectedIds.join(',');
         let url = `<?= base_url('reports/print_selected_rfid_tags') ?>?item_stock_rfid_ids=${idsString}`;
+        window.open(url, '_blank');
+    }
+
+    function generateTags() {
+        let selectedIds = [];
+        document.querySelectorAll('.stock-checkbox:checked').forEach((checkbox) => {
+            selectedIds.push(checkbox.value); // Collect the checkbox value (RFID ID)
+        });
+
+        if (selectedIds.length === 0) {
+            alert("Please select at least one tag to print.");
+            return;
+        }
+        let idsString = selectedIds.join(',');
+        console.clear();
+        console.log(idsString);
+        let url = `<?= base_url('reports/print_selected_stock_items_tags') ?>?item_stock_id=${idsString}`;
         window.open(url, '_blank');
     }
 
