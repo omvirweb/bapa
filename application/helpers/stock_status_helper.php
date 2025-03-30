@@ -2,6 +2,7 @@
 
 defined('BASEPATH') or exit('No direct script access allowed');
 
+
 //loading datatable library
 if (!function_exists('load_datatables_library')) {
     function load_datatables_library($config = []) {

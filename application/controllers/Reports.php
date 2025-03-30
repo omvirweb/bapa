@@ -29,7 +29,6 @@ class Reports extends CI_Controller
         $this->now_time = date('Y-m-d H:i:s');
     }
 
-
     // Daybook related Functions
     function daybook($daybook_id = '')
     {
